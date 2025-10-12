@@ -22,6 +22,107 @@
 
 ---
 
+## 🤖 **CÓMO USAR ESTE ROADMAP CON TU AGENTE IA**
+
+### **⚠️ IMPORTANTE: Este NO es un documento solo de lectura**
+
+Este roadmap está diseñado para ser **interactivo**. En cada checkpoint encontrarás **secciones especiales** para trabajar con tu agente de IA (Copilot, IntelliJ AI Assistant, ChatGPT, etc.)
+
+### **🎯 Estructura de Cada Checkpoint:**
+
+```
+1. ✅ Lista de tareas
+2. 📖 Conceptos clave (breve)
+3. 💻 Código de ejemplo
+4. 🤖 TRABAJA CON TU IA - Prompts para entender ANTES de escribir
+5. 💡 SI NO ENTIENDES - Prompts para profundizar
+6. 🎯 EJERCICIO PRÁCTICO - Mini-retos
+7. ✅ VALIDA TU COMPRENSIÓN - Quiz antes de avanzar
+```
+
+### **📋 Reglas de Oro:**
+
+1. **SIEMPRE** lee el concepto primero
+2. **SIEMPRE** usa los prompts de "🤖 TRABAJA CON TU IA" antes de escribir código
+3. **NUNCA** le pidas al agente IA todo el código de una vez
+4. **SIEMPRE** valida tu comprensión con el quiz antes de avanzar
+5. Si algo NO está claro, usa la sección "💡 SI NO ENTIENDES"
+
+### **✅ Ejemplo de Flujo Correcto:**
+
+```
+Tú: "Estoy en Checkpoint 2.1 - Primera Clase.
+     Explícame con una analogía: ¿qué es una clase?"
+
+IA: [Explica concepto]
+
+Tú: "Entendido. Ahora muéstrame SOLO la estructura básica 
+     de la clase Movement, sin los métodos."
+
+IA: [Muestra estructura básica]
+
+Tú: [Escribes el código tú mismo]
+
+Tú: "Aquí está mi código: [pega código]
+     ¿Está correcto? ¿Qué puedo mejorar?"
+
+IA: [Revisa y da feedback]
+
+Tú: "Completé Checkpoint 2.1.
+     Hazme 3 preguntas para validar que entendí."
+```
+
+### **❌ Ejemplo de Flujo INCORRECTO (Evitar):**
+
+```
+Tú: "Dame el código completo del proyecto Forestech CLI"
+
+IA: [Genera 2000 líneas de código]
+
+Tú: [Copias todo sin entender]
+
+❌ NO APRENDISTE NADA
+```
+
+### **💬 Prompts Genéricos que Puedes Usar en Cualquier Momento:**
+
+```
+"No entiendo [concepto]. Explícalo con una analogía simple."
+
+"¿Por qué usamos [X] en lugar de [Y] en este contexto?"
+
+"Muéstrame un ejemplo de [concepto] aplicado al proyecto Forestech."
+
+"Dame un ejercicio pequeño para practicar [concepto]."
+
+"Revisa mi código y dame feedback constructivo: [pega código]"
+
+"Hazme un quiz de N preguntas sobre [tema] para validar comprensión."
+
+"Estoy atascado con este error: [pega error]. Ayúdame a entenderlo."
+
+"Antes de escribir código, explícame qué voy a hacer y por qué."
+```
+
+### **🎓 Recordatorio Constante:**
+
+**Tu agente de IA es tu tutor personal, NO tu generador de código automático.**
+
+Úsalo para:
+- ✅ Entender conceptos
+- ✅ Aclarar dudas
+- ✅ Validar tu código
+- ✅ Recibir feedback
+- ✅ Practicar con ejercicios
+
+NO lo uses para:
+- ❌ Generar todo el código
+- ❌ Copiar sin entender
+- ❌ Saltarte pasos del roadmap
+- ❌ Avanzar sin validar comprensión
+
+---
+
 ## 🗺️ **ROADMAP COMPLETO**
 
 ### **FASE 0: PREPARACIÓN (Semana 0)**
@@ -77,10 +178,10 @@ public class Main {
 ---
 
 #### **Checkpoint 1.2: Variables y Tipos de Datos**
-- [ ] Declarar variables (`int`, `double`, `String`, `boolean`)
-- [ ] Entender tipos primitivos vs objetos
-- [ ] Usar `final` para constantes
-- [ ] Conversión de tipos (casting)
+- [x] Declarar variables (`int`, `double`, `String`, `boolean`)
+- [x] Entender tipos primitivos vs objetos
+- [x] Usar `final` para constantes
+- [x] Conversión de tipos (casting)
 
 **Conceptos:**
 - Tipos primitivos: `int`, `double`, `boolean`, `char`, `long`, `float`
@@ -97,6 +198,28 @@ boolean isActive = true;
 final String DATABASE = "DBforestech";
 ```
 
+**🤖 TRABAJA CON TU IA:**
+```
+"Estoy en Checkpoint 1.2 - Variables y Tipos de Datos.
+Antes de escribir código, explícame con una analogía simple:
+¿Qué es una variable? ¿Por qué necesito diferentes tipos?"
+```
+
+**📝 DESPUÉS DE ESCRIBIR EL CÓDIGO:**
+```
+"Ya escribí el código de variables. Explícame:
+1. ¿Por qué 'double' para version y no 'int'?
+2. ¿Qué pasa si cambio el valor de 'final String DATABASE'?
+3. ¿Cuándo uso String vs int en el proyecto Forestech?"
+```
+
+**✅ VALIDA TU COMPRENSIÓN:**
+```
+"He completado Checkpoint 1.2. 
+Hazme un quiz de 3 preguntas sobre variables y tipos de datos.
+Usa ejemplos del proyecto Forestech."
+```
+
 ---
 
 #### **Checkpoint 1.3: Operadores y Expresiones**
@@ -111,6 +234,25 @@ double quantity = 100.5;
 double unitPrice = 12500.0;
 double totalValue = quantity * unitPrice;
 System.out.println("Total: $" + totalValue);
+```
+
+**🤖 TRABAJA CON TU IA:**
+```
+"Checkpoint 1.3 - Operadores.
+Muéstrame paso a paso cómo calcular el total de un movimiento.
+Explica cada operador que usamos y por qué."
+```
+
+**💡 SI NO ENTIENDES ALGO:**
+```
+"No entiendo [el operador % / la diferencia entre == y equals() / etc].
+Explícamelo con un ejemplo del sistema de combustibles."
+```
+
+**✅ EJERCICIO PRÁCTICO:**
+```
+"Dame 2 ejercicios pequeños usando operadores para practicar.
+Que estén relacionados con cálculos de combustibles."
 ```
 
 ---
@@ -139,6 +281,26 @@ if (movementType.equals("ENTRADA")) {
 }
 ```
 
+**🤖 ANTES DE EMPEZAR:**
+```
+"Checkpoint 1.4 - Control de Flujo.
+Explícame con una analogía cotidiana: ¿qué es un if-else?
+¿Por qué lo necesito en mi programa?"
+```
+
+**🔍 PROFUNDIZA SI ES NECESARIO:**
+```
+"No entiendo [por qué uso .equals() y no == / cuándo usar switch vs if-else / etc].
+Dame más ejemplos del proyecto Forestech."
+```
+
+**✅ VALIDA ANTES DE AVANZAR:**
+```
+"Completé el código de if-else.
+Hazme un quiz de 3 preguntas sobre control de flujo.
+Incluye un ejercicio donde deba escribir código."
+```
+
 ---
 
 #### **Checkpoint 1.5: Bucles (Loops)**
@@ -154,6 +316,28 @@ String[] menuOptions = {"ENTRADA", "SALIDA", "INVENTARIO", "SALIR"};
 for (int i = 0; i < menuOptions.length; i++) {
     System.out.println((i + 1) + ". " + menuOptions[i]);
 }
+```
+
+**🤖 TRABAJA CON TU IA:**
+```
+"Checkpoint 1.5 - Bucles.
+Explícame la diferencia entre for, while y do-while.
+¿Cuándo uso cada uno en el proyecto Forestech?"
+```
+
+**🎯 PRÁCTICA GUIADA:**
+```
+"Guíame paso a paso para crear un bucle que:
+1. Muestre el menú principal
+2. Siga ejecutándose hasta que el usuario elija 'SALIR'
+Explica cada línea mientras la escribo."
+```
+
+**✅ VALIDACIÓN:**
+```
+"Terminé Checkpoint 1.5.
+Hazme un mini-reto: dame un problema pequeño que requiera usar un bucle.
+Luego revisa mi solución y dame feedback."
 ```
 
 ---
@@ -177,6 +361,36 @@ Scanner scanner = new Scanner(System.in);
 System.out.print("Ingresa opción: ");
 int option = scanner.nextInt();
 scanner.nextLine(); // Consumir newline
+```
+
+**🤖 TRABAJA CON TU IA:**
+```
+"Checkpoint 1.6 - Scanner.
+¿Qué significa 'import' y 'new'? 
+Explícame paso a paso cómo leer input del usuario."
+```
+
+**💡 PREGUNTA SI NO ENTIENDES:**
+```
+"¿Por qué necesito scanner.nextLine() después de nextInt()?
+Muéstrame qué pasa si no lo pongo."
+```
+
+**🎯 EJERCICIO PRÁCTICO:**
+```
+"Ayúdame a crear un menú interactivo simple que:
+1. Muestre 3 opciones
+2. Lea la opción del usuario
+3. Valide que sea un número entre 1 y 3
+Guíame paso a paso."
+```
+
+**✅ ANTES DE CONTINUAR A FASE 2:**
+```
+"Completé Fase 1 - Fundamentos de Java.
+Hazme un quiz de 5 preguntas que cubra TODOS los temas de Fase 1:
+variables, operadores, if-else, loops, y Scanner.
+Quiero asegurarme de que entendí todo antes de avanzar a POO."
 ```
 
 ---
@@ -218,6 +432,31 @@ public class Movement {
 }
 ```
 
+**🤖 ANTES DE EMPEZAR POO:**
+```
+"Voy a empezar Fase 2 - POO. Este es un concepto nuevo y fundamental.
+Explícame con una analogía del mundo real:
+¿Qué es una clase? ¿Qué es un objeto? ¿Cuál es la diferencia?
+Usa ejemplos de Forestech (vehiculos, combustibles, movimientos)."
+```
+
+**📚 MIENTRAS ESCRIBES EL CÓDIGO:**
+```
+"Estoy escribiendo mi primera clase Movement.
+Explícame línea por línea:
+1. ¿Qué significa 'private'?
+2. ¿Qué es 'this.'?
+3. ¿Por qué el constructor no tiene 'void'?
+4. ¿Qué hace UUID.randomUUID()?"
+```
+
+**✅ VALIDA TU COMPRENSIÓN:**
+```
+"Completé Checkpoint 2.1.
+Hazme 3 preguntas sobre clases y constructores.
+Luego dame un mini-reto: pedirme crear otra clase simple."
+```
+
 ---
 
 #### **Checkpoint 2.2: Getters y Setters**
@@ -254,6 +493,26 @@ public void setQuantity(double quantity) {
 }
 ```
 
+**🤖 TRABAJA CON TU IA:**
+```
+"Checkpoint 2.2 - Getters y Setters.
+¿Por qué no accedo directamente a los atributos si ya son de mi clase?
+¿Qué beneficio tiene usar getters y setters?
+Explícalo con un ejemplo de por qué validar quantity > 0."
+```
+
+**💡 PROFUNDIZA:**
+```
+"Veo que getTotalValue() no tiene 'set'. ¿Por qué?
+¿Cuándo creo getter sin setter y viceversa?"
+```
+
+**✅ MINI-RETO:**
+```
+"Dame un ejercicio: pedirme agregar un setter con validación.
+Luego revisa mi código y dame feedback."
+```
+
 ---
 
 #### **Checkpoint 2.3: Método toString()**
@@ -275,6 +534,14 @@ public String toString() {
 }
 ```
 
+**🤖 PREGUNTA A TU IA:**
+```
+"Checkpoint 2.3 - toString().
+¿Qué es @Override? ¿Para qué sirve?
+¿Por qué necesito sobrescribir toString()?
+Muéstrame qué pasa si imprimo el objeto sin y con toString()."
+```
+
 ---
 
 #### **Checkpoint 2.4: Más Clases del Dominio**
@@ -287,6 +554,21 @@ public String toString() {
 - Diseño de dominio
 - Relaciones entre clases
 - Instanciación de objetos con `new`
+
+**🎯 TRABAJO INDEPENDIENTE:**
+```
+"Checkpoint 2.4 - Más clases del dominio.
+NO me des el código completo. 
+Dame solo la estructura de la clase Vehicle.
+Yo la escribiré y tú revisas mi código."
+```
+
+**✅ DESPUÉS DE ESCRIBIR:**
+```
+"Aquí está mi clase Vehicle: [pega tu código]
+Revisa mi código y dame feedback:
+¿Está bien estructurado? ¿Falta algo? ¿Qué puedo mejorar?"
+```
 
 ---
 
@@ -315,6 +597,34 @@ for (Movement movement : movements) {
 }
 ```
 
+**🤖 TRABAJA CON TU IA:**
+```
+"Checkpoint 2.5 - ArrayList.
+Explícame la diferencia entre array y ArrayList.
+¿Por qué uso List<Movement> y no ArrayList<Movement> directamente?
+¿Qué significa el <Movement> entre <>?"
+```
+
+**🔍 SI NO ENTIENDES:**
+```
+"No entiendo el for-each loop. 
+¿Cómo funciona diferente al for normal?
+Muéstrame ambos ejemplos comparados."
+```
+
+**✅ ANTES DE PASAR A FASE 3:**
+```
+"Completé Fase 2 - POO.
+Esto es un tema fundamental. 
+Hazme un quiz completo de 6 preguntas sobre:
+- Clases y objetos
+- Constructores
+- Getters/Setters
+- toString()
+- ArrayList
+Incluye preguntas teóricas y de código."
+```
+
 ---
 
 ### **FASE 3: CONEXIÓN A SQL SERVER (Semana 5)**
@@ -337,6 +647,21 @@ for (Movement movement : movements) {
     <artifactId>mssql-jdbc</artifactId>
     <version>12.8.1.jre11</version>
 </dependency>
+```
+
+**🤖 ANTES DE EMPEZAR:**
+```
+"Voy a empezar Fase 3 - Conexión a SQL Server.
+Antes de tocar código, explícame:
+¿Qué es JDBC? ¿Cómo se conecta Java a una base de datos?
+Usa una analogía simple."
+```
+
+**💡 MIENTRAS CONFIGURAS:**
+```
+"Estoy agregando la dependencia en pom.xml.
+¿Qué hace Maven con esta dependencia?
+¿Dónde descarga el archivo JAR?"
 ```
 
 ---
@@ -381,6 +706,29 @@ public class DatabaseConnection {
 }
 ```
 
+**🤖 TRABAJA CON TU IA:**
+```
+"Checkpoint 3.2 - DatabaseConnection.
+Explícame línea por línea este código:
+1. ¿Qué es 'static final'?
+2. ¿Qué significa 'try-with-resources' (el try con paréntesis)?
+3. ¿Por qué 'throws SQLException'?
+4. ¿Qué hace DriverManager.getConnection()?"
+```
+
+**⚠️ SI HAY ERRORES:**
+```
+"Tengo este error al conectar: [pega el error]
+Ayúdame a entender qué significa y cómo solucionarlo."
+```
+
+**✅ DESPUÉS DE PROBAR:**
+```
+"¡Mi conexión funcionó! Ahora explícame:
+¿Por qué es importante cerrar la conexión?
+¿Qué pasa si no uso try-with-resources?"
+```
+
 ---
 
 #### **Checkpoint 3.3: Primera Query - SELECT**
@@ -416,6 +764,35 @@ public static void listProducts() {
         System.err.println("Error al listar productos: " + e.getMessage());
     }
 }
+```
+
+**🤖 APRENDE CON TU IA:**
+```
+"Checkpoint 3.3 - Primera Query SELECT.
+Explícame paso a paso este código:
+1. ¿Qué es un Statement?
+2. ¿Qué hace executeQuery()?
+3. ¿Cómo funciona el while con rs.next()?
+4. ¿Por qué rs.getString('id') y no directamente el valor?"
+```
+
+**🎯 EJERCICIO:**
+```
+"Quiero hacer mi propia query SELECT. 
+Ayúdame a listar todos los vehículos de la tabla combustibles_vehicles.
+NO me des el código completo, guíame paso a paso."
+```
+
+**✅ VALIDA FASE 3:**
+```
+"Completé Fase 3 - Conexión a SQL Server.
+Hazme un quiz de 5 preguntas sobre:
+- JDBC y drivers
+- Connection strings
+- Try-with-resources
+- Queries SELECT
+- ResultSet
+Quiero asegurarme de entender antes del CRUD."
 ```
 
 ---
@@ -462,6 +839,33 @@ public class SupplierService {
         }
     }
 }
+```
+
+**🤖 TRABAJA CON TU IA:**
+```
+"Checkpoint 4.1 - INSERT con PreparedStatement.
+Explícame la diferencia entre Statement y PreparedStatement.
+¿Por qué usar PreparedStatement es más seguro?
+¿Qué es SQL Injection y cómo PreparedStatement lo previene?"
+```
+
+**💡 PROFUNDIZA:**
+```
+"No entiendo los placeholders '?'.
+¿Cómo sabe el PreparedStatement qué valor va en cada '?'?
+Muéstrame un ejemplo de query vulnerable vs query segura."
+```
+
+**🎯 EJERCICIO:**
+```
+"Quiero crear mi propio método INSERT.
+Ayúdame a crear createVehicle() para insertar vehículos.
+Guíame en la estructura pero NO me des el código completo."
+```
+
+**✅ VALIDA:**
+```
+"Terminé el INSERT. Hazme 3 preguntas sobre PreparedStatement."
 ```
 
 ---
@@ -1113,3 +1517,66 @@ java -jar target/forestech-cli-1.0-jar-with-dependencies.jar
 ---
 
 **¡EMPECEMOS ESTA AVENTURA! 🚀**
+
+---
+
+## 🎯 **RESUMEN DE CÓMO USAR ESTE ROADMAP**
+
+### **Cada Checkpoint Ahora Tiene:**
+
+1. **📋 Tareas y Conceptos** - Lo básico que necesitas saber
+2. **💻 Código de Ejemplo** - Referencia, pero NO copies directamente
+3. **🤖 TRABAJA CON TU IA** - Prompts para entender ANTES de programar
+4. **💡 SI NO ENTIENDES** - Prompts para profundizar en conceptos
+5. **🎯 EJERCICIO PRÁCTICO** - Mini-retos para practicar
+6. **✅ VALIDA TU COMPRENSIÓN** - Quiz antes de avanzar
+
+### **Tu Flujo de Trabajo Ideal:**
+
+```
+1. Lee el checkpoint
+   ↓
+2. Usa prompt "🤖 TRABAJA CON TU IA" para entender concepto
+   ↓
+3. IA te explica (NO te da código todavía)
+   ↓
+4. Tú escribes el código basándote en el ejemplo
+   ↓
+5. Si te atascas, usa "💡 SI NO ENTIENDES"
+   ↓
+6. Completas el checkpoint
+   ↓
+7. Haces el "🎯 EJERCICIO PRÁCTICO"
+   ↓
+8. Usas "✅ VALIDA TU COMPRENSIÓN" para el quiz
+   ↓
+9. Solo avanzas si pasas el quiz
+```
+
+### **Recuerda:**
+
+- 🤖 **Tu IA es tu tutor, NO tu generador de código**
+- 📝 **Escribe el código tú mismo, no copies**
+- ❓ **Usa los prompts sugeridos en cada checkpoint**
+- ✅ **SIEMPRE valida tu comprensión antes de avanzar**
+- 🔄 **Si no entiendes, pregunta más - no hay prisa**
+
+### **Los checkpoints sin secciones interactivas:**
+
+Algunos checkpoints más avanzados (Fase 5+) no tienen todas las secciones interactivas todavía, pero **puedes aplicar el mismo patrón**:
+
+```
+"Estoy en [Checkpoint X.Y] - [Nombre].
+Antes de escribir código, explícame [concepto].
+Usa ejemplos del proyecto Forestech."
+```
+
+```
+"Completé [Checkpoint X.Y].
+Hazme un quiz de 3 preguntas para validar comprensión."
+```
+
+---
+
+**Última actualización:** 12 de octubre de 2025
+**Versión:** 2.0 - Roadmap Interactivo con Agente IA
