@@ -254,13 +254,13 @@ Una vez hayas ejecutado todos los comandos, responde:
 ### **Checklist de Verificación:**
 
 ```
-[ ] java -version muestra Java 17 o 21
-[ ] javac -version funciona
-[ ] echo $JAVA_HOME muestra una ruta
-[ ] mvn -version muestra Maven 3.8+
-[ ] git --version funciona
-[ ] Conexión a SQL Server (nc -zv) exitosa
-[ ] IntelliJ IDEA ya instalado (mencionaste que sí)
+[x] java -version muestra Java 17 o 21
+[x] javac -version funciona
+[x] echo $JAVA_HOME muestra una ruta
+[x] mvn -version muestra Maven 3.8+
+[x] git --version funciona
+[x] Conexión a SQL Server (nc -zv) exitosa
+[x] IntelliJ IDEA ya instalado (mencionaste que sí)
 ```
 
 ---

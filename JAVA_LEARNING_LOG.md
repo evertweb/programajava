@@ -17,9 +17,9 @@
 ## ✅ **CONCEPTOS APRENDIDOS**
 
 ### **Fundamentos de Java**
-- [ ] ¿Qué es JDK, JRE, JVM?
-- [ ] Compilación vs Ejecución
-- [ ] Método `main()` como punto de entrada
+- [x] ¿Qué es JDK, JRE, JVM?
+- [x] Compilación vs Ejecución
+- [x] Método `main()` como punto de entrada
 - [ ] Variables y tipos de datos primitivos
 - [ ] Tipos de referencia (String, objetos)
 - [ ] Operadores (aritméticos, lógicos, comparación)
@@ -105,18 +105,18 @@
 ## 🎯 **HITOS COMPLETADOS**
 
 ### **Fase 0: Preparación**
-- [ ] **Checkpoint 0.1:** Verificar Entorno
-  - [ ] JDK instalado y verificado
-  - [ ] Maven instalado y verificado
-  - [ ] IntelliJ IDEA configurado
-  - [ ] VS Code con extensiones Java
-  - [ ] Git configurado
+- [x] **Checkpoint 0.1:** Verificar Entorno
+  - [x] JDK instalado y verificado
+  - [x] Maven instalado y verificado
+  - [x] IntelliJ IDEA configurado
+  - [x] VS Code con extensiones Java
+  - [x] Git configurado
   
-- [ ] **Checkpoint 0.2:** Crear Proyecto Base
-  - [ ] Estructura de carpetas creada
-  - [ ] `pom.xml` configurado
-  - [ ] SQL Server JDBC driver agregado
-  - [ ] Primera ejecución exitosa de "Hello World"
+- [x] **Checkpoint 0.2:** Crear Proyecto Base
+  - [x] Estructura de carpetas creada
+  - [x] `pom.xml` configurado
+  - [x] SQL Server JDBC driver agregado
+  - [x] Primera ejecución exitosa de "Hello World"
 
 ### **Fase 1: Fundamentos de Java**
 - [ ] **Checkpoint 1.1:** Primer Programa

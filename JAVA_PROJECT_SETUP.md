@@ -7,12 +7,12 @@
 ## ✅ **CHECKLIST RÁPIDO**
 
 Antes de empezar, verifica que tienes:
-- [ ] JDK 17 o 21 instalado
-- [ ] Maven instalado
-- [ ] IntelliJ IDEA configurado (ya lo tienes ✅)
-- [ ] VS Code con extensiones Java
-- [ ] Git configurado
-- [ ] Conexión a SQL Server verificada
+- [x] JDK 17 o 21 instalado
+- [x] Maven instalado
+- [x] IntelliJ IDEA configurado (ya lo tienes ✅)
+- [x] VS Code con extensiones Java
+- [x] Git configurado
+- [x] Conexión a SQL Server verificada
 
 ---
 
@@ -359,12 +359,12 @@ idea.sh &  # O el comando que uses para abrir IntelliJ
 ```
 
 ### **Checklist Final:**
-- [ ] `java -version` muestra Java 17 o 21
-- [ ] `javac -version` muestra el compilador
-- [ ] `mvn -version` muestra Maven 3.8+
-- [ ] IntelliJ abre correctamente
-- [ ] VS Code tiene Extension Pack for Java
-- [ ] Conexión a SQL Server funciona (nc o telnet)
+- [x] `java -version` muestra Java 17 o 21
+- [x] `javac -version` muestra el compilador
+- [x] `mvn -version` muestra Maven 3.8+
+- [x] IntelliJ abre correctamente
+- [x] VS Code tiene Extension Pack for Java
+- [x] Conexión a SQL Server funciona (nc o telnet)
 
 ---
 

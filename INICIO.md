@@ -375,15 +375,15 @@ Usa una analogía y un ejemplo simple relacionado con Forestech."
 
 Marca cuando completes cada paso:
 
-- [ ] Abrí VS Code en `~/Documents/programajava`
-- [ ] Configuré contexto de Copilot con `JAVA_AGENTS_INSTRUCTIONS.md`
-- [ ] Leí `JAVA_LEARNING_ROADMAP.md` (al menos Fase 0-2)
-- [ ] Leí `JAVA_PROJECT_SETUP.md` completo
-- [ ] Abrí `JAVA_NEXT_STEPS.md` y sé cuál es mi tarea
-- [ ] Ejecuté comandos de verificación (java -version, mvn -version)
-- [ ] Reporté resultados a Copilot
-- [ ] Inicialicé Git en la carpeta (opcional)
-- [ ] Estoy listo para empezar Fase 0, Checkpoint 0.1
+- [x] Abrí VS Code en `~/Documents/programajava`
+- [x] Configuré contexto de Copilot con `JAVA_AGENTS_INSTRUCTIONS.md`
+- [x] Leí `JAVA_LEARNING_ROADMAP.md` (al menos Fase 0-2)
+- [x] Leí `JAVA_PROJECT_SETUP.md` completo
+- [x] Abrí `JAVA_NEXT_STEPS.md` y sé cuál es mi tarea
+- [x] Ejecuté comandos de verificación (java -version, mvn -version)
+- [x] Reporté resultados a Copilot
+- [x] Inicialicé Git en la carpeta (opcional)
+- [x] Estoy listo para empezar Fase 0, Checkpoint 0.1
 
 ---
 

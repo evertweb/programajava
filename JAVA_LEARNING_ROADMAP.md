@@ -28,17 +28,17 @@
 **Objetivo:** Tener todo listo para empezar a programar
 
 #### **Checkpoint 0.1: Verificar Entorno**
-- [ ] JDK instalado (Java 17 o 21)
-- [ ] IntelliJ IDEA configurado
-- [ ] VS Code con extensiones Java
-- [ ] Maven instalado
-- [ ] Git configurado
+- [x] JDK instalado (Java 17 o 21)
+- [x] IntelliJ IDEA configurado
+- [x] VS Code con extensiones Java
+- [x] Maven instalado
+- [x] Git configurado
 
 #### **Checkpoint 0.2: Crear Proyecto Base**
-- [ ] Estructura de carpetas creada
-- [ ] `pom.xml` configurado (Maven)
-- [ ] SQL Server JDBC driver agregado
-- [ ] Primera ejecución exitosa de "Hello World"
+- [x] Estructura de carpetas creada
+- [x] `pom.xml` configurado (Maven)
+- [x] SQL Server JDBC driver agregado
+- [x] Primera ejecución exitosa de "Hello World"
 
 **Conceptos a Aprender:**
 - ¿Qué es JDK vs JRE vs JVM?
@@ -54,10 +54,10 @@
 **Objetivo:** Entender sintaxis básica y estructura de un programa Java
 
 #### **Checkpoint 1.1: Primer Programa**
-- [ ] Crear `Main.java` con método `main()`
-- [ ] Imprimir en consola con `System.out.println()`
-- [ ] Compilar y ejecutar desde terminal
-- [ ] Compilar y ejecutar desde IntelliJ
+- [x] Crear `Main.java` con método `main()`
+- [x] Imprimir en consola con `System.out.println()`
+- [x] Compilar y ejecutar desde terminal
+- [x] Compilar y ejecutar desde IntelliJ
 
 **Conceptos:**
 - Estructura de un programa Java
