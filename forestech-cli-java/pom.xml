@@ -94,7 +94,7 @@
                     <archive>
                         <manifest>
                             <!-- Clase principal (punto de entrada) -->
-                            <mainClass>Main</mainClass>
+                            <mainClass>com.forestech.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -121,7 +121,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>Main</mainClass>
+                    <mainClass>com.forestech.Main</mainClass>
                 </configuration>
             </plugin>
             

@@ -8,9 +8,9 @@
 
 **Fecha de inicio:** 7 de octubre de 2025  
 **Fase actual:** Fase 0 - Preparación  
-**Checkpoint actual:** 0.1 - Verificar Entorno  
+**Checkpoint actual:** 0.2 - Crear Proyecto Base ✅ (Completado!)  
 
-**Progreso general:** 0% (🎯 ¡Empezando la aventura!)
+**Progreso general:** 5% (🎯 Entorno listo y conceptos básicos dominados!)
 
 ---
 
@@ -20,12 +20,23 @@
 - [x] ¿Qué es JDK, JRE, JVM?
 - [x] Compilación vs Ejecución
 - [x] Método `main()` como punto de entrada
-- [ ] Variables y tipos de datos primitivos
-- [ ] Tipos de referencia (String, objetos)
+- [x] ¿Qué es el bytecode (.class)?
+- [x] Flujo completo: .java → .class → ejecución en JVM
+- [x] Variables y tipos de datos primitivos
+- [x] Tipos de referencia (String, objetos)
 - [ ] Operadores (aritméticos, lógicos, comparación)
 - [ ] Estructuras de control (if-else, switch)
 - [ ] Bucles (for, while, do-while)
 - [ ] Scanner para entrada de usuario
+
+### **Herramientas y Build Tools**
+- [x] ¿Qué hace Maven?
+- [x] Maven como gestor de dependencias
+- [x] Maven como constructor automático
+- [x] Repositorio local Maven (~/.m2/repository/)
+- [x] Cómo Maven descarga y reutiliza dependencias
+- [x] Ciclo de vida: mvn compile, mvn exec:java
+- [x] Estructura de carpetas: src/ vs target/
 
 ### **Programación Orientada a Objetos**
 - [ ] ¿Qué es una clase?
@@ -171,7 +182,33 @@
 
 ### **Preguntas Resueltas:**
 
-**[Pendiente]**
+#### **Sesión 1 - 13 de octubre de 2025**
+
+**P1: "¿Qué hace Maven por mí y dónde guarda las dependencias?"**
+
+**R:** Maven es un gestor de dependencias y constructor automático. Hace 3 cosas principales:
+1. **Gestiona dependencias:** Lee el `pom.xml` y descarga automáticamente las librerías necesarias (como el SQL Server driver) desde Maven Central Repository.
+2. **Construye el proyecto:** Compila tu código `.java` a `.class`, ejecuta tests y empaqueta todo.
+3. **Organiza:** Mantiene una estructura clara: `src/` para código fuente, `target/` para compilados.
+
+**Dónde guarda dependencias:** En el repositorio local `~/.m2/repository/`. Si tienes múltiples proyectos que usan la misma librería, Maven la descarga UNA SOLA VEZ y todos los proyectos la reutilizan.
+
+**Metáfora:** Maven es como un asistente de construcción que va a la tienda (Maven Central), trae los materiales que pediste (dependencias) y construye tu casa (proyecto).
+
+---
+
+**P2: "Explícame con una metáfora qué es el bytecode (.class)."**
+
+**R:** El bytecode es un "idioma intermedio" que hace a Java portable entre diferentes sistemas operativos.
+
+**Metáfora:** Imagina que escribes una carta en español (tu código `.java`). Luego un traductor la convierte a Esperanto (bytecode `.class`), un idioma universal. Finalmente, personas en diferentes países (Linux, Windows, Mac) tienen sus propios traductores (JVM) que leen el Esperanto y lo hablan en su idioma local.
+
+**Flujo:**
+```
+Main.java → [javac compila] → Main.class (bytecode) → [JVM ejecuta] → Código binario específico del sistema
+```
+
+**Por qué existe:** Para que escribas tu código UNA VEZ y funcione en cualquier sistema operativo. La JVM de cada sistema traduce el bytecode a instrucciones específicas de ese sistema.
 
 ---
 
