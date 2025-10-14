@@ -1,8 +1,5 @@
 package com.forestech;
 
-import javax.swing.plaf.synth.SynthOptionPaneUI;
-import javax.xml.crypto.dsig.spec.XSLTTransformParameterSpec;
-
 public class Main {
     // Constantes de la aplicación
     private static final String PROJECT_NAME = "Gestion e inventario de combustibles FORESTECH";
@@ -21,22 +18,26 @@ public class Main {
 
 
 
+
     public static void main(String[] args) {
         //variables para la clase movimientos
         //condición? ValorSiTrue: valorSiFalse;
-        final String logMovement = "=======REGISTRO DE MOVIMIENTO======";
-        boolean esEntrada = true;
-        String typeMovement = esEntrada ? "ENTRADA" : "SALIDA";
-        String typeFuel = "ACPM";
-        int cantFuel = 20;
-        String textpresentation = cantFuel ==1 ?  "GALON" : "GALONES";
+        final String txtMovement = "=====REGISTRO DE MOVIMIENTO=====";
+        final String txtCalculo = "=====DESGLOSE DE LA OPERACION=====";
+        boolean isInput = true;
+        String typeMovement = isInput ? "ENTRADA" : "SALIDA";
+        String fuelType = "DIESEL";
+        int fuelQuantity = 20;
+        String textpresentation = fuelQuantity == 1 ? "GALON" : "GALONES";
         double priceGal = 10.000;
+        double subTotalMovement = fuelQuantity * priceGal;
+        double iva = 0.19 * subTotalMovement;
+        double totalMovement = subTotalMovement + iva;
+        boolean isBigBuy = fuelQuantity >= 100;
+        boolean isValidPurchase = isInput && fuelType.equals("DIESEL") && fuelQuantity > 0;
 
 
-
-
-
-
+        System.out.println("=================================");
         System.out.println("Hello, Forestech CLI!");
         System.out.println("=================================");
         System.out.println("Proyecto: " + PROJECT_NAME);
@@ -45,13 +46,21 @@ public class Main {
         System.out.println("Base de datos: " + DATABASE);
         System.out.println("Estado: " + (ACTIVE ? "Activo" : "Inactivo"));
         System.out.println("=================================");
+        System.out.println(txtMovement);
+        System.out.println("TIPO DE MOVIMIENTO: " + typeMovement);
+        System.out.println("TIPO DE COMBUSTIBLE: " + fuelType);
+        System.out.println("CANTIDAD: " + fuelQuantity + " " + textpresentation);
+        System.out.println("=================================");
+        System.out.println(txtCalculo);
+        System.out.println("EL SUBTOTAL DE TU COMPRA ES " + String.format("%.2f", subTotalMovement));
+        System.out.println("EL IVA DE TU COMPRA ES " + String.format("%.2f", iva));
+        System.out.println("EL TOTAL DE TU COMPRA ES " + String.format("%.2f", totalMovement));
+        System.out.println("TU COMPRA FUE GRANDE " + isBigBuy);
+        System.out.println("LA COMPRA ES VALIDA: " + isValidPurchase);
+        System.out.println("=================================");
 
 
 
-        System.out.println(logMovement);
-        System.out.println("TIPO DE MOVIMIENTO " + typeMovement);
-        System.out.println("TIPO DE COMBUSTIBLE " + typeFuel);
-        System.out.println("CANTIDAD " + cantFuel + " " + textpresentation);
 
 
     }

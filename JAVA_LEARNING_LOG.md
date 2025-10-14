@@ -24,7 +24,7 @@
 - [x] Flujo completo: .java → .class → ejecución en JVM
 - [x] Variables y tipos de datos primitivos
 - [x] Tipos de referencia (String, objetos)
-- [ ] Operadores (aritméticos, lógicos, comparación)
+- [x] Operadores (aritméticos, lógicos, comparación) ✅ (Checkpoint 1.3 completado el 14/10/2025)
 - [ ] Estructuras de control (if-else, switch)
 - [ ] Bucles (for, while, do-while)
 - [ ] Scanner para entrada de usuario
@@ -132,7 +132,7 @@
 ### **Fase 1: Fundamentos de Java**
 - [ ] **Checkpoint 1.1:** Primer Programa
 - [ ] **Checkpoint 1.2:** Variables y Tipos de Datos
-- [ ] **Checkpoint 1.3:** Operadores y Expresiones
+- [ ] **Checkpoint 1.3:** Operadores y Expresiones ✅ (Completado el 14/10/2025)
 - [ ] **Checkpoint 1.4:** Control de Flujo
 - [ ] **Checkpoint 1.5:** Bucles (Loops)
 - [ ] **Checkpoint 1.6:** Entrada de Usuario (Scanner)
