@@ -101,6 +101,7 @@ public class Main {
 
 //        System.out.println("TIPO DE COMBUSTIBLE: " + fuelType);
 //        System.out.println("CANTIDAD: " + fuelQuantity + " " + textpresentation);
+// [MermaidChart: 8938b785-785e-4300-869e-4f053a1bf197]
 //        System.out.println("=================================");
 //        System.out.println(txtCalculo);
 //        System.out.println("EL SUBTOTAL DE TU COMPRA ES " + String.format("%.2f", subTotalMovement));

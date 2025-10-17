@@ -1,0 +1,164 @@
+@startuml Forestech_Architecture
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam classBackgroundColor #F0F0F0
+skinparam classBorderColor #333333
+skinparam arrowColor #333333
+
+package "com.forestech" {
+    
+    ' ====== CAPA DE PRESENTACIÓN ======
+    package "presentation" {
+        class Main {
+            {static} main(args: String[]): void
+        }
+        
+        class MenuManager {
+            -{static} scanner: Scanner
+            +MenuManager()
+            +displayMainMenu(): void
+            +handleMovementEntry(): void
+            +handleMovementExit(): void
+            +handleQuery(): void
+            +getUserInput(): String
+            +getIntInput(): int
+            +getDoubleInput(): double
+        }
+        
+        class DisplayHelper {
+            {static} +printSuccess(message: String): void
+            {static} +printError(message: String): void
+            {static} +printWarning(message: String): void
+            {static} +printInfo(message: String): void
+            {static} +printMovementList(movements: List): void
+            {static} +printSummary(entry: double, exit: double): void
+        }
+    }
+    
+    ' ====== CAPA DE LÓGICA DE NEGOCIO ======
+    package "business" {
+        class Movement {
+            -id: String
+            -type: String
+            -quantity: double
+            -date: LocalDate
+            -supplierId: String
+            +Movement()
+            +Movement(id, type, quantity, date, supplierId)
+            +getId(): String
+            +setId(id: String): void
+            +getType(): String
+            +setType(type: String): void
+            +getQuantity(): double
+            +setQuantity(quantity: double): void
+            +getDate(): LocalDate
+            +setDate(date: LocalDate): void
+            +getSupplierId(): String
+            +setSupplierId(id: String): void
+            +toString(): String
+        }
+        
+        class Supplier {
+            -id: String
+            -name: String
+            -phone: String
+            -location: String
+            +Supplier()
+            +Supplier(id, name, phone, location)
+            +getId(): String
+            +setId(id: String): void
+            +getName(): String
+            +setName(name: String): void
+            +getPhone(): String
+            +setPhone(phone: String): void
+            +getLocation(): String
+            +setLocation(location: String): void
+            +toString(): String
+        }
+        
+        class MovementValidator {
+            {static} +validateQuantity(qty: double): boolean
+            {static} +validateDate(date: LocalDate): boolean
+            {static} +validateType(type: String): boolean
+            {static} +validateSupplier(supplierId: String): boolean
+            {static} +validateMovement(movement: Movement): void
+        }
+        
+        class CalculationService {
+            {static} +calculateTotalEntry(movements: List): double
+            {static} +calculateTotalExit(movements: List): double
+            {static} +calculateBalance(entry: double, exit: double): double
+            {static} +getMovementsByType(movements: List, type: String): List
+            {static} +getMovementsByDate(movements: List, startDate, endDate): List
+        }
+    }
+    
+    ' ====== CAPA DE DATOS ======
+    package "data" {
+        class DatabaseConnection {
+            -{static} instance: DatabaseConnection
+            -connection: Connection
+            -host: String
+            -port: int
+            -database: String
+            -user: String
+            -password: String
+            -{code} DatabaseConnection()
+            +{static} getInstance(): DatabaseConnection
+            +connect(): void
+            +disconnect(): void
+            +getConnection(): Connection
+            +isConnected(): boolean
+        }
+        
+        class MovementDAO {
+            -connection: Connection
+            +MovementDAO(connection: Connection)
+            +insert(movement: Movement): boolean
+            +update(movement: Movement): boolean
+            +delete(id: String): boolean
+            +findById(id: String): Movement
+            +findAll(): List<Movement>
+            +findByType(type: String): List<Movement>
+            +findByDateRange(startDate, endDate): List<Movement>
+        }
+        
+        class SupplierDAO {
+            -connection: Connection
+            +SupplierDAO(connection: Connection)
+            +insert(supplier: Supplier): boolean
+            +update(supplier: Supplier): boolean
+            +delete(id: String): boolean
+            +findById(id: String): Supplier
+            +findAll(): List<Supplier>
+            +findByName(name: String): Supplier
+        }
+    }
+    
+    ' ====== RELACIONES ======
+    Main --> MenuManager: usa
+    Main --> DisplayHelper: usa
+    
+    MenuManager --> MovementValidator: valida con
+    MenuManager --> CalculationService: calcula con
+    MenuManager --> Movement: crea
+    MenuManager --> Supplier: crea
+    MenuManager --> MovementDAO: comunica con
+    MenuManager --> SupplierDAO: comunica con
+    
+    DisplayHelper --> Movement: muestra
+    DisplayHelper --> Supplier: muestra
+    
+    MovementValidator --> Movement: valida
+    CalculationService --> Movement: procesa
+    
+    MovementDAO --> DatabaseConnection: usa conexión
+    MovementDAO --> Movement: mapea a
+    
+    SupplierDAO --> DatabaseConnection: usa conexión
+    SupplierDAO --> Supplier: mapea a
+    
+    DatabaseConnection --> "java.sql.Connection": maneja
+}
+
+@enduml
