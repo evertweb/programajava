@@ -47,6 +47,8 @@ public class Main {
 
 
 
+
+
 //        System.out.println(txtMovement);
 //        System.out.println("TIPO DE MOVIMIENTO: " + typeMovement);
 

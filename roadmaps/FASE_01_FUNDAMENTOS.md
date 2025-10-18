@@ -187,45 +187,100 @@ Antes de calcular o guardar datos, debes **validar** que sean correctos:
 "Explícame los operadores && y || con ejemplos de validaciones."
 ```
 
-**Tareas paso a paso:**
+**📋 DIAGRAMA DE TAREAS:**
 
-1. **En MovementCalculator.java, agregar método:**
-   ```java
-   public static boolean isValidMovement(String fuelType, double quantity, double unitPrice) {
-       // Valida que todos los datos sean correctos
-       // Retorna true si es válido, false si no
-   }
-   ```
+```
+MovementCalculator.java
+│
+├── Método 1: isValidMovement
+│   ├── Parámetros que debe recibir:
+│   │   • String fuelType
+│   │   • double quantity
+│   │   • double unitPrice
+│   │
+│   ├── Condiciones a validar:
+│   │   • fuelType NO puede ser null
+│   │   • fuelType NO puede estar vacío ("")
+│   │   • quantity debe ser MAYOR a 0
+│   │   • unitPrice debe ser MAYOR a 0
+│   │
+│   ├── Tipo de retorno: boolean
+│   └── Retorna: true si TODO es válido, false si hay AL MENOS un problema
+│
+├── Método 2: isBigPurchase
+│   ├── Parámetros: double quantity
+│   ├── Condición: quantity >= 100
+│   ├── Tipo de retorno: boolean
+│   └── Retorna: true si es compra grande, false si no
+│
+└── Método 3: requiresApproval
+    ├── Parámetros:
+    │   • String type (puede ser "ENTRADA" o "SALIDA")
+    │   • double quantity
+    │   • double total
+    │
+    ├── Lógica a implementar:
+    │   Requiere aprobación SI:
+    │   • El tipo es "SALIDA" Y (quantity > 100 O total > 500)
+    │   
+    │   Usa operadores:
+    │   • && para "Y" (ambas condiciones deben cumplirse)
+    │   • || para "O" (al menos una debe cumplirse)
+    │   • .equals() para comparar Strings
+    │
+    ├── Tipo de retorno: boolean
+    └── Retorna: true si requiere aprobación, false si no
+```
 
-2. **Agregar método:**
-   ```java
-   public static boolean isBigPurchase(double quantity) {
-       return quantity >= 100;
-   }
-   ```
+**🧪 PRUEBAS EN Main.java:**
 
-3. **Agregar método con lógica compleja:**
-   ```java
-   public static boolean requiresApproval(String type, double quantity, double total) {
-       // Combina varias condiciones con && y ||
-       // Ej: requiere aprobación si es SALIDA Y (cantidad > 100 O total > 500)
-   }
-   ```
+```
+Crear casos de prueba para validar tu código:
 
-4. **En Main.java, probar:**
-   ```java
-   // Prueba varios casos
-   boolean valid1 = MovementCalculator.isValidMovement("Diesel", 100, 3.45);
-   boolean valid2 = MovementCalculator.isValidMovement("", -10, 0);
-   
-   System.out.println("Movimiento 1 válido: " + valid1);
-   System.out.println("Movimiento 2 válido: " + valid2);
-   ```
+Caso 1: Movimiento válido
+├── Datos: fuelType="Diesel", quantity=100, unitPrice=3.45
+└── Resultado esperado: isValidMovement retorna TRUE
+
+Caso 2: Movimiento inválido (cantidad negativa)
+├── Datos: fuelType="", quantity=-10, unitPrice=0
+└── Resultado esperado: isValidMovement retorna FALSE
+
+Caso 3: Compra grande
+├── Datos: quantity=150
+└── Resultado esperado: isBigPurchase retorna TRUE
+
+Caso 4: Requiere aprobación
+├── Datos: type="SALIDA", quantity=120, total=600
+└── Resultado esperado: requiresApproval retorna TRUE
+```
+
+**💡 PISTAS DE IMPLEMENTACIÓN:**
+
+1. **Para validar String no vacío:**
+   - Primero verifica que no sea null
+   - Luego verifica que su longitud sea mayor a 0
+   - O usa el método `.isEmpty()`
+
+2. **Para comparar Strings:**
+   - ❌ NUNCA uses: `type == "ENTRADA"`
+   - ✅ SIEMPRE usa: `type.equals("ENTRADA")`
+
+3. **Para combinar condiciones:**
+   - `&&` significa "ambas deben ser true"
+   - `||` significa "al menos una debe ser true"
+   - Usa paréntesis para agrupar: `(condicion1 || condicion2) && condicion3`
 
 **✅ Resultado esperado:** 
 - Validaciones funcionando correctamente
 - Main.java sigue limpio (solo pruebas)
 - Entiendes la diferencia entre `==` y `.equals()` para Strings
+- Puedes explicar cuándo usar `&&` vs `||`
+
+**🎯 AUTO-EVALUACIÓN:**
+Antes de continuar, pregúntate:
+- [ ] ¿Puedo explicar por qué `"Diesel" == "Diesel"` a veces falla?
+- [ ] ¿Entiendo qué hace cada operador lógico?
+- [ ] ¿Mis validaciones cubren TODOS los casos posibles?
 
 **⏱️ Tiempo estimado:** 2 horas
 
@@ -255,78 +310,118 @@ El menú es el corazón de tu aplicación CLI. En lugar de ponerlo en Main, crea
 "¿Qué pasa si olvido el 'break' en un case de switch?"
 ```
 
-**Tareas paso a paso:**
+**📋 DIAGRAMA DE TAREAS:**
 
-1. **Crear MenuHelper.java:**
+```
+MenuHelper.java
+│
+├── Método 1: displayMainMenu
+│   ├── Modificador: public static
+│   ├── Tipo de retorno: void (no retorna nada, solo imprime)
+│   ├── Parámetros: ninguno
+│   │
+│   └── Debe imprimir:
+│       ┌─────────────────────────────────────┐
+│       │   ========== MENÚ PRINCIPAL ==========   │
+│       │   1. Registrar Entrada de Combustible    │
+│       │   2. Registrar Salida de Combustible     │
+│       │   3. Ver Inventario                      │
+│       │   4. Salir                                │
+│       │   ====================================   │
+│       └─────────────────────────────────────┘
+│
+├── Método 2: processMenuOption
+│   ├── Modificador: public static
+│   ├── Tipo de retorno: void
+│   ├── Parámetros: int option
+│   │
+│   ├── Usa estructura SWITCH (no if-else)
+│   │
+│   └── Casos a manejar:
+│       ├── case 1: Imprimir "→ Módulo de ENTRADA seleccionado"
+│       ├── case 2: Imprimir "→ Módulo de SALIDA seleccionado"
+│       ├── case 3: Imprimir "→ Módulo de INVENTARIO seleccionado"
+│       ├── case 4: Imprimir "→ Saliendo del sistema..."
+│       └── default: Imprimir "❌ Opción inválida"
+│       
+│       ⚠️ IMPORTANTE: No olvides 'break;' después de cada case
+│
+└── Método 3: validateMovementType
+    ├── Modificador: public static
+    ├── Tipo de retorno: void
+    ├── Parámetros: String type
+    │
+    ├── Usa estructura IF-ELSE (no switch)
+    │
+    └── Lógica:
+        ├── Si type.equals("ENTRADA") → Imprimir "✓ Inventario AUMENTARÁ"
+        ├── Si type.equals("SALIDA") → Imprimir "✓ Inventario DISMINUIRÁ"
+        └── Si es otro valor → Imprimir "✗ Tipo de movimiento inválido"
+        
+        ⚠️ RECUERDA: Usa .equals() NO uses ==
+```
+
+**🧪 PRUEBAS EN Main.java:**
+
+```
+En el método main(), escribe código para probar MenuHelper:
+
+Prueba 1: Mostrar el menú
+├── Llamar a: MenuHelper.displayMainMenu()
+└── Resultado esperado: Ver el menú formateado en consola
+
+Prueba 2: Simular selección de opción 1
+├── Crear variable: int opcionUsuario = 1;
+├── Llamar a: MenuHelper.processMenuOption(opcionUsuario)
+└── Resultado esperado: Ver "→ Módulo de ENTRADA seleccionado"
+
+Prueba 3: Probar opción inválida
+├── Llamar a: MenuHelper.processMenuOption(99)
+└── Resultado esperado: Ver "❌ Opción inválida"
+
+Prueba 4: Validar tipo de movimiento
+├── Llamar a: MenuHelper.validateMovementType("ENTRADA")
+├── Llamar a: MenuHelper.validateMovementType("SALIDA")
+├── Llamar a: MenuHelper.validateMovementType("INVALIDO")
+└── Resultado esperado: Ver los tres mensajes correspondientes
+```
+
+**💡 PISTAS DE IMPLEMENTACIÓN:**
+
+1. **¿Cuándo usar switch vs if-else?**
+   - **Switch:** Cuando comparas UNA variable contra múltiples valores constantes (números, Strings)
+   - **If-else:** Para condiciones más complejas (rangos, operadores lógicos)
+
+2. **Estructura básica de switch:**
    ```java
-   public class MenuHelper {
-       
-       public static void displayMainMenu() {
-           // Imprime las opciones del menú
-           System.out.println("\n========== MENÚ PRINCIPAL ==========");
-           System.out.println("1. Registrar Entrada de Combustible");
-           System.out.println("2. Registrar Salida de Combustible");
-           System.out.println("3. Ver Inventario");
-           System.out.println("4. Salir");
-           System.out.println("====================================");
-       }
-       
-       public static void processMenuOption(int option) {
-           // Usa switch para procesar la opción
-           switch(option) {
-               case 1:
-                   System.out.println("→ Módulo de ENTRADA seleccionado");
-                   break;
-               case 2:
-                   System.out.println("→ Módulo de SALIDA seleccionado");
-                   break;
-               case 3:
-                   System.out.println("→ Módulo de INVENTARIO seleccionado");
-                   break;
-               case 4:
-                   System.out.println("→ Saliendo del sistema...");
-                   break;
-               default:
-                   System.out.println("❌ Opción inválida");
-           }
-       }
+   switch(variable) {
+       case valor1:
+           // código
+           break;  // ← NO OLVIDES ESTO
+       case valor2:
+           // código
+           break;
+       default:
+           // código para casos no contemplados
    }
    ```
 
-2. **Crear método para validar tipo de movimiento:**
-   ```java
-   public static void validateMovementType(String type) {
-       // Usa if/else para validar
-       if (type.equals("ENTRADA")) {
-           System.out.println("✓ Inventario AUMENTARÁ");
-       } else if (type.equals("SALIDA")) {
-           System.out.println("✓ Inventario DISMINUIRÁ");
-       } else {
-           System.out.println("✗ Tipo de movimiento inválido");
-       }
-   }
-   ```
-
-3. **En Main.java:**
-   ```java
-   // Mostrar y simular menú
-   MenuHelper.displayMainMenu();
-   
-   // Simular selección de usuario (sin Scanner aún)
-   int opcionUsuario = 1;
-   MenuHelper.processMenuOption(opcionUsuario);
-   
-   // Validar tipo de movimiento
-   MenuHelper.validateMovementType("ENTRADA");
-   ```
+3. **¿Qué pasa si olvidas `break`?**
+   - El código "cae" al siguiente case (efecto cascada)
+   - Esto casi siempre es un error (salvo casos muy específicos)
 
 **✅ Resultado esperado:** 
 - Ver menú formateado
-- Ver procesamiento de opciones
-- Main.java tiene menos de 20 líneas
+- Ver procesamiento de opciones funcionando
+- Main.java sigue corto (menos de 25 líneas para estas pruebas)
 - Todo organizado por responsabilidades
 
-**💡 Recuerda:** Usa `.equals()` para comparar Strings, NUNCA `==`
+**🎯 AUTO-EVALUACIÓN:**
+Antes de continuar, pregúntate:
+- [ ] ¿Entiendo la diferencia entre switch e if-else?
+- [ ] ¿Sé por qué es importante el `break` en switch?
+- [ ] ¿Puedo explicar por qué uso `.equals()` en vez de `==`?
+- [ ] ¿Mi código está en MenuHelper, NO en Main?
 
 **⏱️ Tiempo estimado:** 2 horas
 
@@ -353,81 +448,253 @@ Necesitas mostrar listas de datos (productos, opciones, resultados). DataDisplay
 "¿Cuándo usar for clásico vs for-each?"
 ```
 
-**Tareas paso a paso:**
+**📋 DIAGRAMA DE TAREAS:**
 
-1. **Crear DataDisplay.java:**
-   ```java
-   public class DataDisplay {
-       
-       public static void showFuelTypes() {
-           String[] fuelTypes = {"Diesel", "Gasolina 93", "Gasolina 95", "ACPM"};
-           
-           System.out.println("\n=== TIPOS DE COMBUSTIBLE ===");
-           for (int i = 0; i < fuelTypes.length; i++) {
-               System.out.println((i + 1) + ". " + fuelTypes[i]);
-           }
-       }
-       
-       public static void showMenuWithForEach(String[] options) {
-           int counter = 1;
-           for (String option : options) {
-               System.out.println(counter + ". " + option);
-               counter++;
-           }
-       }
-       
-       public static void simulateProcessing(int totalMovements) {
-           System.out.println("\n=== PROCESANDO MOVIMIENTOS ===");
-           int processed = 0;
-           while (processed < totalMovements) {
-               processed++;
-               System.out.println("Procesando movimiento #" + processed);
-           }
-           System.out.println("✓ Total procesado: " + processed);
-       }
-   }
-   ```
+```
+DataDisplay.java
+│
+├── Método 1: showFuelTypes
+│   ├── Modificador: public static
+│   ├── Tipo de retorno: void
+│   ├── Parámetros: ninguno
+│   │
+│   ├── Paso 1: Crear un array de String llamado fuelTypes
+│   │   └── Valores: {"Diesel", "Gasolina 93", "Gasolina 95", "ACPM"}
+│   │
+│   ├── Paso 2: Imprimir encabezado
+│   │   └── Texto: "\n=== TIPOS DE COMBUSTIBLE ==="
+│   │
+│   ├── Paso 3: Usar bucle FOR CLÁSICO
+│   │   ├── Variable de control: int i
+│   │   ├── Condición: i < fuelTypes.length
+│   │   ├── Incremento: i++
+│   │   └── Dentro del bucle: Imprimir (i + 1) + ". " + fuelTypes[i]
+│   │
+│   └── Formato de salida esperado:
+│       === TIPOS DE COMBUSTIBLE ===
+│       1. Diesel
+│       2. Gasolina 93
+│       3. Gasolina 95
+│       4. ACPM
+│       
+│       💡 PISTA: Usa (i + 1) porque los arrays empiezan en 0
+│                  pero quieres mostrar números desde 1
+│
+├── Método 2: showMenuWithForEach
+│   ├── Modificador: public static
+│   ├── Tipo de retorno: void
+│   ├── Parámetros: String[] options
+│   │
+│   ├── Paso 1: Crear variable contador
+│   │   └── int counter = 1
+│   │
+│   ├── Paso 2: Usar bucle FOR-EACH (NO for clásico)
+│   │   ├── Sintaxis: for (String option : options)
+│   │   ├── Dentro del bucle:
+│   │   │   ├── Imprimir counter + ". " + option
+│   │   │   └── Incrementar counter++
+│   │
+│   └── Ejemplo de salida (si recibe ["Entrada", "Salida"]):
+│       1. Entrada
+│       2. Salida
+│       
+│       💡 PISTA: for-each NO tiene índice automático, por eso
+│                  necesitas el counter manual
+│
+└── Método 3: simulateProcessing
+    ├── Modificador: public static
+    ├── Tipo de retorno: void
+    ├── Parámetros: int totalMovements
+    │
+    ├── Paso 1: Imprimir encabezado
+    │   └── Texto: "\n=== PROCESANDO MOVIMIENTOS ==="
+    │
+    ├── Paso 2: Crear variable para contar
+    │   └── int processed = 0
+    │
+    ├── Paso 3: Usar bucle WHILE (NO for)
+    │   ├── Condición: processed < totalMovements
+    │   ├── Dentro del bucle:
+    │   │   ├── Incrementar: processed++
+    │   │   └── Imprimir: "Procesando movimiento #" + processed
+    │   │
+    │   └── ⚠️ IMPORTANTE: Si olvidas el processed++, tendrás
+    │                      un loop infinito
+    │
+    ├── Paso 4: Después del bucle
+    │   └── Imprimir: "✓ Total procesado: " + processed
+    │
+    └── Ejemplo de salida (si recibe totalMovements=3):
+        === PROCESANDO MOVIMIENTOS ===
+        Procesando movimiento #1
+        Procesando movimiento #2
+        Procesando movimiento #3
+        ✓ Total procesado: 3
+```
 
-2. **En Main.java:**
-   ```java
-   // Mostrar tipos de combustible
-   DataDisplay.showFuelTypes();
-   
-   // Mostrar menú con array
-   String[] menuOptions = {"Registrar Entrada", "Registrar Salida", "Ver Inventario", "Salir"};
-   DataDisplay.showMenuWithForEach(menuOptions);
-   
-   // Simular procesamiento
-   DataDisplay.simulateProcessing(5);
-   ```
+**🧪 PRUEBAS EN Main.java:**
+
+```
+Escribir código de prueba en el método main():
+
+Prueba 1: Tipos de combustible
+├── Llamar a: DataDisplay.showFuelTypes()
+└── Resultado esperado: Ver lista numerada del 1 al 4
+
+Prueba 2: Menú personalizado
+├── Crear array: String[] menuOptions = {"Registrar Entrada", "Registrar Salida", "Ver Inventario", "Salir"}
+├── Llamar a: DataDisplay.showMenuWithForEach(menuOptions)
+└── Resultado esperado: Ver lista numerada del 1 al 4
+
+Prueba 3: Simular procesamiento
+├── Llamar a: DataDisplay.simulateProcessing(5)
+└── Resultado esperado: Ver 5 líneas de "Procesando movimiento #X"
+```
+
+**💡 COMPARACIÓN DE BUCLES - Cuándo usar cada uno:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ FOR CLÁSICO                                                      │
+├─────────────────────────────────────────────────────────────────┤
+│ Úsalo cuando:                                                    │
+│ • Necesitas el ÍNDICE (posición) del elemento                   │
+│ • Quieres recorrer al revés                                     │
+│ • Necesitas saltar elementos (i += 2)                           │
+│                                                                  │
+│ Estructura:                                                      │
+│   for (int i = 0; i < array.length; i++) {                     │
+│       // array[i] accede al elemento en posición i             │
+│   }                                                              │
+│                                                                  │
+│ Ejemplo Forestech: Mostrar movimientos numerados                │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│ FOR-EACH                                                         │
+├─────────────────────────────────────────────────────────────────┤
+│ Úsalo cuando:                                                    │
+│ • SOLO necesitas el VALOR, no la posición                       │
+│ • Código más simple y legible                                   │
+│ • NO necesitas modificar el array                               │
+│                                                                  │
+│ Estructura:                                                      │
+│   for (String elemento : array) {                              │
+│       // elemento ya contiene el valor                         │
+│   }                                                              │
+│                                                                  │
+│ Ejemplo Forestech: Imprimir todos los tipos de combustible      │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│ WHILE                                                            │
+├─────────────────────────────────────────────────────────────────┤
+│ Úsalo cuando:                                                    │
+│ • NO sabes cuántas veces se repetirá                            │
+│ • La condición depende de algo que cambia en el bucle           │
+│ • Necesitas mayor flexibilidad                                  │
+│                                                                  │
+│ Estructura:                                                      │
+│   while (condicion) {                                           │
+│       // código                                                 │
+│       // ⚠️ Debes actualizar la condición                      │
+│   }                                                              │
+│                                                                  │
+│ Ejemplo Forestech: Procesar movimientos hasta completar todos   │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│ DO-WHILE                                                         │
+├─────────────────────────────────────────────────────────────────┤
+│ Úsalo cuando:                                                    │
+│ • Necesitas ejecutar el código AL MENOS UNA VEZ                 │
+│ • Luego verificar si se debe repetir                            │
+│                                                                  │
+│ Estructura:                                                      │
+│   do {                                                          │
+│       // código se ejecuta primero                             │
+│   } while (condicion);                                          │
+│                                                                  │
+│ Ejemplo Forestech: Mostrar menú al menos una vez                │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**🚨 ERRORES COMUNES:**
+
+```
+❌ ERROR 1: Loop infinito en while
+int i = 0;
+while (i < 10) {
+    System.out.println("Hola");
+    // Olvidaste i++, nunca termina
+}
+
+✅ CORRECTO:
+int i = 0;
+while (i < 10) {
+    System.out.println("Hola");
+    i++;  // Eventualmente i será 10 y saldrá del bucle
+}
+
+---
+
+❌ ERROR 2: Acceder fuera del array
+String[] tipos = {"Diesel", "Gasolina"};
+for (int i = 0; i <= tipos.length; i++) {  // ← <= está mal
+    System.out.println(tipos[i]);  // Error en tipos[2]
+}
+
+✅ CORRECTO:
+for (int i = 0; i < tipos.length; i++) {  // ← < es correcto
+    System.out.println(tipos[i]);
+}
+
+---
+
+❌ ERROR 3: Modificar array en for-each
+for (String tipo : tipos) {
+    tipo = "NUEVO";  // Esto NO modifica el array
+}
+
+✅ CORRECTO: Usa for clásico si necesitas modificar
+for (int i = 0; i < tipos.length; i++) {
+    tipos[i] = "NUEVO";  // Esto SÍ modifica
+}
+```
 
 **✅ Resultado esperado:** 
-- Ver listas formateadas
-- Entender la diferencia entre los tipos de bucles
-- Main.java sigue corto
+- Ver listas formateadas correctamente
+- Entender cuándo usar cada tipo de bucle
+- Saber cómo acceder a elementos de un array
+- Main.java sigue corto (menos de 15 líneas de pruebas)
 
-**⚠️ CUIDADO:** En while, siempre asegúrate de que la condición eventualmente sea false (evita loops infinitos)
+**🎯 AUTO-EVALUACIÓN:**
+Antes de continuar, pregúntate:
+- [ ] ¿Puedo explicar cuándo usar for vs for-each vs while?
+- [ ] ¿Entiendo por qué los arrays empiezan en índice 0?
+- [ ] ¿Sé cómo evitar un loop infinito en while?
+- [ ] ¿Entiendo qué es `array.length` y por qué NO lleva paréntesis?
+- [ ] ¿Puedo explicar por qué `i < array.length` y no `i <= array.length`?
 
 **⏱️ Tiempo estimado:** 2-3 horas
 
 ---
-
 ## ✅ Checkpoint 1.6: Entrada de Usuario con Scanner
 
 **Concepto clave:** Convertir tu aplicación de estática (datos hardcodeados) a interactiva (usuario ingresa datos).
 
-**📍 DÓNDE:** 
+**📍 DÓNDE:**
 - **Crear nueva clase:** `InputHelper.java` en `forestech-cli-java/src/main/java/com/forestech/`
 - **Main.java:** Solo para demostrar el flujo interactivo completo
 
-**🎯 PARA QUÉ:** 
+**🎯 PARA QUÉ:**
 Esta clase centralizará TODA la captura de datos del usuario:
 - **InputHelper**: Métodos para leer números, texto, validar entradas
 - **Main**: Solo orquesta el flujo (muestra menú → lee opción → procesa)
 
 Esto evita repetir código de Scanner en todas partes y maneja el problema del buffer en UN SOLO LUGAR.
 
-**🔗 CONEXIÓN FUTURA:** 
+**🔗 CONEXIÓN FUTURA:**
 - En Fase 6, InputHelper se integrará con ConsoleMenu
 - En Fase 7, agregarás manejo de excepciones aquí
 - Este patrón de "clase helper para inputs" es profesional
@@ -439,110 +706,230 @@ Esto evita repetir código de Scanner en todas partes y maneja el problema del b
 "¿Cómo valido que el usuario ingresó un número y no texto?"
 ```
 
-**Tareas paso a paso:**
+**📋 DIAGRAMA DE TAREAS:**
 
-1. **Crear InputHelper.java:**
-   ```java
-   import java.util.Scanner;
-   
-   public class InputHelper {
-       private static Scanner scanner = new Scanner(System.in);
-       
-       public static int readInt(String prompt) {
-           System.out.print(prompt);
-           int value = scanner.nextInt();
-           scanner.nextLine(); // LIMPIAR BUFFER - MUY IMPORTANTE
-           return value;
-       }
-       
-       public static double readDouble(String prompt) {
-           System.out.print(prompt);
-           double value = scanner.nextDouble();
-           scanner.nextLine(); // LIMPIAR BUFFER
-           return value;
-       }
-       
-       public static String readString(String prompt) {
-           System.out.print(prompt);
-           return scanner.nextLine();
-       }
-       
-       public static String readFuelType() {
-           DataDisplay.showFuelTypes();
-           int option = readInt("Seleccione tipo de combustible: ");
-           
-           switch(option) {
-               case 1: return "Diesel";
-               case 2: return "Gasolina 93";
-               case 3: return "Gasolina 95";
-               case 4: return "ACPM";
-               default: return "Diesel"; // Por defecto
-           }
-       }
-   }
-   ```
-
-2. **En Main.java, crear flujo completo interactivo:**
-   ```java
-   public static void main(String[] args) {
-       // Bienvenida
-       System.out.println("=================================");
-       System.out.println("Bienvenido a " + AppConfig.APP_NAME);
-       System.out.println("=================================");
-       
-       // Mostrar menú
-       MenuHelper.displayMainMenu();
-       
-       // Leer opción del usuario
-       int option = InputHelper.readInt("Seleccione una opción: ");
-       MenuHelper.processMenuOption(option);
-       
-       // Si eligió opción 1 o 2, capturar datos de movimiento
-       if (option == 1 || option == 2) {
-           System.out.println("\n=== CAPTURA DE DATOS ===");
-           
-           String fuelType = InputHelper.readFuelType();
-           double quantity = InputHelper.readDouble("Ingrese cantidad (litros): ");
-           double unitPrice = InputHelper.readDouble("Ingrese precio unitario: $");
-           
-           // Validar
-           if (MovementCalculator.isValidMovement(fuelType, quantity, unitPrice)) {
-               System.out.println("\n✓ Datos válidos");
-               MovementCalculator.printMovementSummary(fuelType, quantity, unitPrice);
-           } else {
-               System.out.println("\n✗ Datos inválidos");
-           }
-       }
-       
-       System.out.println("\n=== FIN DEL PROGRAMA ===");
-   }
-   ```
-
-**✅ Resultado esperado:** 
-- El programa muestra el menú y ESPERA tu input
-- Puedes ingresar datos reales
-- Se calculan y muestran los resultados
-- Main.java es ORQUESTADOR (llama a otros, no hace todo él mismo)
-
-**💡 PATRÓN PROFESIONAL logrado:**
 ```
-Main.java → solo coordina el flujo
-AppConfig → constantes del sistema  
-MovementCalculator → lógica de cálculos
-MenuHelper → lógica del menú
-DataDisplay → visualización de datos
-InputHelper → captura de inputs
+InputHelper.java
+│
+├── Configuración inicial de la clase
+│   ├── Import necesario: import java.util.Scanner;
+│   │
+│   └── Declarar variable estática de clase:
+│       private static Scanner scanner = new Scanner(System.in);
+│       
+│       💡 EXPLICACIÓN:
+│       • private: Solo esta clase puede acceder al scanner
+│       • static: Compartido entre todos los métodos (no necesitas crear objeto)
+│       • Scanner(System.in): Captura entrada desde el teclado
+│
+├── Método 1: readInt
+│   ├── Modificador: public static
+│   ├── Tipo de retorno: int
+│   ├── Parámetros: String prompt (mensaje a mostrar al usuario)
+│   │
+│   ├── Lógica paso a paso:
+│   │   1. Imprimir el prompt (sin salto de línea, usa print no println)
+│   │   2. Leer un int usando scanner.nextInt()
+│   │   3. ⚠️ CRÍTICO: Llamar a scanner.nextLine() para limpiar buffer
+│   │   4. Retornar el valor leído
+│   │
+│   └── ¿Por qué limpiar el buffer?
+│       Cuando el usuario escribe "5[ENTER]", nextInt() lee el "5"
+│       pero deja el "[ENTER]" en el buffer. Si luego usas nextLine(),
+│       capturará ese ENTER vacío en lugar de esperar nueva entrada.
+│
+├── Método 2: readDouble
+│   ├── Modificador: public static
+│   ├── Tipo de retorno: double
+│   ├── Parámetros: String prompt
+│   │
+│   ├── Lógica paso a paso:
+│   │   1. Imprimir el prompt
+│   │   2. Leer un double usando scanner.nextDouble()
+│   │   3. ⚠️ CRÍTICO: Llamar a scanner.nextLine() para limpiar buffer
+│   │   4. Retornar el valor leído
+│   │
+│   └── Mismo problema de buffer que readInt()
+│
+├── Método 3: readString
+│   ├── Modificador: public static
+│   ├── Tipo de retorno: String
+│   ├── Parámetros: String prompt
+│   │
+│   ├── Lógica paso a paso:
+│   │   1. Imprimir el prompt
+│   │   2. Leer una línea completa usando scanner.nextLine()
+│   │   3. Retornar directamente (nextLine NO deja basura en buffer)
+│   │
+│   └── 💡 PISTA: Este método NO necesita limpiar buffer porque
+│                  nextLine() consume todo incluyendo el ENTER
+│
+└── Método 4: readFuelType
+    ├── Modificador: public static
+    ├── Tipo de retorno: String
+    ├── Parámetros: ninguno
+    │
+    ├── Lógica paso a paso:
+    │   1. Llamar a DataDisplay.showFuelTypes() para mostrar opciones
+    │   2. Llamar a readInt("Seleccione tipo de combustible: ")
+    │   3. Usar SWITCH para convertir número a nombre de combustible:
+    │       ├── case 1: retornar "Diesel"
+    │       ├── case 2: retornar "Gasolina 93"
+    │       ├── case 3: retornar "Gasolina 95"
+    │       ├── case 4: retornar "ACPM"
+    │       └── default: retornar "Diesel" (opción por defecto)
+    │
+    └── 💡 NOTA: Reutiliza readInt() en lugar de duplicar código
 ```
 
-**⚠️ PROBLEMA COMÚN - EL BUFFER:**
-Cuando usas `nextInt()` o `nextDouble()`, el Enter que presionas queda en el buffer. Si después usas `nextLine()`, este captura ese Enter vacío. **Solución:** Siempre usa un `nextLine()` extra después de leer números (ya implementado en InputHelper).
+**🧪 FLUJO COMPLETO EN Main.java:**
 
-**🔍 Depuración:** 
-Si el programa salta preguntas, el problema es el buffer. Verifica que cada `nextInt()` y `nextDouble()` tengan su `nextLine()` después.
+```
+El método main() debe orquestar el flujo interactivo completo:
+
+┌─────────────────────────────────────────────────────────────┐
+│ PASO 1: Bienvenida                                           │
+├─────────────────────────────────────────────────────────────┤
+│ • Imprimir línea de separación: "================================="
+│ • Imprimir mensaje usando: AppConfig.APP_NAME
+│ • Imprimir otra línea de separación
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ PASO 2: Mostrar y capturar opción del menú                  │
+├─────────────────────────────────────────────────────────────┤
+│ • Llamar a MenuHelper.displayMainMenu()
+│ • Llamar a InputHelper.readInt("Seleccione una opción: ")
+│   └── Guardar en variable: int option
+│ • Llamar a MenuHelper.processMenuOption(option)
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ PASO 3: SI eligió opción 1 o 2 (Entrada o Salida)          │
+├─────────────────────────────────────────────────────────────┤
+│ Condición: if (option == 1 || option == 2)
+│
+│ Dentro del if:
+│ 1. Imprimir encabezado: "\n=== CAPTURA DE DATOS ==="
+│
+│ 2. Capturar tipo de combustible:
+│    String fuelType = InputHelper.readFuelType()
+│
+│ 3. Capturar cantidad:
+│    double quantity = InputHelper.readDouble("Ingrese cantidad (litros): ")
+│
+│ 4. Capturar precio:
+│    double unitPrice = InputHelper.readDouble("Ingrese precio unitario: $")
+│
+│ 5. Validar los datos:
+│    if (MovementCalculator.isValidMovement(fuelType, quantity, unitPrice)) {
+│        • Imprimir: "\n✓ Datos válidos"
+│        • Llamar a: MovementCalculator.printMovementSummary(...)
+│    } else {
+│        • Imprimir: "\n✗ Datos inválidos"
+│    }
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ PASO 4: Despedida                                            │
+├─────────────────────────────────────────────────────────────┤
+│ • Imprimir: "\n=== FIN DEL PROGRAMA ==="
+└─────────────────────────────────────────────────────────────┘
+```
+
+**🚨 EL PROBLEMA DEL BUFFER - Explicación Visual:**
+
+```
+Situación: Usuario escribe "5" y presiona ENTER
+
+┌─────────────────────────────────────────────┐
+│ Buffer de entrada después de nextInt():     │
+├─────────────────────────────────────────────┤
+│ nextInt() lee → "5"                          │
+│ Queda en buffer → "\n" (el ENTER)           │
+└─────────────────────────────────────────────┘
+
+❌ SI NO LIMPIAS EL BUFFER:
+Scanner scanner = new Scanner(System.in);
+int edad = scanner.nextInt();        // Usuario escribe: 5[ENTER]
+String nombre = scanner.nextLine();  // ¡Lee el ENTER vacío!
+// nombre queda como "" (String vacío)
+
+✅ SI LIMPIAS EL BUFFER:
+Scanner scanner = new Scanner(System.in);
+int edad = scanner.nextInt();        // Usuario escribe: 5[ENTER]
+scanner.nextLine();                  // ← Consume el ENTER que quedó
+String nombre = scanner.nextLine();  // Ahora SÍ espera nueva entrada
+// nombre queda con lo que el usuario escriba
+
+┌──────────────────────────────────────────────────────────┐
+│ REGLA DE ORO                                              │
+├──────────────────────────────────────────────────────────┤
+│ Después de nextInt() o nextDouble():                     │
+│ • SIEMPRE llama a nextLine() para limpiar               │
+│                                                           │
+│ Después de nextLine():                                   │
+│ • NO necesitas limpiar (ya consumió todo)               │
+└──────────────────────────────────────────────────────────┘
+```
+
+**💡 PATRÓN PROFESIONAL LOGRADO:**
+
+```
+Organización del proyecto después de Checkpoint 1.6:
+
+┌──────────────────┐
+│    Main.java     │  ← ORQUESTADOR (coordina el flujo)
+└────────┬─────────┘
+         │
+         ├─→ AppConfig.java          (constantes del sistema)
+         ├─→ MovementCalculator.java (lógica de cálculos)
+         ├─→ MenuHelper.java         (lógica del menú)
+         ├─→ DataDisplay.java        (visualización de datos)
+         └─→ InputHelper.java        (captura de inputs) ← NUEVO
+
+Principio aplicado: SEPARACIÓN DE RESPONSABILIDADES
+• Cada clase tiene UNA tarea específica
+• Main NO tiene lógica, solo llama a otros
+• Fácil de mantener y extender
+```
+
+**✅ Resultado esperado:**
+- El programa muestra el menú y ESPERA tu input real
+- Puedes escribir números y texto
+- Se validan y procesan los datos correctamente
+- Main.java es corto y claro (menos de 40 líneas)
+- Entiendes el problema del buffer y cómo solucionarlo
+
+**🎯 AUTO-EVALUACIÓN:**
+Antes de continuar, pregúntate:
+- [ ] ¿Puedo explicar qué es el buffer y por qué causa problemas?
+- [ ] ¿Sé cuándo necesito limpiar el buffer y cuándo no?
+- [ ] ¿Entiendo por qué uso `print()` vs `println()` para prompts?
+- [ ] ¿Puedo explicar por qué el Scanner es `static` en InputHelper?
+- [ ] ¿Entiendo cómo Main.java orquesta el flujo sin tener lógica?
+
+**🔍 DEPURACIÓN - Si el programa "salta" preguntas:**
+
+```
+SÍNTOMA: El programa no espera que escribas algo, continúa solo
+
+DIAGNÓSTICO:
+┌─────────────────────────────────────────────────┐
+│ Olvidaste scanner.nextLine() después de:        │
+│ • scanner.nextInt()                             │
+│ • scanner.nextDouble()                          │
+└─────────────────────────────────────────────────┘
+
+SOLUCIÓN:
+1. Revisa TODOS los lugares donde usas nextInt() o nextDouble()
+2. Agrega scanner.nextLine() inmediatamente después
+3. Compila y prueba de nuevo
+```
 
 **⏱️ Tiempo estimado:** 3 horas
 
----
+
 
 ## 🧾 Checklist de salida de Fase 1
 
