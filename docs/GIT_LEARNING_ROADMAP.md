@@ -643,13 +643,14 @@ nano .gitignore
 ```
 
 **Contenido para proyecto Java:**
+
 ```gitignore
 # Archivos compilados
 *.class
 target/
 
 # IDEs
-.idea/
+../.idea/
 .vscode/
 *.iml
 

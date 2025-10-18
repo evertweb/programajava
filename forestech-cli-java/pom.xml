@@ -79,6 +79,11 @@
                 <configuration>
                     <source>17</source>
                     <target>17</target>
+                    <!-- Compilación incremental - solo archivos modificados -->
+                    <useIncrementalCompilation>true</useIncrementalCompilation>
+                    <!-- Mostrar warnings -->
+                    <showWarnings>true</showWarnings>
+                    <showDeprecation>true</showDeprecation>
                 </configuration>
             </plugin>
             
