@@ -2,7 +2,7 @@
 
 ## 🎯 Objetivo de la tarea
 
-Necesito que revises y corrijas el archivo `roadmaps/FASE_02_POO.md` para eliminar TODO el código completo listo para copiar/pegar y reemplazarlo con **diagramas de instrucciones tipo árbol** que guíen al usuario a escribir su propio código.
+Necesito que revises y corrijas el archivo `roadmaps/FASE_02_POO.md` para aplicar a todo  el código el formato   **diagramas de instrucciones tipo árbol** que guíen al usuario a escribir su propio código.
 
 Este es un proyecto de APRENDIZAJE, no de desarrollo rápido. El usuario está aprendiendo Java desde CERO y debe escribir el código él mismo, no copiarlo.
 
@@ -10,7 +10,7 @@ Este es un proyecto de APRENDIZAJE, no de desarrollo rápido. El usuario está a
 
 ## ✅ Formato correcto aplicado en Fase 1 (REFERENCIA)
 
-### ❌ FORMATO INCORRECTO (lo que hay que eliminar):
+### ❌ FORMATO INCORRECTO (lo que hay que eliminar si se encuentra ):
 
 ```java
 // Aquí está toda la clase Movement completa:
@@ -33,7 +33,7 @@ public class Movement {
 }
 ```
 
-### ✅ FORMATO CORRECTO (lo que debe quedar):
+### ✅ FORMATO CORRECTO (lo que debe quedar por ejemplo):
 
 ```
 Movement.java
@@ -607,15 +607,8 @@ Antes de continuar, pregúntate:
    - Errores comunes
    - Auto-evaluación
 
-7. **Crea un respaldo** antes de modificar:
-   ```bash
-   cp roadmaps/FASE_02_POO.md roadmaps/FASE_02_POO.md.backup
-   ```
 
-8. **Al terminar**, genera un resumen de cambios indicando:
-   - Cuántos checkpoints corregiste
-   - Qué secciones tenían más código completo
-   - Ejemplos de antes/después
+
 
 ---
 
@@ -630,6 +623,34 @@ La corrección será exitosa cuando:
 - ✅ El usuario tenga que PENSAR y ESCRIBIR el código, no copiarlo
 - ✅ Cada concepto de POO esté explicado visualmente
 - ✅ Los ejemplos usen el contexto de Forestech (combustibles)
+
+---
+
+## 🔄 DIRECTIVA DE CASCADA - PRÓXIMAS FASES
+
+**⚠️ IMPORTANTE:** Al terminar la corrección de esta FASE 2, debes:
+
+1. **Editar este archivo** para crear un nuevo prompt similar
+2. **Cambiar referencias:**
+   - `FASE_02_POO.md` → `FASE_03_SQL.md`
+   - Checkpoint 2.X → Checkpoint 3.X
+   - Conceptos POO → Conceptos SQL y BD
+   - Ejemplos de clases → Ejemplos de conexión BD
+
+3. **Guardar como:** `PROMPT_CORRECCION_FASE_3.md` (YA EXISTE - Actualizar si es necesario)
+
+4. **Repetir el ciclo para cada fase:**
+   - FASE 3 (SQL y BD) → `PROMPT_CORRECCION_FASE_3.md` ✅ Creado
+   - FASE 4 (CRUD Completo) → `PROMPT_CORRECCION_FASE_4.md`
+   - FASE 5 (Lógica de Negocio) → `PROMPT_CORRECCION_FASE_5.md`
+   - FASE 6 (Interfaz de Usuario) → `PROMPT_CORRECCION_FASE_6.md`
+   - FASE 7 (Manejo de Errores) → `PROMPT_CORRECCION_FASE_7.md`
+   - FASE 8 (Características Avanzadas) → `PROMPT_CORRECCION_FASE_8.md`
+
+5. **Al terminar TODAS las fases:**
+   - Tendrás un archivo de prompt para cada fase
+   - Todos los roadmaps estarán en formato didáctico de árbol
+   - El usuario podrá aprender escribiendo código, no copiándolo
 
 ---
 

@@ -62,6 +62,40 @@ movement.getTotalValue() → método de instancia
 "¿Qué significa 'encapsulamiento' en términos simples?"
 ```
 
+**Diagrama de tareas - Estructura de Movement.java:**
+
+```
+Movement.java
+│
+├── Declaración de clase
+│   └── public class Movement { }
+│
+└── Atributos privados (6 totales)
+    ├── String id
+    │   └── Descripción: Identificador único del movimiento
+    │       Cómo generarlo: UUID.randomUUID().toString()
+    │
+    ├── String movementType
+    │   └── Descripción: Tipo de movimiento ("ENTRADA" o "SALIDA")
+    │       Validación: Solo esos dos valores permitidos
+    │
+    ├── String fuelType
+    │   └── Descripción: Tipo de combustible (Diesel, Gasolina 93, ACPM, etc.)
+    │       Ejemplos: "Diesel", "Gasolina 93", "ACPM"
+    │
+    ├── double quantity
+    │   └── Descripción: Cantidad en litros
+    │       Validación: Debe ser > 0
+    │
+    ├── double unitPrice
+    │   └── Descripción: Precio por litro en pesos
+    │       Validación: Debe ser > 0
+    │
+    └── String movementDate
+        └── Descripción: Fecha y hora del movimiento
+            Cómo capturarlo: LocalDateTime.now().toString()
+```
+
 **Tareas paso a paso:**
 
 1. **Crear el paquete `models`:**
@@ -73,39 +107,44 @@ movement.getTotalValue() → método de instancia
    - Clic derecho en `models` → New → Java Class → "Movement"
    - **TÚ debes escribir:** La declaración de clase pública
    - **Pista de sintaxis:**
-     ```java
-     public class NombreDeLaClase {
-         // contenido
+     ```
+     public class NOMBRE {
+         // El contenido va aquí
      }
      ```
+   - **Pregunta:** ¿Cuál debe ser el NOMBRE de la clase?
 
-3. **Declarar 6 atributos privados:**
+3. **Declarar los 6 atributos privados:**
    
-   **Piensa:** ¿Qué información ESENCIAL necesitas guardar de un movimiento de combustible en Forestech?
+   Usando el diagrama anterior como referencia, TÚ escribes la declaración de cada atributo.
    
-   **Debes declarar (TÚ escribes el código):**
-   - Identificador único (String) - nombre sugerido: `id`
-   - Tipo de movimiento (String) - ¿"ENTRADA" o "SALIDA"?
-   - Tipo de combustible (String) - "Diesel", "Gasolina 93", etc.
-   - Cantidad (double) - en litros
-   - Precio por litro (double)
-   - Fecha del movimiento (String por ahora) - luego lo mejoraremos
-   
-   **Sintaxis de atributo privado:**
-   ```java
-   private TipoDeDato nombreAtributo;
+   **Estructura para cada atributo:**
+   ```
+   private TIPO NOMBRE;
    ```
    
-   **Recuerda:** TODOS deben ser `private` para encapsulamiento.
+   **Ejemplos:**
+   - `private String id;`
+   - `private double cantidad;` (pero usa el nombre del diagrama)
+   
+   **Tareas:**
+   - [ ] Declara todos los 6 atributos
+   - [ ] Cada uno en una línea separada
+   - [ ] Todos marcados como `private`
+   - [ ] Tipos correctos (String, double, etc.)
+   
+   **Validación:** Cuando termines, cada atributo debe aparecer una sola vez en la clase.
 
-4. **Agregar comentarios explicativos:**
-   - Sobre cada atributo, escribe un comentario breve explicando su propósito
+4. **Agregar comentarios en cada atributo:**
+   - Sobre cada línea, escribe un comentario breve explicando su propósito
+   - Uso: `// comentario aquí`
    - Ejemplo: `// Identificador único del movimiento`
-   - Esto te ayuda a entender el diseño mientras lo construyes
+   - Beneficio: Te ayuda a entender el diseño mientras lo construyes
 
 5. **Verificar que compile:**
    - Ejecuta desde terminal: `mvn clean compile`
    - Debe compilar sin errores (aunque la clase no hace nada aún)
+   - **Si hay errores:** Revisa que los tipos estén bien (String vs double)
 
 **✅ Resultado esperado:** 
 - Archivo `Movement.java` creado en el paquete `models`
@@ -187,83 +226,140 @@ CON: Movement m = new Movement("ENTRADA", "Diesel", 100.0, 3.45);  // ✅ Listo
    import java.time.LocalDateTime;
    ```
 
-2. **Crear tu PRIMER constructor (ejemplo completo - primera vez que lo ves):**
+**Diagrama de tareas - Constructores para Movement:**
+
+```
+Movement.java - Constructores
+│
+├── Constructor Principal (con parámetros)
+│   ├── Firma: public Movement(String, String, double, double)
+│   │
+│   ├── Parámetros que recibe:
+│   │   • String movementType → Tipo de movimiento
+│   │   • String fuelType → Tipo de combustible
+│   │   • double quantity → Cantidad en litros
+│   │   • double unitPrice → Precio por litro
+│   │
+│   ├── Inicialización de atributos:
+│   │   1. this.id = UUID.randomUUID().toString()
+│   │   2. this.movementType = movementType
+│   │   3. this.fuelType = fuelType
+│   │   4. this.quantity = quantity
+│   │   5. this.unitPrice = unitPrice
+│   │   6. this.movementDate = LocalDateTime.now().toString()
+│   │
+│   └── 💡 PISTA: 'this.' se refiere al atributo de la clase
+│       'this.quantity' = el atributo
+│       'quantity' = el parámetro
+│
+└── Constructor Vacío (sin parámetros)
+    ├── Firma: public Movement()
+    │
+    ├── Inicialización:
+    │   1. Generar ID único (igual que el constructor principal)
+    │   2. Generar fecha actual (igual que el constructor principal)
+    │   3. Los demás atributos: dejarlos como null o 0 (se llenarán con setters después)
+    │
+    └── 💡 CUÁNDO USARLO: Frameworks y herramientas lo necesitan a veces
+```
+
+**Tareas paso a paso:**
+
+1. **Agregar imports necesarios (boilerplate permitido):**
    
-   Un constructor es un método especial con estas características:
-   - Mismo nombre que la clase
-   - NO tiene tipo de retorno (ni void)
-   - Se ejecuta automáticamente al hacer `new`
+   Antes de la declaración de clase `public class Movement`, agrega:
+   ```
+   import java.util.UUID;
+   import java.time.LocalDateTime;
+   ```
    
-   **EJEMPLO DIDÁCTICO (estudia la sintaxis):**
-   ```java
-   public Movement(String movementType, String fuelType, double quantity, double unitPrice) {
-       // this.atributo distingue el atributo de la clase del parámetro
-       this.id = UUID.randomUUID().toString();  // Genera ID único
-       this.movementType = movementType;
-       this.fuelType = fuelType;
-       this.quantity = quantity;
-       this.unitPrice = unitPrice;
-       this.movementDate = LocalDateTime.now().toString();
+   **¿Por qué?** UUID es para generar IDs, LocalDateTime para la fecha actual.
+
+2. **Analiza el patrón del constructor (ejemplo didáctico):**
+   
+   Lee y **ENTIENDE** este pseudocódigo:
+   
+   ```
+   Un constructor es como las instrucciones de un IKEA:
+   
+   public Movement(parámetro1, parámetro2, ...) {
+       // Paso 1: Usar los parámetros para llenar los atributos privados
+       this.atributo1 = parámetro1;
+       this.atributo2 = parámetro2;
+       
+       // Paso 2: Generar valores automáticos si es necesario
+       this.id = UUID.randomUUID().toString();
    }
    ```
    
-   **Anatomía del constructor:**
-   - `public`: Puede ser llamado desde cualquier lugar
-   - `Movement`: Mismo nombre que la clase (NO es un método normal)
-   - `(String movementType, ...)`: Parámetros que recibe
-   - `this.id = ...`: El `this` se refiere al objeto que se está creando
-   - `UUID.randomUUID()`: Genera un ID único automáticamente
-   - `LocalDateTime.now()`: Captura la fecha/hora actual
+   **Preguntas de reflexión:**
+   - ¿Por qué todas las líneas usan `this.`?
+   - ¿Qué pasa si olvidas asignar un atributo?
 
-3. **Entiende el flujo (depuración obligatoria):**
-   - Coloca un breakpoint en la primera línea del constructor
-   - Crea un Movement en Main.java
-   - Ejecuta en debug mode
-   - Usa "Step Over" (F8) para ver línea por línea cómo se asignan los valores
-   - Observa en el panel de variables cómo `this` va tomando forma
+3. **AHORA TÚ - Implementar el constructor principal:**
+   
+   Usando el diagrama como referencia, TÚ escribes:
+   
+   - Abre un bloque: `public Movement(String movementType, String fuelType, double quantity, double unitPrice) {`
+   - Dentro, asigna los 4 parámetros a sus atributos con `this.`
+   - Genera el ID: `this.id = UUID.randomUUID().toString();`
+   - Genera la fecha: `this.movementDate = LocalDateTime.now().toString();`
+   - Cierra el bloque: `}`
+   
+   **Verificación:**
+   - [ ] El nombre de la clase (`Movement`) es igual al nombre del constructor
+   - [ ] No escribiste `void` ni otro tipo de retorno (los constructores NO tienen retorno)
+   - [ ] Todos los `this.` están presentes
+   - [ ] Compiló sin errores (`mvn clean compile`)
 
-4. **AHORA TÚ - Constructor sin parámetros (sobrecarga):**
+4. **AHORA TÚ - Implementar el constructor vacío:**
    
-   **Objetivo:** Crear un constructor vacío para casos especiales (frameworks lo necesitan).
+   Similar al anterior, pero:
+   - NO recibe parámetros: `public Movement() {`
+   - Genera ID: `this.id = UUID.randomUUID().toString();`
+   - Genera fecha: `this.movementDate = LocalDateTime.now().toString();`
+   - Los demás atributos (`movementType`, `fuelType`, etc.) NO los inicializas aquí
    
-   **Especificaciones:**
-   - No recibe parámetros
-   - Genera el id automáticamente (igual que el otro)
-   - Genera la fecha automáticamente
-   - Los demás atributos quedan en null/0 (se llenarán con setters después)
-   
-   **Pregunta guía:** ¿Por qué tendrías DOS constructores en la misma clase? ¿Cuándo usarías uno u otro?
+   **¿Por qué?** Se llenarán con setters después cuando sea necesario.
 
-5. **Probar en Main.java:**
+5. **Depuración obligatoria - Entender el flujo:**
    
-   **Escribe este código de prueba:**
+   Sigamos esto paso a paso:
    
-   a) Crea un movimiento usando el constructor principal:
-      ```java
+   - En Main.java, crea un movimiento: `Movement m = new Movement("ENTRADA", "Diesel", 100.0, 3.45);`
+   - Coloca un **breakpoint** en la primera línea del constructor
+   - Ejecuta en **debug mode** (Run → Debug)
+   - Usa **Step Over** (F8) para ver línea por línea
+   - En el panel de **Variables**, observa cómo se llena cada atributo
+   - **Reflexiona:** ¿Ves el ID siendo generado? ¿La fecha? ¿Los parámetros siendo asignados?
+
+6. **Probar en Main.java:**
+   
+   Escribe código para **probar ambos constructores**:
+   
+   ```
+   a) Crear un movimiento con el constructor principal:
       Movement entrada1 = new Movement("ENTRADA", "Diesel", 100.0, 3.45);
-      ```
-   
-   b) Imprime el objeto (verás algo como `Movement@2a84aee7` por ahora - lo arreglaremos en Checkpoint 2.4):
-      ```java
       System.out.println(entrada1);
-      ```
    
-   c) Crea otro movimiento diferente para verificar que cada uno tiene su propio ID:
-      ```java
+   b) Crear otro movimiento diferente:
       Movement salida1 = new Movement("SALIDA", "Gasolina 93", 50.0, 4.20);
       System.out.println(salida1);
-      ```
    
-   d) Prueba el constructor vacío:
-      ```java
+   c) Probar el constructor vacío:
       Movement vacio = new Movement();
       System.out.println(vacio);
-      ```
+   ```
+   
+   **¿Qué esperas ver?**
+   - 3 salidas
+   - Cada una con un ID diferente (generado automáticamente)
+   - Los datos que pasaste al constructor aparecen en la salida
 
-6. **Compilar y ejecutar:**
+7. **Compilar y ejecutar:**
    - Terminal: `mvn clean compile`
-   - IntelliJ: Run Main.java
-   - Deberías ver 3 líneas con hashcodes diferentes (cada objeto es único)
+   - Ejecuta Main.java
+   - Deberías ver algo como: `com.forestech.models.Movement@2a84aee7` (por ahora inútil - lo arreglaremos en Checkpoint 2.4)
 
 **✅ Resultado esperado:** 
 - Puedes crear objetos Movement con `new Movement("ENTRADA", "Diesel", 100.0, 3.45)`
@@ -347,34 +443,104 @@ movement.getTotalValue()  // El objeto se calcula a sí mismo
 
 **Tareas paso a paso:**
 
+**Diagrama de tareas - Métodos de acceso (Getters y Setters):**
+
+```
+Movement.java - Acceso Controlado a Atributos
+│
+├── GETTERS (Lectura)
+│   ├── getId()
+│   │   └── Retorna: this.id
+│   │
+│   ├── getMovementType()
+│   │   └── Retorna: this.movementType
+│   │
+│   ├── getFuelType()
+│   │   └── Retorna: this.fuelType
+│   │
+│   ├── getQuantity()
+│   │   └── Retorna: this.quantity
+│   │
+│   ├── getUnitPrice()
+│   │   └── Retorna: this.unitPrice
+│   │
+│   └── getMovementDate()
+│       └── Retorna: this.movementDate
+│
+├── MÉTODOS DE CÁLCULO (Derivados)
+│   ├── getTotalValue()
+│   │   ├── Tipo retorno: double
+│   │   ├── Fórmula: quantity × unitPrice
+│   │   ├── Usa: this.quantity y this.unitPrice
+│   │   └── Ejemplo: 100 litros × $3.45 = $345.00
+│   │
+│   ├── getIVA()
+│   │   ├── Tipo retorno: double
+│   │   ├── Fórmula: getTotalValue() × 0.19
+│   │   ├── Usa: Llama a getTotalValue() (reutilización)
+│   │   └── Depende de: AppConfig.IVA_RATE
+│   │
+│   └── getTotalWithIVA()
+│       ├── Tipo retorno: double
+│       ├── Fórmula: getTotalValue() + getIVA()
+│       ├── Usa: Llama a otros métodos de cálculo
+│       └── Concepto: Reutiliza métodos en lugar de duplicar lógica
+│
+├── SETTERS (Modificación con validación)
+│   ├── setQuantity(double quantity)
+│   │   ├── Validación: quantity > 0
+│   │   ├── Si NO valida: Mostrar mensaje, NO asignar
+│   │   └── Si SÍ valida: this.quantity = quantity
+│   │
+│   ├── setUnitPrice(double unitPrice)
+│   │   ├── Validación: unitPrice > 0
+│   │   ├── Si NO valida: Mostrar mensaje, NO asignar
+│   │   └── Si SÍ valida: this.unitPrice = unitPrice
+│   │
+│   └── setMovementType(String movementType)
+│       ├── Validación: "ENTRADA" o "SALIDA"
+│       ├── Usa: .equals() para comparar Strings (NO ==)
+│       ├── Si NO valida: Mostrar mensaje, NO asignar
+│       └── Si SÍ valida: this.movementType = movementType
+│
+└── SIN SETTERS (Atributos inmutables)
+    ├── NO crear setter para id (nunca cambia)
+    └── NO crear setter para movementDate (la fecha es histórica)
+```
+
+**Tareas paso a paso:**
+
 1. **Crear tu PRIMER getter (ejemplo didáctico):**
    
-   Un getter es un método público que retorna el valor de un atributo privado.
+   Lee y ENTIENDE este patrón:
    
-   **EJEMPLO COMPLETO (estudia el patrón):**
-   ```java
+   ```
+   public TipoDeRetorno getNombreAtributo() {
+       return this.nombreAtributo;
+   }
+   
+   Ejemplo real:
    public String getId() {
        return this.id;
    }
    ```
    
-   **Anatomía del getter:**
+   **Anatomía:**
    - `public`: Otros pueden llamarlo
-   - `String`: Tipo de dato que retorna (mismo que el atributo)
+   - `String`: Tipo de dato que retorna (igual al atributo)
    - `getId`: Convención: get + NombreAtributo (camelCase)
    - `return this.id`: Devuelve el valor del atributo
-   - **NO modifica** nada, solo lectura
+   - NO modifica nada, solo lectura
 
-2. **AHORA TÚ - Crear getters para los demás atributos:**
+2. **AHORA TÚ - Crear getters para todos los atributos:**
    
-   **RECUERDA:** Ya viste el patrón en el paso 1. Ahora aplícalo.
+   Usando el patrón que viste en el paso 1, TÚ escribes:
    
-   **Debes crear getters para:**
-   - `movementType` (String) → `getMovementType()`
-   - `fuelType` (String) → `getFuelType()`
-   - `quantity` (double) → `getQuantity()`
-   - `unitPrice` (double) → `getUnitPrice()`
-   - `movementDate` (String) → `getMovementDate()`
+   - [ ] `getMovementType()` retorna this.movementType
+   - [ ] `getFuelType()` retorna this.fuelType
+   - [ ] `getQuantity()` retorna this.quantity
+   - [ ] `getUnitPrice()` retorna this.unitPrice
+   - [ ] `getMovementDate()` retorna this.movementDate
    
    **Pista:** Usa el mismo patrón que `getId()`, solo cambia:
    - El tipo de retorno (según el atributo)
@@ -383,109 +549,116 @@ movement.getTotalValue()  // El objeto se calcula a sí mismo
 
 3. **Crear método de cálculo `getTotalValue()` (migrado de MovementCalculator):**
    
-   **Diferencia importante:** Este NO es un getter normal porque no hay un atributo `totalValue`. Es un **cálculo derivado**.
+   Este NO es un getter normal - no hay un atributo `totalValue`.
+   Es un **método de cálculo** que deriva un valor de otros atributos.
    
-   **TÚ debes implementarlo con estas especificaciones:**
+   **Especificaciones:**
    - Tipo de retorno: double
-   - Sin parámetros (¿por qué? porque los datos están en `this`)
-   - Fórmula: cantidad multiplicada por precio unitario
-   - Usa `this.quantity` y `this.unitPrice`
+   - Sin parámetros (¿por qué? los datos están en `this`)
+   - Fórmula: `this.quantity * this.unitPrice`
+   - Retorna el resultado
    
-   **Pregunta guía:** ¿Por qué este método no necesita parámetros si está multiplicando dos valores?
+   **Pregunta guía:** ¿Por qué este método no necesita parámetros si multiplica dos valores?
 
 4. **AHORA TÚ - Crear métodos adicionales de cálculo:**
    
-   Siguiendo el patrón de `getTotalValue()`, crea:
+   Siguiendo el patrón de `getTotalValue()`, TÚ implementas:
    
-   a) **`getIVA()`** (migrado de MovementCalculator):
+   a) **`getIVA()`:**
       - Tipo de retorno: double
-      - Calcula el IVA del movimiento
-      - Usa `getTotalValue()` para obtener el subtotal
-      - Multiplica por `AppConfig.IVA_RATE` (debes agregarlo a AppConfig si no existe)
+      - Fórmula: `getTotalValue() * 0.19`
+      - 💡 **PISTA:** Reutiliza getTotalValue() en lugar de duplicar la lógica
    
-   b) **`getTotalWithIVA()`** (migrado de MovementCalculator):
+   b) **`getTotalWithIVA()`:**
       - Tipo de retorno: double
-      - Suma el subtotal + IVA
-      - **Pista:** Llama a `getTotalValue()` y `getIVA()` - ¡reutiliza métodos!
+      - Fórmula: `getTotalValue() + getIVA()`
+      - 💡 **PISTA:** Llama ambos métodos, sumalos
 
-5. **Agregar constante IVA a AppConfig (si no existe):**
-   ```java
-   // En AppConfig.java
-   public static final double IVA_RATE = 0.19;  // 19% IVA en Colombia
+5. **Crear tu PRIMER setter con validación (ejemplo didáctico):**
+   
+   Lee y ENTIENDE este patrón:
+   
    ```
-
-6. **Crear tu PRIMER setter con validación (ejemplo didáctico):**
-   
-   Un setter es un método público que modifica un atributo, pero con VALIDACIÓN.
-   
-   **EJEMPLO COMPLETO (estudia el patrón):**
-   ```java
-   public void setQuantity(double quantity) {
-       // Validar ANTES de asignar
-       if (quantity <= 0) {
-           System.out.println("⚠️  Error: La cantidad debe ser mayor a 0. Valor rechazado.");
-           return;  // Sale del método sin asignar
+   public void setNombreAtributo(Tipo valor) {
+       // Paso 1: VALIDAR
+       if (condición invalida) {
+           System.out.println("Error: mensaje claro");
+           return;  // Sale sin asignar
        }
-       // Si llegó aquí, el valor es válido
+       
+       // Paso 2: Si llegó aquí, es válido
+       this.nombreAtributo = valor;
+   }
+   
+   Ejemplo real:
+   public void setQuantity(double quantity) {
+       if (quantity <= 0) {
+           System.out.println("⚠️ Error: Cantidad debe ser > 0");
+           return;
+       }
        this.quantity = quantity;
    }
    ```
    
-   **Anatomía del setter:**
+   **Anatomía:**
    - `public void`: No retorna nada
    - `setQuantity`: Convención: set + NombreAtributo
    - Parámetro: mismo tipo que el atributo
-   - **Validación primero**: evita valores inválidos
+   - **Validación PRIMERO**: evita estados inválidos
    - `return` temprano si es inválido
-   - Asigna con `this` solo si es válido
+   - `this.` solo si es válido
 
-7. **AHORA TÚ - Crear setters adicionales con validación:**
+6. **AHORA TÚ - Crear setters adicionales con validación:**
    
-   Siguiendo el patrón del paso 6, crea setters para:
+   Siguiendo el patrón del paso 5, TÚ implementas:
    
    a) **`setUnitPrice(double unitPrice)`:**
-      - Valida que sea > 0
-      - Si no, muestra mensaje y no asigna
+      - Valida: unitPrice > 0
+      - Si NO: muestra mensaje y retorna
+      - Si SÍ: asigna con this.
    
    b) **`setMovementType(String movementType)`:**
-      - Valida que sea "ENTRADA" o "SALIDA"
-      - **Pista:** Usa `.equals()` para comparar Strings
-      - **Recuerda:** NUNCA uses `==` para comparar Strings
+      - Valida: debe ser "ENTRADA" o "SALIDA"
+      - **Recuerda:** Usa `.equals()` para comparar Strings (NUNCA `==`)
+      - Si NO: muestra mensaje y retorna
+      - Si SÍ: asigna con this.
 
-8. **NO crear setters para:**
-   - `id` - NUNCA debe cambiar después de creado
-   - `movementDate` - La fecha de creación es inmutable
+7. **IMPORTANTE - NO crear setters para:**
    
-   **Si alguien intenta `movement.setId("hack")`, el código ni compilará** (el método no existe).
+   - `id`: NUNCA debe cambiar después de creado
+   - `movementDate`: La fecha de creación es histórica e inmutable
+   
+   **Ventaja:** Si alguien intenta `movement.setId("hack")`, el código ni compilará (el método no existe).
 
-9. **Probar COMPLETO en Main.java:**
+8. **Probar en Main.java:**
    
-   **Escribe este código de prueba (TÚ lo escribes):**
+   **TÚ escribes código que pruebe TODO:**
    
-   a) Crear un movimiento
+   ```
+   a) Crear un movimiento:
+      Movement m = new Movement("ENTRADA", "Diesel", 100.0, 3.45);
    
-   b) **Probar GETTERS:**
-      - Imprime cada dato del movimiento usando los getters
-      - Formato: `"ID: " + entrada1.getId()`
+   b) PROBAR GETTERS (lectura):
+      - Imprime: m.getId()
+      - Imprime: m.getQuantity()
+      - Imprime: m.getUnitPrice()
    
-   c) **Probar MÉTODOS DE CÁLCULO:**
-      - Imprime subtotal con `getTotalValue()`
-      - Imprime IVA con `getIVA()`
-      - Imprime total con IVA con `getTotalWithIVA()`
-      - **Verifica:** ¿Los cálculos son correctos?
+   c) PROBAR CÁLCULOS:
+      - Imprime: m.getTotalValue()  → ¿es 345.00?
+      - Imprime: m.getIVA()  → ¿es ~65.55?
+      - Imprime: m.getTotalWithIVA()  → ¿es ~410.55?
    
-   d) **Probar SETTERS VÁLIDOS:**
-      - Cambia la cantidad a un valor válido (ej: 150.0)
-      - Imprime la nueva cantidad
-      - Imprime el nuevo total (debería cambiar)
+   d) PROBAR SETTERS VÁLIDOS:
+      - m.setQuantity(150.0)
+      - Imprime cantidad (debe ser 150)
+      - Imprime nuevo total (debe ser diferente)
    
-   e) **Probar SETTERS INVÁLIDOS:**
-      - Intenta asignar cantidad negativa (-50)
-      - Debería mostrar mensaje de error
-      - Verifica que la cantidad NO cambió (debe seguir en 150.0)
-      - Intenta asignar precio 0
-      - Intenta asignar tipo "VENTA"
-      - **Verifica:** Todos deben ser rechazados
+   e) PROBAR SETTERS INVÁLIDOS:
+      - m.setQuantity(-50)  → Debe rechazarse
+      - m.setUnitPrice(0)  → Debe rechazarse
+      - m.setMovementType("VENTA")  → Debe rechazarse
+      - Verifica que los valores NO cambiaron
+   ```
 
 **✅ Resultado esperado:** 
 - Puedes leer todos los datos con getters
@@ -565,74 +738,144 @@ Sin `toString()`, al imprimir ves `Movement@2a84aee7` (inútil). Con `toString()
 
 **Tareas paso a paso:**
 
+**Diagrama de tareas - Método toString():**
+
+```
+Movement.java - toString() para representación legible
+│
+└── toString()
+    ├── Anotación: @Override
+    │   └── Indica que sobrescribe un método de la clase padre (Object)
+    │
+    ├── Firma: public String toString()
+    │   ├── Modificador: public
+    │   ├── Retorno: String
+    │   └── Sin parámetros
+    │
+    ├── Contenido:
+    │   └── return String.format("patrón", valor1, valor2, ...)
+    │
+    ├── Formato sugerido:
+    │   Movement[id=..., type=..., fuel=..., qty=..., price=$..., total=$...]
+    │
+    ├── Especificadores de formato:
+    │   • %s = String
+    │   • %.2f = double con 2 decimales
+    │   • ID sugerido: mostrar solo primeros 8 caracteres (.substring(0, 8))
+    │
+    ├── Valores a mostrar:
+    │   1. ID (parcial)
+    │   2. Tipo de movimiento
+    │   3. Tipo de combustible
+    │   4. Cantidad (2 decimales)
+    │   5. Precio unitario (2 decimales, formato moneda $)
+    │   6. Total calculado (getTotalValue())
+    │
+    └── Resultado esperado:
+        Movement[id=a3f2b4c5, type=ENTRADA, fuel=Diesel, qty=100.00, price=$3.45, total=$345.00]
+```
+
+**Tareas paso a paso:**
+
 1. **Entender @Override (boilerplate permitido):**
    
-   `@Override` le dice a Java: "Este método sobrescribe uno de la clase padre (Object)".
+   `@Override` es una anotación que le dice a Java:
+   - "Este método sobrescribe uno de la clase padre (Object)"
+   - Ventaja: Si escribes mal el nombre, Java te avisa con error
    
-   **Ventaja:** Si escribes mal el nombre, Java te avisa con error de compilación.
+   Simplemente: agrega `@Override` encima del método, eso es todo.
 
-2. **Crear método toString() (primera vez - ejemplo didáctico):**
+2. **Estudiar String.format() con especificadores:**
    
-   **EJEMPLO COMPLETO:**
-   ```java
-   @Override
-   public String toString() {
-       return String.format("Movement[id=%s, type=%s, fuel=%s, qty=%.2f, price=$%.2f, total=$%.2f]",
-           this.id.substring(0, 8),  // Solo primeros 8 caracteres del ID
-           this.movementType,
-           this.fuelType,
-           this.quantity,
-           this.unitPrice,
-           this.getTotalValue()  // Reutiliza el método de cálculo
-       );
-   }
+   Lee y ENTIENDE estos ejemplos:
+   
    ```
+   String.format("Hola %s", "Juan")
+   → Resultado: "Hola Juan"
    
-   **Anatomía del toString():**
-   - `@Override`: Indica sobrescritura
-   - `public String`: Retorna un String
-   - No recibe parámetros
-   - `String.format()`: Formatea con placeholders
-     - `%s`: String
-     - `%.2f`: double con 2 decimales
-   - Incluye valores calculados (getTotalValue())
-
-3. **Estudiar String.format():**
+   String.format("Precio: $%.2f", 345.1)
+   → Resultado: "Precio: $345.10"
+   
+   String.format("ID: %s, Qty: %.2f", "abc123", 100.5)
+   → Resultado: "ID: abc123, Qty: 100.50"
+   ```
    
    **Especificadores comunes:**
    - `%s`: String
-   - `%d`: int
-   - `%f`: double (default 6 decimales)
-   - `%.2f`: double con 2 decimales
-   - `%10s`: String con ancho mínimo 10
+   - `%d`: entero
+   - `%f`: double (por defecto 6 decimales)
+   - `%.2f`: double con exactamente 2 decimales
    
-   **Investiga:** ¿Qué hace `%.2f` vs `%f`?
+   **Tu tarea:** Entiende por qué `%.2f` es mejor que `%f` para dinero.
 
-4. **Probar en Main.java:**
+3. **Ver el patrón de toString() (referencia didáctica):**
    
-   **TÚ debes escribir:**
+   Estructura general:
    
-   a) Crear un Movement:
-      ```java
+   ```
+   @Override
+   public String toString() {
+       return String.format(
+           "Movement[campos y valores con formato]",
+           this.atributo1,
+           this.atributo2,
+           método de cálculo,
+           ...
+       );
+   }
+   ```
+
+4. **AHORA TÚ - Implementar toString():**
+   
+   Usando el diagrama como guía, TÚ escribes:
+   
+   - [ ] Agrega `@Override` encima
+   - [ ] Declara: `public String toString() {`
+   - [ ] Usa `String.format()` con patrón:
+     - Muestra: id (primeros 8 chars), movementType, fuelType, quantity, unitPrice, getTotalValue()
+     - Formatos: Strings con %s, números con %.2f, moneda con $ delante
+   - [ ] Retorna el resultado
+   - [ ] Cierra el método
+   
+   **Pista:** Tu formato podría verse así (pero ajusta el texto según quieras):
+   ```
+   "Movement[id=%s, type=%s, fuel=%s, qty=%.2f, price=$%.2f, total=$%.2f]"
+   ```
+
+5. **Probar en Main.java:**
+   
+   **TÚ escribes:**
+   
+   ```
+   a) Crear un movimiento:
       Movement m = new Movement("ENTRADA", "Diesel", 100.0, 3.45);
-      ```
    
-   b) Imprimir directamente (ahora verás datos legibles):
-      ```java
+   b) Imprimir directamente:
       System.out.println(m);
-      ```
+      → Ahora verás datos legibles en lugar de "Movement@2a84aee7"
    
-   c) Crear varios y comparar:
-      ```java
+   c) Crear varios movimientos:
       Movement m2 = new Movement("SALIDA", "Gasolina 93", 50.0, 4.20);
       System.out.println(m2);
-      ```
+      
+   d) Compara la salida:
+      ¿Cambian los valores?
+      ¿Tienen IDs diferentes?
+   ```
    
    **Resultado esperado:**
    ```
    Movement[id=a3f2b4c5, type=ENTRADA, fuel=Diesel, qty=100.00, price=$3.45, total=$345.00]
    Movement[id=d6e8f1a2, type=SALIDA, fuel=Gasolina 93, qty=50.00, price=$4.20, total=$210.00]
    ```
+
+6. **Validar en el debugger:**
+   
+   - Ejecuta Main.java
+   - Coloca breakpoint en `System.out.println(m);`
+   - Inspecciona el objeto en el panel de variables
+   - Compara el toString() impreso con los valores reales
+   - ¿Coinciden?
 
 **✅ Resultado esperado:** 
 Al imprimir un Movement, ver todos sus datos formateados y legibles.
@@ -678,90 +921,202 @@ Cada entidad tiene sus propios atributos y comportamientos → merece su clase.
 
 **Tareas paso a paso:**
 
+**Diagrama de tareas - Nuevas clases del dominio:**
+
+```
+Vehicle.java
+├── Atributos privados:
+│   ├── String id → Generado con UUID
+│   ├── String placa → Ej: "ABC123"
+│   ├── String modelo → Ej: "Volvo FH16"
+│   ├── String categoria → Ej: "Cisterna" o "Camión"
+│   └── double capacidadLitros → Cuántos litros puede cargar
+│
+├── Constructores:
+│   ├── Principal: recibe placa, modelo, categoria, capacidadLitros
+│   └── Vacío: solo inicializa id y fecha
+│
+├── Getters: para todos los atributos
+│
+└── toString(): muestra placa, modelo, capacidad
+
+Supplier.java
+├── Atributos privados:
+│   ├── String id → Generado con UUID
+│   ├── String nombre → Ej: "Petro Colombia S.A."
+│   ├── String telefono → Ej: "+57 310 1234567"
+│   ├── String email → Ej: "contacto@petrocol.com"
+│   └── String direccion → Ej: "Calle 50 #10-20, Bogotá"
+│
+├── Constructores:
+│   ├── Principal: recibe nombre, telefono, email, direccion
+│   └── Vacío: solo inicializa id
+│
+├── Getters: para todos los atributos
+│
+└── toString(): muestra nombre, teléfono, ciudad
+
+Product.java
+├── Atributos privados:
+│   ├── String id → Generado con UUID
+│   ├── String nombre → Ej: "Diesel Extra"
+│   ├── String tipoCombustible → Ej: "Diesel" o "Gasolina"
+│   ├── String unidadMedida → Ej: "Litros"
+│   └── double precioEstandar → Precio base actual
+│
+├── Constructores:
+│   ├── Principal: recibe nombre, tipoCombustible, unidadMedida, precioEstandar
+│   └── Vacío: solo inicializa id
+│
+├── Getters: para todos los atributos
+│
+├── Métodos de cálculo:
+│   └── getPrecioConDescuento(double porcentaje)
+│       └── Fórmula: precioEstandar * (1 - porcentaje/100)
+│
+└── toString(): muestra nombre y precio
+```
+
+**Tareas paso a paso:**
+
 1. **Analizar y diseñar ANTES de codificar:**
    
-   En papel o herramienta digital, dibuja 4 cajas (Movement, Vehicle, Supplier, Product).
+   En papel o en tu IDE, dibuja 3 cajas (Vehicle, Supplier, Product).
    
-   **Piensa y anota:**
-   - **Vehicle:** ¿Qué datos necesitas? (placa, modelo, categoría, capacidad...)
-   - **Supplier:** ¿Qué datos? (nombre, contacto, dirección...)
-   - **Product:** ¿Qué datos? (nombre del combustible, tipo, unidad, precio estándar...)
-   
-   **Pregunta guía:** ¿Hay relaciones entre ellas? (ej: Movement podría tener un supplierId)
+   Para cada una, escribe:
+   - [ ] ¿Qué datos reales necesita?
+   - [ ] ¿Cuáles deben ser inmutables? (sin setter)
+   - [ ] ¿Qué cálculos derivados tiene?
 
 2. **Crear clase Vehicle (TÚ debes hacerlo):**
    
-   **Especificaciones:**
-   - Archivo: `Vehicle.java` en el paquete `models`
-   - **Atributos privados sugeridos:**
-     - id (String) - generado automáticamente
-     - placa (String) - ej: "ABC123"
-     - modelo (String) - ej: "Volvo FH16"
-     - categoria (String) - ej: "Camión", "Cisterna"
-     - capacidadLitros (double) - cuántos litros puede cargar
+   **Paso a paso:**
    
-   **Debes implementar:**
-   - Constructor principal (recibe todo menos id)
-   - Constructor vacío
-   - Getters para todos los atributos
-   - Setters solo para atributos modificables (NO para id)
-   - toString() personalizado
+   a) En el paquete `models`, crea nuevo archivo: `Vehicle.java`
    
-   **Patrón:** Usa Movement como referencia - misma estructura, diferentes atributos.
+   b) Declara la clase pública
+   
+   c) Agrega 5 atributos privados (ver diagrama):
+      - id (String)
+      - placa (String)
+      - modelo (String)
+      - categoria (String)
+      - capacidadLitros (double)
+   
+   d) Constructor principal que recibe: placa, modelo, categoria, capacidadLitros
+      - Genera UUID para id
+      - Asigna los 4 parámetros a sus atributos
+   
+   e) Constructor vacío que solo genera el id
+   
+   f) Getters para todos los atributos
+      - NO crear setters (el vehículo no cambia sus características)
+   
+   g) toString() legible mostrando placa, modelo, categoría
+   
+   **Verificación:**
+   - [ ] Compila sin errores
+   - [ ] Puedes crear Vehicle en Main.java
+   - [ ] toString() muestra información útil
 
 3. **Crear clase Supplier (TÚ debes hacerlo):**
    
-   **Especificaciones:**
-   - Archivo: `Supplier.java` en el paquete `models`
-   - **Atributos privados sugeridos:**
-     - id (String)
-     - nombre (String) - ej: "Petro Colombia S.A."
-     - telefono (String)
-     - email (String)
-     - direccion (String)
+   **Paso a paso:**
    
-   **Implementar:** Constructor, getters, setters selectivos, toString()
+   a) Crea `Supplier.java` en el paquete `models`
    
-   **Pregunta guía:** ¿Qué atributos NO deberían tener setter? ¿Por qué?
+   b) Agrega 5 atributos privados:
+      - id (String)
+      - nombre (String)
+      - telefono (String)
+      - email (String)
+      - direccion (String)
+   
+   c) Constructor principal que recibe: nombre, telefono, email, direccion
+      - Genera UUID para id
+      - Asigna los 4 parámetros
+   
+   d) Constructor vacío
+   
+   e) Getters para todos
+      - NO crear setter para id
+      - Considera: ¿hay otros que NO deberían cambiar?
+   
+   f) toString() mostrando nombre y teléfono
+   
+   **Pregunta reflexiva:** ¿Deberías poder cambiar el email de un proveedor? ¿Y su dirección?
 
 4. **Crear clase Product (TÚ debes hacerlo):**
    
-   **Especificaciones:**
-   - Archivo: `Product.java` en el paquete `models`
-   - **Atributos privados sugeridos:**
-     - id (String)
-     - nombre (String) - ej: "Diesel Extra"
-     - tipoCombustible (String) - ej: "Diesel", "Gasolina"
-     - unidadMedida (String) - ej: "Litros"
-     - precioEstandar (double) - precio base actual
+   **Paso a paso:**
    
-   **Implementar:** Constructor, getters, setters selectivos, toString()
+   a) Crea `Product.java` en el paquete `models`
    
-   **Desafío:** Agrega un método `getPrecioConDescuento(double porcentaje)` que calcule un precio con descuento.
+   b) Agrega 5 atributos privados:
+      - id (String)
+      - nombre (String)
+      - tipoCombustible (String)
+      - unidadMedida (String)
+      - precioEstandar (double)
+   
+   c) Constructor principal que recibe: nombre, tipoCombustible, unidadMedida, precioEstandar
+      - Genera UUID para id
+      - Asigna parámetros
+   
+   d) Constructor vacío
+   
+   e) Getters para todos
+      - NO crear setter para id ni tipoCombustible
+   
+   f) Método de cálculo `getPrecioConDescuento(double porcentaje)`:
+      - Recibe: un porcentaje (ej: 10 para 10%)
+      - Retorna: `precioEstandar * (1 - porcentaje/100)`
+      - Ejemplo: precio 100, descuento 10% → retorna 90
+   
+   g) toString() mostrando nombre y precio
+   
+   **Desafío:** ¿Por qué es mejor tener `getPrecioConDescuento()` como método en lugar de cambiar `precioEstandar`?
 
 5. **Probar CADA clase en Main.java:**
    
-   **TÚ debes escribir pruebas para:**
+   **TÚ escribes pruebas para Vehicle:**
+   ```
+   a) Crear: Vehicle v = new Vehicle("ABC123", "Volvo FH16", "Cisterna", 5000.0);
    
-   a) **Vehicle:**
-      ```java
-      Vehicle camion1 = new Vehicle("ABC123", "Volvo FH16", "Cisterna", 5000.0);
-      System.out.println(camion1);
-      ```
-      Verifica que el toString() muestre datos legibles.
+   b) Imprimir: System.out.println(v);
    
-   b) **Supplier:**
-      Crea un proveedor con datos realistas e imprímelo.
+   c) Verificar getters:
+      - System.out.println("Placa: " + v.getPlaca());
+      - System.out.println("Modelo: " + v.getModelo());
+   ```
    
-   c) **Product:**
-      Crea un producto (tipo de combustible) e imprímelo.
-      Prueba el método de descuento si lo implementaste.
+   **TÚ escribes pruebas para Supplier:**
+   ```
+   a) Crear: Supplier s = new Supplier("Petro Colombia", "+57310...", "info@...", "Calle 50");
+   
+   b) Imprimir: System.out.println(s);
+   
+   c) Verificar getters
+   ```
+   
+   **TÚ escribes pruebas para Product:**
+   ```
+   a) Crear: Product p = new Product("Diesel Extra", "Diesel", "Litros", 3.45);
+   
+   b) Imprimir: System.out.println(p);
+   
+   c) Probar descuento:
+      - double precioConDesc = p.getPrecioConDescuento(10);  // 10% descuento
+      - System.out.println("Precio con 10% desc: $" + precioConDesc);
+   ```
 
-6. **Actualizar diagrama:**
+6. **Reflejar sobre el diseño:**
    
-   Ahora que las clases existen, actualiza tu diagrama con los atributos reales.
-   
-   **Reflexiona:** ¿Ves relaciones potenciales? (Movement podría tener vehicleId y supplierId)
+   Después de crear las 3 clases, responde:
+   - [ ] ¿Hay atributos duplicados entre clases? (malo)
+   - [ ] ¿Cada clase representa UNA entidad clara? (bueno)
+   - [ ] ¿Hay métodos que podrían mejorar? (ej: validar email en Supplier)
+   - [ ] ¿Ves relaciones entre las clases? (Movement podría tener vehicleId y supplierId)
 
 **✅ Resultado esperado:** 
 - 4 clases funcionales (Movement, Vehicle, Supplier, Product)
@@ -831,121 +1186,262 @@ ArrayList es dinámico:
 
 **Tareas paso a paso:**
 
+**Diagrama de tareas - Trabajar con ArrayList<Movement>:**
+
+```
+Main.java - Operaciones con ArrayList
+│
+├── 1. Crear el ArrayList
+│   └── ArrayList<Movement> movements = new ArrayList<>();
+│
+├── 2. Operaciones básicas
+│   ├── Agregar: movements.add(objeto);
+│   ├── Tamaño: movements.size()
+│   ├── Obtener: movements.get(indice)
+│   └── Eliminar: movements.remove(indice)
+│
+├── 3. Recorrer la lista
+│   ├── Forma 1 - for clásico:
+│   │   for (int i = 0; i < movements.size(); i++) {
+│   │       Movement m = movements.get(i);
+│   │   }
+│   │
+│   └── Forma 2 - for-each (preferida):
+│       for (Movement m : movements) {
+│           // Procesar m
+│       }
+│
+├── 4. Búsquedas y filtros
+│   ├── Encontrar el PRIMER elemento que cumpla condición:
+│   │   for (...) {
+│   │       if (condición) {
+│   │           guardar resultado;
+│   │           break;  // Sal del bucle
+│   │       }
+│   │   }
+│   │
+│   └── Encontrar TODOS los elementos (crear lista nueva):
+│       ArrayList<Movement> resultado = new ArrayList<>();
+│       for (Movement m : movements) {
+│           if (condición) {
+│               resultado.add(m);
+│           }
+│       }
+│
+└── 5. Cálculos sobre la colección
+    └── Acumular valores:
+        double total = 0;
+        for (Movement m : movements) {
+            total += m.getTotalValue();
+        }
+```
+
+**Tareas paso a paso:**
+
 1. **Importar ArrayList (boilerplate permitido):**
-   ```java
+   
+   En Main.java, agrega al inicio:
+   ```
    import java.util.ArrayList;
    ```
 
-2. **Crear tu primer ArrayList (ejemplo didáctico):**
+2. **Crear tu primer ArrayList (TÚ lo escribes):**
    
-   **En Main.java:**
-   ```java
+   En el método main(), escribe:
+   ```
    ArrayList<Movement> movements = new ArrayList<>();
    ```
    
-   **Anatomía:**
-   - `ArrayList<Movement>`: Tipo de la variable - lista de Movement
-   - `movements`: Nombre de la variable
-   - `new ArrayList<>()`: Crea la lista vacía
-   - `<>`: El compilador infiere que es de Movement
+   **Entiende:**
+   - `ArrayList<Movement>`: Tipo - una lista de objetos Movement
+   - `movements`: Nombre de tu variable
+   - `new ArrayList<>()`: Crea la lista vacía y lista para crecer
+   - `<>`: El compilador infiere automáticamente que es de Movement
 
-3. **Agregar objetos al ArrayList:**
+3. **Crear 3 movimientos y agregarlos:**
    
-   **TÚ debes escribir:**
-   - Crea al menos 3 movimientos diferentes:
-     - 1 ENTRADA de Diesel
-     - 1 SALIDA de Gasolina 93
-     - 1 ENTRADA de ACPM
+   **TÚ escribes:**
    
-   - Agrégalos al ArrayList usando `.add()`:
-     ```java
-     movements.add(entrada1);
-     movements.add(salida1);
-     movements.add(entrada2);
-     ```
+   a) Crea movimiento 1: ENTRADA de Diesel, 100 litros, $3.45
+   
+   b) Agrégalo: `movements.add(entrada1);`
+   
+   c) Crea movimiento 2: SALIDA de Gasolina 93, 50 litros, $4.20
+   
+   d) Agrégalo: `movements.add(salida1);`
+   
+   e) Crea movimiento 3: ENTRADA de ACPM, 75 litros, $2.90
+   
+   f) Agrégalo: `movements.add(entrada2);`
+   
+   **Resultado:** ArrayList con 3 objetos Movement
 
-4. **Operaciones básicas (TÚ implementas):**
+4. **Probar operaciones básicas:**
    
-   a) **Obtener el tamaño:**
-      - Usa `.size()` para saber cuántos movimientos hay
-      - Imprime: "Total de movimientos: X"
+   **TÚ escribes y verifica:**
    
-   b) **Obtener un elemento específico:**
-      - Usa `.get(indice)` para obtener el movimiento en posición 0
-      - Imprime ese movimiento
-      - **Pregunta:** ¿Por qué el primer elemento está en posición 0 y no 1?
+   a) Obtener el tamaño:
+      ```
+      System.out.println("Total: " + movements.size());
+      → Debe mostrar: "Total: 3"
+      ```
    
-   c) **Eliminar un elemento:**
-      - Usa `.remove(indice)` para eliminar el del medio
-      - Imprime el tamaño después de eliminar
-      - **Verifica:** ¿El tamaño disminuyó?
+   b) Obtener el primer movimiento:
+      ```
+      Movement primero = movements.get(0);
+      System.out.println(primero);
+      ```
+   
+   c) Obtener el tercero:
+      ```
+      Movement tercero = movements.get(2);
+      System.out.println(tercero);
+      ```
+   
+   d) Intentar obtener el 4º (no existe):
+      ```
+      Movement inexistente = movements.get(3);
+      → ¿Qué error ves? IndexOutOfBoundsException
+      ```
+   
+   e) Eliminar el del medio:
+      ```
+      movements.remove(1);
+      System.out.println("Después de eliminar: " + movements.size());
+      → Debe mostrar: "Después de eliminar: 2"
+      ```
 
-5. **Recorrer e imprimir TODOS (3 formas):**
+5. **Recorrer e imprimir TODOS (Forma 1 - for clásico):**
    
-   **Forma 1 - for clásico (TÚ escribes):**
-   ```java
+   **TÚ escribes:**
+   
+   ```
    for (int i = 0; i < movements.size(); i++) {
        Movement m = movements.get(i);
+       System.out.println("Movimiento " + (i+1) + ": " + m);
+   }
+   ```
+   
+   **Entiende:**
+   - `i = 0`: Empieza en el índice 0 (primer elemento)
+   - `i < movements.size()`: Continúa mientras i sea menor al tamaño
+   - `movements.get(i)`: Obtiene el elemento en posición i
+   - `i+1` en la impresión: Porque usuarios cuentan desde 1, no desde 0
+
+6. **Recorrer e imprimir TODOS (Forma 2 - for-each, PREFERIDA):**
+   
+   **TÚ escribes:**
+   
+   ```
+   for (Movement m : movements) {
        System.out.println(m);
    }
    ```
    
-   **Forma 2 - for-each (TÚ escribes):**
-   ```java
-   for (Movement m : movements) {
-       // Imprimir m
-   }
+   **Ventajas sobre form 1:**
+   - Más legible
+   - No necesitas índices
+   - Menos errores por "off-by-one"
+   
+   **Pregunta:** ¿Cuándo usarías forma 1 vs forma 2?
+   - Forma 1: Cuando necesites el índice
+   - Forma 2: Cuando solo necesites iterar
+
+7. **Calcular el total de TODOS los movimientos:**
+   
+   **TÚ escribes:**
+   
+   ```
+   a) Declare acumulador:
+      double granTotal = 0;
+   
+   b) Recorre la lista:
+      for (Movement m : movements) {
+          granTotal += m.getTotalValue();
+      }
+   
+   c) Imprime:
+      System.out.println("Gran total: $" + granTotal);
    ```
    
-   **Pregunta guía:** ¿Cuál es más legible? ¿Cuándo usarías una u otra?
-   
-   **Forma 3 - Desafío avanzado (opcional):**
-   Investiga `movements.forEach()` con lambdas (lo verás en Fase 8).
+   **Entiende:**
+   - `granTotal += m.getTotalValue()` es lo mismo que `granTotal = granTotal + m.getTotalValue()`
+   - Vas acumulando el total de cada movimiento
+   - Al final tienes el total de todos
 
-6. **Cálculo sobre la colección (TÚ implementas):**
+8. **Búsqueda simple - Encontrar el PRIMER movimiento de tipo "ENTRADA":**
    
-   **Objetivo:** Sumar el total de TODOS los movimientos.
+   **TÚ escribes:**
    
-   **Especificaciones:**
-   - Variable acumuladora: `double granTotal = 0;`
-   - Recorre el ArrayList
-   - En cada iteración: suma el `getTotalValue()` del movimiento
-   - Al final, imprime el gran total
+   ```
+   a) Variable para guardar el resultado:
+      Movement primeraEntrada = null;
    
-   **Pregunta guía:** ¿Por qué necesitas una variable acumuladora?
+   b) Recorre buscando:
+      for (Movement m : movements) {
+          if (m.getMovementType().equals("ENTRADA")) {
+              primeraEntrada = m;
+              break;  // Sal del bucle
+          }
+      }
+   
+   c) Verifica:
+      if (primeraEntrada != null) {
+          System.out.println("Primera entrada: " + primeraEntrada);
+      } else {
+          System.out.println("No hay entradas");
+      }
+   ```
+   
+   **Importante:**
+   - `.equals()` para comparar Strings (NO ==)
+   - `break` para salir apenas encuentres el primero
+   - `!= null` para verificar que encontraste algo
 
-7. **Búsqueda simple (TÚ implementas):**
+9. **Búsqueda avanzada - Encontrar TODOS los movimientos de "SALIDA":**
    
-   **Objetivo:** Encontrar el PRIMER movimiento de tipo "ENTRADA".
+   **TÚ escribes:**
    
-   **Especificaciones:**
-   - Recorre el ArrayList
-   - Para cada movimiento, verifica si `getMovementType().equals("ENTRADA")`
-   - Cuando lo encuentres, guárdalo y **sal del bucle** con `break`
-   - Imprime cuál encontraste
+   ```
+   a) Create lista nueva para resultados:
+      ArrayList<Movement> salidas = new ArrayList<>();
    
-   **Pregunta:** ¿Qué pasa si ninguno es ENTRADA? ¿Cómo lo manejarías?
+   b) Recorre y filtra:
+      for (Movement m : movements) {
+          if (m.getMovementType().equals("SALIDA")) {
+              salidas.add(m);
+          }
+      }
+   
+   c) Imprime resultados:
+      System.out.println("Total salidas: " + salidas.size());
+      for (Movement s : salidas) {
+          System.out.println(s);
+      }
+   ```
 
-8. **Búsqueda avanzada (TÚ implementas):**
-   
-   **Objetivo:** Encontrar TODOS los movimientos de "SALIDA" y ponerlos en otra lista.
-   
-   **Especificaciones:**
-   - Crea un nuevo ArrayList: `ArrayList<Movement> salidas = new ArrayList<>();`
-   - Recorre el ArrayList original
-   - Si el movimiento es SALIDA, agrégalo a `salidas`
-   - Imprime cuántas salidas encontraste
-   - Imprime la lista de salidas
-
-9. **Estadística compleja (Desafío):**
-   
-   **Objetivo:** Encontrar el movimiento con mayor cantidad de litros.
-   
-   **Pistas:**
-   - Variable para guardar el máximo: `Movement mayorMovimiento = null;`
-   - Recorre el ArrayList
-   - Compara cantidades con `getQuantity()`
-   - Actualiza `mayorMovimiento` si encuentras uno mayor
+10. **Desafío - Encontrar el movimiento con MAYOR cantidad:**
+    
+    **TÚ escribes:**
+    
+    ```
+    a) Variable para guardar el máximo:
+       Movement movimientoMayor = null;
+       double cantidadMaxima = 0;
+    
+    b) Recorre comparando:
+       for (Movement m : movements) {
+           if (m.getQuantity() > cantidadMaxima) {
+               cantidadMaxima = m.getQuantity();
+               movimientoMayor = m;
+           }
+       }
+    
+    c) Imprime:
+       if (movimientoMayor != null) {
+           System.out.println("Mayor cantidad: " + movimientoMayor);
+       }
+    ```
 
 **✅ Resultado esperado:** 
 - Lista de movimientos que crece/decrece dinámicamente
