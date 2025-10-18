@@ -109,65 +109,70 @@ El driver JDBC:
 "¿Por qué cada base de datos (MySQL, PostgreSQL, SQL Server) necesita su propio driver?"
 ```
 
-**Tareas paso a paso:**
+**Diagrama de tareas - Configurar JDBC Driver:**
+
+```
+pom.xml
+│
+└── Sección <dependencies>
+    │
+    └── Nueva dependencia <dependency>
+        ├── <groupId>: com.microsoft.sqlserver
+        ├── <artifactId>: mssql-jdbc
+        └── <version>: 12.8.1.jre11 (o superior)
+
+Propósito: Esto permite que Maven descargue el driver de SQL Server
+```
+
+**Tareas paso a paso (TÚ completas cada una):**
 
 1. **Abrir `pom.xml`** en el editor
+   - Localiza la sección `<dependencies>`
+   - Si no existe, debes crearla dentro de `<project>` (antes de `</project>`)
 
-2. **Localizar la sección `<dependencies>`:**
-   - Si no existe, debes crearla dentro de `<project>`
-   - Debe estar antes de `</project>` y después de `<build>`
+2. **Agregar la dependencia:**
+   - Estructura de una dependencia:
+     ```
+     <dependency>
+         <groupId>...</groupId>
+         <artifactId>...</artifactId>
+         <version>...</version>
+     </dependency>
+     ```
+   - **TÚ completas:** Coloca el groupId, artifactId y version para el driver de SQL Server
+   - **Pregunta:** ¿Por qué `jre11` en la versión? ¿Qué pasa si tu proyecto usa Java 17?
 
-3. **Agregar la dependencia del driver de SQL Server:**
-   
-   **Especificaciones (TÚ debes escribirlo):**
-   - groupId: `com.microsoft.sqlserver`
-   - artifactId: `mssql-jdbc`
-   - version: `12.8.1.jre11` o superior
-   
-   **Sintaxis de dependencia:**
-   ```xml
-   <dependency>
-       <groupId>...</groupId>
-       <artifactId>...</artifactId>
-       <version>...</version>
-   </dependency>
-   ```
-   
-   **Pregunta guía:** ¿Por qué usamos `jre11` en la versión? ¿Qué pasa si tu proyecto usa Java 17?
+3. **Guardar** el archivo pom.xml
 
-4. **Guardar** el archivo pom.xml
+4. **Descargar la dependencia desde terminal:**
+   - Comando a ejecutar:
+     ```bash
+     cd forestech-cli-java/
+     mvn clean install
+     ```
+   - Deberías ver líneas en la salida mencionando la descarga del JAR
 
-5. **Descargar dependencia desde terminal:**
-   
-   **Comandos a ejecutar (en orden):**
-   ```bash
-   cd forestech-cli-java/
-   mvn clean install
-   ```
-   
-   **Observa la salida:** Deberías ver líneas como:
-   ```
-   Downloading from central: https://repo.maven.apache.org/.../mssql-jdbc-12.8.1.jre11.jar
-   ```
-
-6. **Verificar descarga exitosa:**
+5. **Verificar descarga exitosa:**
    
    **Opción A - Por terminal:**
-   ```bash
-   ls ~/.m2/repository/com/microsoft/sqlserver/mssql-jdbc/
-   ```
-   Debes ver la carpeta con tu versión (ej: `12.8.1.jre11/`)
+   - Ejecuta:
+     ```
+     ls ~/.m2/repository/com/microsoft/sqlserver/mssql-jdbc/
+     ```
+   - Resultado esperado: Carpeta con tu versión (ej: `12.8.1.jre11/`)
    
-   **Opción B - Por IntelliJ:**
+   **Opción B - En IntelliJ:**
    - Ve a: View → Tool Windows → Maven
    - Expande: Dependencies → compile
    - Busca: `com.microsoft.sqlserver:mssql-jdbc`
+   - Resultado esperado: Debes verlo en la lista
 
-7. **Compilar el proyecto:**
-   ```bash
-   mvn clean compile
-   ```
-   Debe compilar sin errores.
+6. **Compilar el proyecto:**
+   - Ejecuta:
+     ```
+     mvn clean compile
+     ```
+   - Resultado esperado: Compilación exitosa SIN errores
 
 **✅ Resultado esperado:** 
 - Maven descarga el driver sin errores
@@ -232,103 +237,101 @@ Con DatabaseConnection:
 "¿Por qué DatabaseConnection tiene métodos static?"
 ```
 
+**Diagrama de estructura - Clase DatabaseConnection:**
+
+```
+DatabaseConnection.java
+│
+├── Constructor privado (patrón Utility Class)
+│   └── Sin parámetros, cuerpo vacío
+│
+├── Constantes de configuración (private static final)
+│   ├── URL → "jdbc:sqlserver://localhost:1433;databaseName=FORESTECH"
+│   ├── USER → Tu usuario SQL Server (ej: "sa")
+│   └── PASSWORD → Tu contraseña SQL Server
+│
+├── Método: getConnection()
+│   ├── Tipo retorno: Connection
+│   ├── Modificadores: public static
+│   ├── Excepciones: throws SQLException
+│   ├── Lógica:
+│   │   1. Usar DriverManager.getConnection(URL, USER, PASSWORD)
+│   │   2. Retornar el objeto Connection obtenido
+│   │
+│   └── Import necesario:
+│       - java.sql.Connection
+│       - java.sql.DriverManager
+│       - java.sql.SQLException
+│
+└── Método: testConnection()
+    ├── Tipo retorno: void
+    ├── Modificadores: public static
+    ├── Manejo de excepciones: try-catch (NO throws)
+    │
+    ├── Sección try (TÚ escribes):
+    │   ├── Obtener conexión con try-with-resources
+    │   ├── Obtener metadata: conn.getMetaData()
+    │   └── Imprimir nombre BD: metadata.getDatabaseProductName()
+    │
+    └── Sección catch (TÚ escribes):
+        ├── Imprimir mensaje de error
+        └── Mostrar: e.getMessage()
+```
+
 **Tareas paso a paso:**
 
 1. **Crear el paquete `config`:**
    - En IntelliJ: clic derecho en `com.forestech` → New → Package → "config"
-   - **¿Por qué `config`?** Convención: configuraciones técnicas van separadas de lógica
+   - **Pregunta:** ¿Por qué las configuraciones técnicas van en un paquete separado?
 
 2. **Crear la clase DatabaseConnection:**
    - Clic derecho en `config` → New → Java Class → "DatabaseConnection"
    - Declarar como clase pública
 
-3. **Constructor privado (patrón Utility Class):**
-   
-   **Especificaciones:**
-   - Constructor privado sin parámetros
-   - Cuerpo vacío (o lanza excepción)
-   
-   **Pregunta guía:** ¿Por qué NO queremos que nadie haga `new DatabaseConnection()`?
-   
-   **Pista:** Esta es una clase de utilidad con solo métodos estáticos. No tiene sentido crear objetos de ella.
+3. **Constructor privado (es una Utility Class):**
+   - **TÚ implementas:** constructor sin parámetros
+   - **Pregunta:** ¿Por qué un constructor privado? ¿Qué pasaría si fuera público?
 
-4. **Declarar constantes privadas de configuración:**
-   
-   **Especificaciones (TÚ debes escribir):**
-   - URL de conexión (String, private static final)
-     - Formato: `jdbc:sqlserver://localhost:1433;databaseName=FORESTECH`
-     - **Investiga:** ¿Qué significa cada parte de la URL?
-   - Usuario (String, private static final)
-     - Tu usuario de SQL Server (ej: "sa" o tu usuario Windows)
-   - Contraseña (String, private static final)
-     - Tu contraseña de SQL Server
-   
-   **Pregunta guía:** ¿Por qué usar `final` para credenciales?
+4. **Declarar constantes de configuración (TÚ las escribes):**
+   - Tres constantes: URL, USER, PASSWORD
+   - Modificadores: `private static final`
+   - **URL formato:** `jdbc:sqlserver://localhost:1433;databaseName=FORESTECH`
+   - **Pregunta:** ¿Qué significa cada parte de la URL? Investiga: `jdbc`, `sqlserver`, `1433`, `databaseName`
 
-5. **Crear método estático `getConnection()`:**
-   
-   **Especificaciones:**
-   - Modificador: `public static`
-   - Tipo de retorno: `Connection` (del paquete java.sql)
-   - Parámetros: ninguno
-   - Declaración de excepción: `throws SQLException`
-   
-   **Implementación (TÚ debes hacerla):**
-   - Usar `DriverManager.getConnection(URL, USUARIO, CONTRASEÑA)`
-   - Retornar el objeto Connection obtenido
-   
-   **Import necesario:**
-   ```java
-   import java.sql.Connection;
-   import java.sql.DriverManager;
-   import java.sql.SQLException;
-   ```
+5. **Implementar getConnection() (TÚ lo escribes):**
+   - Usar `DriverManager.getConnection(URL, USER, PASSWORD)`
+   - Retornar la Connection obtenida
+   - Agregar los tres imports de java.sql
 
-6. **Crear método estático `testConnection()`:**
+6. **Implementar testConnection() (TÚ lo escribes):**
    
-   **Propósito:** Verificar que la configuración de conexión es correcta.
+   a) **Estructura try-with-resources:**
+      - Patrón:
+        ```
+        try (Connection conn = getConnection()) {
+            // Tu código aquí
+        } catch (SQLException e) {
+            // Tu código aquí
+        }
+        ```
    
-   **Especificaciones:**
-   - Modificador: `public static`
-   - Tipo de retorno: `void`
-   - Parámetros: ninguno
-   - NO declarar throws (captura SQLException internamente)
+   b) **En el try:**
+      - Extrae metadata: `conn.getMetaData()`
+      - Imprime nombre de BD: `metadata.getDatabaseProductName()`
+      - Imprime mensaje de éxito
    
-   **Lógica a implementar (TÚ escribes el código):**
+   c) **En el catch:**
+      - Imprime error: `e.getMessage()`
    
-   a) Usar try-with-resources para obtener conexión:
-      ```java
-      try (Connection conn = getConnection()) {
-          // código aquí
-      } catch (SQLException e) {
-          // manejo de error aquí
-      }
-      ```
-   
-   b) Si la conexión es exitosa:
-      - Obtener metadata de la conexión: `conn.getMetaData()`
-      - Imprimir nombre de la BD: `metadata.getDatabaseProductName()`
-      - Imprimir mensaje de éxito con el nombre de la BD
-   
-   c) Si falla (bloque catch):
-      - Imprimir mensaje de error claro
-      - Imprimir el mensaje de la excepción: `e.getMessage()`
-   
-   **Pregunta guía:** ¿Por qué usamos try-with-resources en vez de try-finally?
+   d) **Pregunta:** ¿Por qué try-with-resources vs try-finally manual?
 
 7. **Probar en Main.java:**
-   
-   **Agregar al método main (después de las pruebas de Fase 2):**
-   ```java
-   System.out.println("\n=== PRUEBA DE CONEXIÓN A BD ===");
-   DatabaseConnection.testConnection();
-   ```
-   
-   **Compilar y ejecutar:**
-   ```bash
-   mvn clean compile
-   mvn exec:java -Dexec.mainClass="com.forestech.Main"
-   ```
+   - Agrega esta línea (donde corresponda):
+     ```
+     DatabaseConnection.testConnection();
+     ```
+   - Compila: `mvn clean compile`
+   - Ejecuta: `mvn exec:java -Dexec.mainClass="com.forestech.Main"`
 
 **✅ Resultado esperado:** 
 - Ver mensaje "✅ Conexión exitosa a FORESTECH (o el nombre de tu BD)" en consola
@@ -429,106 +432,115 @@ SQL Server (base de datos)
 "¿Dónde va la lógica SQL: en Service o en Manager? ¿Por qué?"
 ```
 
+**Diagrama de estructura - Método getAllProducts():**
+
+```
+ProductService.java → getAllProducts()
+│
+├── Tipo retorno: void (por ahora)
+├── Modificadores: public static
+├── Sin parámetros
+├── Manejo: try-catch
+│
+├── 1. Definir query SQL
+│   └── SELECT id, name, type, unit FROM combustibles_products
+│
+├── 2. Usar try-with-resources anidado
+│   ├── Connection conn = DatabaseConnection.getConnection()
+│   ├── Statement stmt = conn.createStatement()
+│   └── ResultSet rs = stmt.executeQuery(sql)
+│
+├── 3. Ciclo de lectura de datos
+│   ├── while (rs.next())  ← TÚ implementas
+│   │   ├── Extraer: rs.getString("id")
+│   │   ├── Extraer: rs.getString("name")
+│   │   ├── Extraer: rs.getString("type")
+│   │   ├── Extraer: rs.getString("unit")
+│   │   └── Imprimir datos con formato
+│   │
+│   └── Contar filas procesadas
+│
+├── 4. Después del while
+│   └── Imprimir total de productos
+│
+└── 5. catch (SQLException e)
+    ├── Imprimir mensaje de error
+    └── Imprimir: e.getMessage()
+```
+
 **Tareas paso a paso:**
 
 1. **Crear el paquete `services`:**
-   - En IntelliJ: clic derecho en `com.forestech` → New → Package → "services"
-   - **¿Por qué `services`?** Convención: clases que acceden a BD van en services
+   - Clic derecho en `com.forestech` → New → Package → "services"
 
 2. **Crear la clase ProductService:**
    - Clic derecho en `services` → New → Java Class → "ProductService"
-   - Declarar como clase pública
-   - Constructor privado (es una utility class con métodos estáticos por ahora)
+   - Constructor privado (es una Utility Class)
 
-3. **Imports necesarios (boilerplate permitido):**
-   ```java
-   import com.forestech.config.DatabaseConnection;
-   import java.sql.Connection;
-   import java.sql.Statement;
-   import java.sql.ResultSet;
-   import java.sql.SQLException;
-   ```
+3. **Imports necesarios (TÚ agregas):**
+   - De DatabaseConnection: `com.forestech.config.DatabaseConnection`
+   - De SQL: `Connection`, `Statement`, `ResultSet`, `SQLException` de `java.sql`
 
-4. **Crear método `getAllProducts()` - versión simple:**
-   
-   **Especificaciones:**
-   - Modificador: `public static`
-   - Tipo de retorno: `void` (por ahora solo imprime, no retorna nada)
-   - Parámetros: ninguno
-   - NO declarar throws (captura SQLException internamente)
-   
-   **Estructura del método (TÚ completas la implementación):**
-   
-   a) Definir la query SQL como String:
-      - Selecciona columnas: id, name, type, unit
-      - De la tabla: `combustibles_products`
-      - Sin WHERE (queremos todos los productos)
-   
-   b) Usar try-with-resources anidado para:
-      - Connection (obtén con DatabaseConnection.getConnection())
-      - Statement (crea con conn.createStatement())
-      - ResultSet (ejecuta query con stmt.executeQuery(sql))
-   
-   **Sintaxis try-with-resources múltiple:**
-   ```java
-   try (Connection conn = ...;
-        Statement stmt = ...;
-        ResultSet rs = ...) {
-       // código aquí
-   } catch (SQLException e) {
-       // manejo de error
-   }
-   ```
-   
-   c) Imprimir encabezado (antes del while):
-      ```
-      === PRODUCTOS EN BD ===
-      ```
-   
-   d) Recorrer ResultSet con while:
-      - `while (rs.next())` - avanza fila por fila
-      - Extraer cada columna con `rs.getString("nombre_columna")`
-      - Imprimir datos con formato legible
-      
-   **Pregunta guía:** ¿Por qué `rs.next()` retorna boolean? ¿Qué pasa cuando no hay más filas?
-   
-   e) Después del while, imprimir total de productos listados
-      - **Desafío:** ¿Cómo llevas la cuenta de cuántas filas procesaste?
-   
-   f) En el bloque catch:
-      - Imprimir mensaje de error descriptivo
-      - Imprimir el mensaje de la excepción
+4. **Implementar getAllProducts() (TÚ lo escribes):**
 
-5. **Verificar que la tabla existe en tu BD:**
+   a) **Definir query:**
+      - Variable: `String sql`
+      - Valor: `"SELECT id, name, type, unit FROM combustibles_products"`
    
-   **Antes de probar el código, verifica en SQL Server Management Studio:**
-   ```sql
-   SELECT * FROM combustibles_products;
-   ```
+   b) **Estructura try-with-resources:**
+      - Patrón con múltiples recursos:
+        ```
+        try (Connection conn = ...;
+             Statement stmt = ...;
+             ResultSet rs = ...) {
+        ```
    
-   - Si la tabla no existe, créala o ajusta el nombre en la query
-   - Asegúrate de tener al menos 1-2 productos para probar
+   c) **Obtener cada recurso:**
+      - Connection: `DatabaseConnection.getConnection()`
+      - Statement: `conn.createStatement()`
+      - ResultSet: `stmt.executeQuery(sql)`
+   
+   d) **Dentro del try:**
+      - Imprime encabezado: `"=== PRODUCTOS EN BD ==="`
+      - Recorre ResultSet con `while (rs.next())`
+      - **En cada iteración extrae:**
+        - `rs.getString("id")`
+        - `rs.getString("name")`
+        - `rs.getString("type")`
+        - `rs.getString("unit")`
+      - Imprime los datos con formato legible
+      - Cuenta cuántas filas procesaste
+   
+   e) **Después del while:**
+      - Imprime el total
+   
+   f) **En el catch:**
+      - Imprime error y el mensaje: `e.getMessage()`
+   
+   **Pregunta clave:** ¿Por qué `rs.next()` retorna `boolean`? ¿Qué sucede cuando no hay más filas?
+
+5. **Verificar tabla en SQL Server:**
+   - Ejecuta manualmente en SQL Server Management Studio:
+     ```
+     SELECT * FROM combustibles_products;
+     ```
+   - Si no existe, créala o ajusta el nombre en la query
+   - Verifica que haya al menos 1-2 productos para probar
 
 6. **Probar en Main.java:**
-   
-   **Agregar al método main:**
-   ```java
-   System.out.println("\n=== PRUEBA DE LECTURA DE PRODUCTOS ===");
-   ProductService.getAllProducts();
-   ```
-   
-   **Compilar y ejecutar:**
-   ```bash
-   mvn clean compile
-   mvn exec:java -Dexec.mainClass="com.forestech.Main"
-   ```
+   - Agrega (donde corresponda):
+     ```
+     System.out.println("\n=== LECTURA DE PRODUCTOS ===");
+     ProductService.getAllProducts();
+     ```
+   - Compila: `mvn clean compile`
+   - Ejecuta: `mvn exec:java -Dexec.mainClass="com.forestech.Main"`
 
 7. **Depuración obligatoria:**
-   - Coloca breakpoint en la línea `while (rs.next())`
-   - Ejecuta en modo debug
-   - Usa "Step Over" para ver cómo avanza el cursor
-   - Inspecciona el contenido de `rs` en el panel de variables
-   - Observa cómo cambian los valores en cada iteración
+   - Coloca breakpoint en el `while (rs.next())`
+   - Ejecuta en debug
+   - Observa cómo se recorren las filas
+   - Verifica los valores en el panel de variables
 
 **✅ Resultado esperado:** 
 - Ver lista de productos de la BD en consola con formato claro
@@ -662,109 +674,127 @@ Product p = new Product("Diesel", 1000, "litros");
    
    **Pregunta guía:** ¿Por qué Product va en `models/` y no en `services/`?
 
-2. **Crear constructor para Product:**
-   
-   **Especificaciones:**
-   - Constructor con 4 parámetros (uno por cada atributo)
-   - Asignar cada parámetro al atributo correspondiente usando `this`
-   
-   **Pregunta guía:** ¿Es necesario un constructor sin parámetros? ¿Por qué sí o por qué no?
+**Diagrama de estructura - Clase Product y mapeo ResultSet:**
 
-3. **Crear getters para todos los atributos:**
-   
-   **RECUERDA:** Ya sabes crear getters de Fase 2. Usa el mismo patrón.
-   
-   Debes crear:
+```
+Product.java (en models/)
+│
+├── Atributos privados
+│   ├── String id
+│   ├── String name
+│   ├── String type
+│   └── String unit
+│
+├── Constructor Product(id, name, type, unit)
+│   └── Asigna parámetros a atributos con this
+│
+├── Getters (Fase 2 ya lo sabes)
+│   ├── getId()
+│   ├── getName()
+│   ├── getType()
+│   └── getUnit()
+│
+└── toString()
+    ├── @Override
+    └── Formato: Product{id='...', name='...', ...}
+
+Mapeo: ResultSet fila → Objeto Product
+│
+├── Extraer: rs.getString("id") → String id
+├── Extraer: rs.getString("name") → String name
+├── Extraer: rs.getString("type") → String type
+├── Extraer: rs.getString("unit") → String unit
+│
+└── new Product(id, name, type, unit) → Objeto creado
+```
+
+**Tareas paso a paso:**
+
+1. **Crear clase Product en models/:**
+   - Clic derecho en `models` → New → Java Class → "Product"
+   - **Pregunta:** ¿Por qué Product va en `models/` y no en `services/`?
+
+2. **Crear atributos privados (TÚ los escribes):**
+   - id (String)
+   - name (String)
+   - type (String)
+   - unit (String)
+
+3. **Crear constructor con 4 parámetros (TÚ lo escribes):**
+   - Recibe: id, name, type, unit
+   - Asigna cada uno a su atributo con `this`
+   - **Pregunta:** ¿Es necesario constructor sin parámetros? ¿Por qué?
+
+4. **Crear getters (Fase 2 - ya lo sabes):**
    - `getId()`
    - `getName()`
    - `getType()`
    - `getUnit()`
 
-4. **Crear método `toString()` para Product:**
-   
-   **Especificaciones:**
-   - Sobrescribe el método heredado de Object
-   - Usa la anotación `@Override`
-   - Retorna String con formato legible
-   
-   **Formato sugerido:**
-   ```
-   Product{id='P001', name='Diesel', type='Combustible', unit='litros'}
-   ```
-   
-   **Pregunta guía:** ¿Para qué sirve toString()? ¿Cuándo se llama automáticamente?
+5. **Crear toString() (TÚ lo escribes):**
+   - Usa `@Override`
+   - Retorna String con formato legible:
+     ```
+     Product{id='P001', name='Diesel', type='Combustible', unit='litros'}
+     ```
+   - **Pregunta:** ¿Para qué sirve toString()? ¿Cuándo se llama?
 
-5. **Modificar ProductService.getAllProducts():**
+6. **Modificar ProductService.getAllProducts() (TÚ lo refactorizas):**
    
-   **Cambios a realizar:**
+   a) **Cambiar firma:**
+      - De: `void getAllProducts()`
+      - A: `List<Product> getAllProducts()`
    
-   a) Cambiar firma del método:
-      - De: `public static void getAllProducts()`
-      - A: `public static List<Product> getAllProducts()`
-      
-   b) Agregar import:
-      ```java
-      import java.util.List;
-      import java.util.ArrayList;
-      import com.forestech.models.Product;
+   b) **Agregar imports:**
+      - `java.util.List`
+      - `java.util.ArrayList`
+      - `com.forestech.models.Product`
+   
+   c) **Crear lista al inicio:**
+      ```
+      List<Product> products = new ArrayList<>()`
       ```
    
-   c) Crear lista al inicio del método:
-      ```java
-      List<Product> products = new ArrayList<>();
+   d) **Dentro del while (TÚ implementas):**
+      - Extrae columnas: id, name, type, unit del ResultSet
+      - Crea objeto: `new Product(...)`
+      - Agrega a lista: `products.add(product)`
+   
+   e) **Después del while:**
+      - Retorna: `products`
+   
+   f) **En el catch:**
+      - Retorna: `new ArrayList<>()` (lista vacía)
+   
+   **Pregunta:** ¿Por qué retornar lista vacía y no null?
+
+7. **Probar en Main.java (TÚ escribes):**
+   
+   a) **Llamar al servicio:**
+      ```
+      List<Product> products = ProductService.getAllProducts();
       ```
    
-   d) Dentro del while (en vez de imprimir):
-      - Extraer datos del ResultSet
-      - Crear objeto Product con esos datos
-      - Agregar el objeto a la lista
-      
-   **TÚ implementas esta lógica:**
-   ```java
-   while (rs.next()) {
-       // Extraer columnas
-       String id = rs.getString("id");
-       // ... extraer las demás columnas
-       
-       // Crear objeto Product
-       // Agregar a la lista
-   }
-   ```
+   b) **Verificar si está vacía:**
+      - if (products.isEmpty()) → Mostrar mensaje
    
-   e) Después del while, retornar la lista
+   c) **Si no está vacía, recorrer:**
+      ```
+      for (Product p : products) {
+          // Imprime cada producto usando toString()
+      }
+      ```
    
-   f) Si hay error (catch), retornar lista vacía
+   d) **Mostrar total al final**
    
-   **Pregunta guía:** ¿Por qué retornar lista vacía en vez de null cuando hay error?
+   **Pregunta:** ¿Qué diferencia hay entre este for y el tradicional con índice?
 
-6. **Probar en Main.java:**
-   
-   **Modificar la prueba anterior:**
-   ```java
-   System.out.println("\n=== PRUEBA DE LECTURA DE PRODUCTOS (CON OBJETOS) ===");
-   List<Product> products = ProductService.getAllProducts();
-   
-   // TÚ debes escribir:
-   // - Verificar si la lista está vacía
-   // - Si no está vacía, recorrer e imprimir cada producto
-   // - Mostrar el total de productos al final
-   ```
-   
-   **Pista para recorrer lista:**
-   ```java
-   for (Product p : products) {
-       // usar p
-   }
-   ```
-   
-   **Pregunta guía:** ¿Qué diferencia hay entre este for y el for tradicional con índice?
-
-7. **Depuración obligatoria:**
-   - Coloca breakpoint en la línea donde creas el objeto Product
+8. **Depuración obligatoria:**
+   - Breakpoint donde creas el objeto Product
    - Ejecuta en debug
    - Inspecciona el objeto recién creado
-   - Ve cómo se va llenando el ArrayList
-   - Verifica que al final de getAllProducts() la lista tiene todos los productos
+   - Ve cómo se llena el ArrayList
+   - Verifica que tenga todos los productos al final
 
 **✅ Resultado esperado:** 
 - Clase Product creada en `models/` con atributos, constructor, getters y toString()
@@ -899,170 +929,173 @@ pstmt.setString(1, userInput);
 "Muéstrame un ejemplo de SQL Injection sin PreparedStatement."
 ```
 
+**Diagrama de estructura - PreparedStatement:**
+
+```
+PreparedStatement para búsquedas seguras
+│
+├── Estructura general:
+│   ├── Query SQL con "?" en lugar de valores
+│   ├── conn.prepareStatement(sql)
+│   ├── pstmt.setXxx(posición, valor)
+│   └── pstmt.executeQuery()
+│
+├── Método: getProductById(String id)
+│   ├── Tipo retorno: Product (o null si no existe)
+│   ├── Query: "SELECT ... WHERE id = ?"
+│   │   └── "?" es posición 1
+│   ├── Configurar: pstmt.setString(1, id)
+│   ├── if (rs.next()): Crear y retornar Product
+│   └── else: Retornar null
+│
+├── Método: getProductsByType(String type)
+│   ├── Tipo retorno: List<Product>
+│   ├── Query: "SELECT ... WHERE type = ?"
+│   ├── Configurar: pstmt.setString(1, type)
+│   ├── while (rs.next()): Agregar productos a lista
+│   └── Retornar lista (vacía si nada encontrado)
+│
+└── Seguridad contra SQL Injection
+    ├── ❌ Concatenación: "SELECT * WHERE id = '" + id + "'"
+    │   → Vulnerable si id = "' OR '1'='1"
+    ├── ✅ PreparedStatement: "SELECT * WHERE id = ?"
+    │   → Seguro, los valores se escapan automáticamente
+    └── Ventaja: También más rápido (compila una sola vez)
+```
+
 **Tareas paso a paso:**
 
-1. **Agregar método `getProductById()` en ProductService:**
+1. **Agregar método `getProductById()` en ProductService (TÚ lo escribes):**
    
-   **Especificaciones:**
-   - Modificador: `public static`
-   - Tipo de retorno: `Product` (un solo producto, no lista)
-   - Parámetros: `String id`
-   - Retorna null si no encuentra el producto
+   a) **Firma del método:**
+      - `public static Product getProductById(String id)`
    
-   **Implementación (TÚ la haces):**
-   
-   a) Definir query SQL con parámetro:
-      ```java
-      String sql = "SELECT id, name, type, unit FROM combustibles_products WHERE id = ?";
+   b) **Query SQL con parámetro:**
       ```
-      
-   b) Agregar import necesario:
-      ```java
+      SELECT id, name, type, unit FROM combustibles_products WHERE id = ?
+      ```
+   
+   c) **Imports necesarios:**
+      ```
       import java.sql.PreparedStatement;
       ```
-      
-   c) Usar try-with-resources con PreparedStatement:
-      ```java
+   
+   d) **Estructura try-with-resources:**
+      ```
       try (Connection conn = DatabaseConnection.getConnection();
-           PreparedStatement pstmt = conn.prepareStatement(sql)) {
-          
-          // Configurar parámetros aquí
-          
-      } catch (SQLException e) {
-          // manejo de error
-      }
+           PreparedStatement pstmt = conn.prepareStatement(sql))
       ```
    
-   d) Configurar el parámetro (el "?"):
-      - Usa `pstmt.setString(1, id)`
+   e) **Configurar parámetro:**
+      - Usa: `pstmt.setString(1, id)`
       - El "1" es la posición del primer "?" en la query
-      
-   **Pregunta guía:** ¿Por qué la numeración empieza en 1 y no en 0?
+      - **Pregunta:** ¿Por qué empieza en 1 y no en 0?
    
-   e) Ejecutar query:
-      - Usa `pstmt.executeQuery()` (igual que Statement)
-      - Guarda el ResultSet
+   f) **Ejecutar y procesar:**
+      - `ResultSet rs = pstmt.executeQuery()`
+      - if (rs.next()) → Crear y retornar Product
+      - else → Retornar null
    
-   f) Verificar si hay resultado:
-      ```java
-      if (rs.next()) {
-          // Extraer columnas y crear objeto Product
-          // Retornar el objeto
-      } else {
-          // No se encontró, retornar null
-      }
-      ```
-   
-   g) En el catch, retornar null
+   g) **En el catch:**
+      - Retornar null
 
-2. **Agregar método `getProductsByType()` en ProductService:**
+2. **Agregar método `getProductsByType()` (TÚ lo escribes):**
    
-   **Especificaciones:**
-   - Modificador: `public static`
-   - Tipo de retorno: `List<Product>`
-   - Parámetros: `String type`
-   - Retorna lista vacía si no encuentra productos
+   a) **Firma:**
+      - `public static List<Product> getProductsByType(String type)`
    
-   **Implementación (TÚ la haces):**
-   
-   a) Query SQL:
-      ```java
-      String sql = "SELECT id, name, type, unit FROM combustibles_products WHERE type = ?";
+   b) **Query SQL:**
+      ```
+      SELECT id, name, type, unit FROM combustibles_products WHERE type = ?
       ```
    
-   b) Igual que getAllProducts() pero con PreparedStatement:
+   c) **Similar a getProductById() pero retorna lista:**
       - Crear lista vacía al inicio
-      - Configurar parámetro con `pstmt.setString(1, type)`
+      - Configurar parámetro: `pstmt.setString(1, type)`
       - Recorrer ResultSet con while
       - Crear objetos Product y agregarlos a la lista
-      - Retornar lista (vacía si no hay resultados)
+      - Retornar lista
 
-3. **OPCIONAL - Método con múltiples parámetros `searchProducts()`:**
+3. **OPCIONAL - Método `searchProducts()` con 2 parámetros:**
    
    **Desafío:** Crea un método que busque por nombre Y tipo:
    
-   ```java
-   public static List<Product> searchProducts(String namePattern, String type)
-   ```
+   a) **Firma:**
+      ```
+      public static List<Product> searchProducts(String namePattern, String type)
+      ```
    
-   **Query SQL:**
-   ```java
-   String sql = "SELECT id, name, type, unit FROM combustibles_products 
-                 WHERE name LIKE ? AND type = ?";
-   ```
+   b) **Query SQL con 2 parámetros:**
+      ```
+      SELECT id, name, type, unit FROM combustibles_products 
+      WHERE name LIKE ? AND type = ?
+      ```
    
-   **Configurar parámetros:**
-   ```java
-   pstmt.setString(1, "%" + namePattern + "%");  // LIKE con wildcards
-   pstmt.setString(2, type);
-   ```
+   c) **Configurar parámetros:**
+      ```
+      pstmt.setString(1, "%" + namePattern + "%");
+      pstmt.setString(2, type);
+      ```
    
-   **Pregunta guía:** ¿Qué hace el "%" en SQL LIKE?
+   d) **Pregunta:** ¿Qué hace el "%" en SQL LIKE?
 
-4. **Probar en Main.java:**
+4. **Probar en Main.java (TÚ lo escribes):**
    
-   **Prueba 1 - Buscar por ID:**
-   ```java
-   System.out.println("\n=== BUSCAR PRODUCTO POR ID ===");
-   Product product = ProductService.getProductById("P001");
+   a) **Prueba 1 - Buscar por ID:**
+      ```
+      Product product = ProductService.getProductById("P001");
+      
+      if (product != null) {
+          System.out.println(product);
+      } else {
+          System.out.println("Producto no encontrado");
+      }
+      ```
    
-   // TÚ debes escribir:
-   // - Verificar si product es null
-   // - Si no es null, imprimirlo
-   // - Si es null, mostrar mensaje "Producto no encontrado"
-   ```
+   b) **Prueba 2 - Buscar por tipo:**
+      ```
+      List<Product> dieselProducts = ProductService.getProductsByType("Diesel");
+      
+      for (Product p : dieselProducts) {
+          System.out.println(p);
+      }
+      System.out.println("Total: " + dieselProducts.size());
+      ```
    
-   **Prueba 2 - Buscar por tipo:**
-   ```java
-   System.out.println("\n=== BUSCAR PRODUCTOS POR TIPO ===");
-   List<Product> dieselProducts = ProductService.getProductsByType("Diesel");
-   
-   // TÚ debes escribir:
-   // - Recorrer e imprimir la lista
-   // - Mostrar cantidad de productos encontrados
-   ```
-   
-   **Prueba 3 (opcional) - Búsqueda múltiple:**
-   ```java
-   List<Product> results = ProductService.searchProducts("Gas", "Combustible");
-   ```
+   c) **Prueba 3 (opcional) - Búsqueda múltiple:**
+      ```
+      List<Product> results = ProductService.searchProducts("Gas", "Combustible");
+      ```
 
-5. **Depuración obligatoria:**
+5. **Depuración obligatoria - Entiende SQL Injection:**
    
-   **Experimento de seguridad (entiende SQL Injection):**
-   
-   a) Coloca breakpoint justo después de configurar el parámetro
-   b) En el debugger, evalúa `pstmt.toString()` para ver la query compilada
-   c) Intenta pasar valores "maliciosos":
-      ```java
+   a) **Coloca breakpoint** después de configurar el parámetro
+   b) **En el debugger**, evalúa: `pstmt.toString()`
+      - Verás cómo se ve la query compilada
+   c) **Intenta pasar un valor "malicioso":**
+      ```
       ProductService.getProductById("' OR '1'='1");
       ```
-   d) Verifica que PreparedStatement lo maneja de forma segura
-   e) **Pregunta:** ¿Qué pasaría con Statement + concatenación?
+   d) **Verifica:** PreparedStatement lo maneja de forma segura (escapa comillas)
+   e) **Pregunta:** ¿Qué pasaría con Statement + concatenación de strings?
 
-6. **Comparación Statement vs PreparedStatement:**
+6. **Comparación lado a lado - Aprende la diferencia:**
    
-   **Ejercicio de comprensión (NO implementes esto, solo entiéndelo):**
-   
-   **❌ INSEGURO (Statement con concatenación):**
-   ```java
-   String id = userInput;  // ej: "' OR '1'='1"
-   String sql = "SELECT * FROM products WHERE id = '" + id + "'";
-   Statement stmt = conn.createStatement();
-   ResultSet rs = stmt.executeQuery(sql);
-   // Query ejecutada: SELECT * FROM products WHERE id = '' OR '1'='1'
-   // ☠️ Retorna TODOS los productos (SQL Injection exitoso)
+   **❌ INSEGURO (NO hacer esto):**
+   ```
+   String userInput = "' OR '1'='1";
+   String sql = "SELECT * FROM products WHERE id = '" + userInput + "'";
+   // Query real: SELECT * FROM products WHERE id = '' OR '1'='1'
+   // ☠️ Retorna TODOS (SQL Injection exitoso)
    ```
    
-   **✅ SEGURO (PreparedStatement):**
-   ```java
-   String id = userInput;  // ej: "' OR '1'='1"
+   **✅ SEGURO (Usa esto siempre):**
+   ```
+   String userInput = "' OR '1'='1";
    String sql = "SELECT * FROM products WHERE id = ?";
-   PreparedStatement pstmt = conn.prepareStatement(sql);
-   pstmt.setString(1, id);
-   ResultSet rs = pstmt.executeQuery();
-   // Query ejecutada: SELECT * FROM products WHERE id = ''' OR ''1''=''1'
-   // ✅ Busca literalmente un producto con ese ID (escapa las comillas)
+   pstmt = conn.prepareStatement(sql);
+   pstmt.setString(1, userInput);
+   // ✅ Busca literalmente un ID con ese valor (seguro)
    ```
 
 **✅ Resultado esperado:** 

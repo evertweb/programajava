@@ -65,84 +65,115 @@ Ahora puedes:
 **Tareas paso a paso:**
 
 1. **Analizar servicios existentes:**
-   - Lista TODOS los métodos públicos de `MovementService`
-   - Lista TODOS los métodos públicos de `VehicleService`, `SupplierService`, `InventoryService`
-   - Anota cuáles son métodos de negocio (estos van en la interfaz) vs auxiliares privados (estos NO)
+   ```
+   Servicios existentes:
+   ├── MovementService
+   │   ├── Métodos: createEntryMovement(), createExitMovement(), getAllMovements(), etc.
+   │   └── Clasifica: ¿Cuáles son públicos de negocio vs privados/auxiliares?
+   ├── VehicleService
+   │   ├── Métodos a analizar
+   │   └── (Aplicar mismo análisis)
+   ├── SupplierService
+   │   └── (Aplicar mismo análisis)
+   └── InventoryService
+       └── (Aplicar mismo análisis)
+   
+   PREGUNTA: ¿Cuál es la diferencia entre un método de negocio y uno auxiliar?
+   PISTA: Los métodos de negocio son los que otros componentes necesitan llamar.
+   ```
 
-2. **Crear `IMovementService`:**
-   - Interfaz pública
-   - Declarar (sin implementar) todos los métodos públicos de MovementService:
-     ```java
-     void createEntryMovement(Movement movement) throws InvalidMovementException;
-     void createExitMovement(Movement movement, String vehicleId) 
-         throws InsufficientInventoryException, InvalidMovementException;
-     List<Movement> getAllMovements();
-     List<Movement> getMovementsByType(String type);
-     List<Movement> getMovementsByDateRange(LocalDateTime start, LocalDateTime end);
-     Movement getMovementById(String id);
-     ```
-   - NO declarar métodos privados o auxiliares
-   - Documentar cada método con Javadoc: qué hace, qué parámetros, qué excepciones
+2. **Crear `IMovementService` interfaz:**
+   ```
+   Archivo: interfaces/IMovementService.java
+   ├── Tipo: interface (no class)
+   ├── Visibilidad: public
+   ├── Métodos a declarar (TÚ identificas cuáles van aquí):
+   │   ├── Crear movimiento de entrada
+   │   ├── Crear movimiento de salida
+   │   ├── Obtener todos los movimientos
+   │   ├── Buscar por tipo
+   │   ├── Buscar por rango de fechas
+   │   └── Obtener por ID
+   └── Documentación: Cada método con Javadoc
+       └── PISTA: Usa /** */ para comentarios Javadoc
+   
+   PREGUNTA: ¿Cuál es la firma correcta de createEntryMovement()?
+   PISTA: Mira qué parámetros y excepciones espera MovementService.
+   ```
 
-3. **Hacer que `MovementService` implemente la interfaz:**
-   - Agregar: `public class MovementService implements IMovementService`
-   - Agregar `@Override` a cada método que viene de la interfaz
-   - Compilar: si algo falla, es porque la firma no coincide exactamente
+3. **Hacer que `MovementService` implemente `IMovementService`:**
+   ```
+   Pasos:
+   ├── 1. Cambiar firma de clase:
+   │   └── de: public class MovementService
+   │       a:  public class MovementService implements IMovementService
+   ├── 2. Para CADA método de la interfaz:
+   │   ├── Agregue anotación: @Override
+   │   └── Verifica que firmas coincidan exactamente
+   └── 3. Compilar y corregir errores
+       └── PISTA: Si no compila, revisa que cada método tenga el @Override
+   
+   PREGUNTA: ¿Qué pasa si la firma de un método NO coincide con la interfaz?
+   PISTA: El compilador dirá "no implementa todos los métodos de IMovementService"
+   ```
 
-4. **Repetir para los demás servicios:**
-   - Crear `IVehicleService` con métodos CRUD de vehículos
-   - Crear `ISupplierService` con métodos CRUD de proveedores
-   - Crear `IInventoryService` con métodos de consulta de inventario
-   - Hacer que cada servicio implemente su interfaz
+4. **Crear interfaces para otros servicios:**
+   ```
+   Repite el patrón para:
+   ├── IVehicleService (interfaces/IVehicleService.java)
+   ├── ISupplierService (interfaces/ISupplierService.java)
+   └── IInventoryService (interfaces/IInventoryService.java)
+   
+   PREGUNTA: ¿Qué métodos públicos tiene VehicleService?
+   ACCIÓN: Crea la interfaz con esos métodos (sin implementar).
+   ```
 
-5. **Modificar `ConsoleMenu` para usar interfaces:**
-   - **ANTES:**
-     ```java
-     private MovementService movementService;
-     private VehicleService vehicleService;
-     ```
-   - **DESPUÉS:**
-     ```java
-     private IMovementService movementService;
-     private IVehicleService vehicleService;
-     ```
-   - Constructor:
-     ```java
-     public ConsoleMenu(IMovementService movementService, 
-                       IVehicleService vehicleService,
-                       ISupplierService supplierService,
-                       IInventoryService inventoryService) {
-         this.movementService = movementService;
-         // ...
-     }
-     ```
+5. **Refactorizar `ConsoleMenu` para usar interfaces:**
+   ```
+   Cambios necesarios:
+   ├── Atributos: Declara con tipo interfaz, no implementación
+   │   ├── ANTES: private MovementService movementService;
+   │   ├── DESPUÉS: private IMovementService movementService;
+   │   └── (Repite para otros servicios)
+   ├── Constructor: Acepta interfaces como parámetros
+   │   ├── parámetro 1: IMovementService
+   │   ├── parámetro 2: IVehicleService
+   │   ├── parámetro 3: ISupplierService
+   │   └── parámetro 4: IInventoryService
+   └── Asignación: Los parámetros se asignan a los atributos (this.x = x)
+   
+   PREGUNTA: ¿Por qué cambiar a interfaces si funciona igual?
+   PISTA: Porque ahora ConsoleMenu NO conoce si es MovementService, 
+          MovementServicePostgres, o MovementServiceMock.
+   ```
 
 6. **Actualizar `Main.java`:**
-   - **ANTES:**
-     ```java
-     MovementService ms = new MovementService();
-     ConsoleMenu menu = new ConsoleMenu(ms, ...);
-     ```
-   - **DESPUÉS:**
-     ```java
-     IMovementService ms = new MovementService();
-     IVehicleService vs = new VehicleService();
-     // ...
-     ConsoleMenu menu = new ConsoleMenu(ms, vs, ss, is);
-     ```
+   ```
+   Flujo actual:
+   ├── 1. Crear instancias de servicios (implementaciones concretas)
+   │   ├── IMovementService ms = new MovementService();
+   │   ├── IVehicleService vs = new VehicleService();
+   │   └── (ídem otros servicios)
+   ├── 2. Pasar al menú como interfaces
+   │   └── ConsoleMenu menu = new ConsoleMenu(ms, vs, ss, is);
+   └── 3. El menú solo ve las interfaces
+   
+   ACCIÓN: Realiza estos cambios en tu Main actual.
+   PREGUNTA: ¿Qué diferencia hay entre new MovementService() y new IMovementService()?
+   PISTA: No puedes instanciar interfaces, solo implementaciones.
+   ```
 
-7. **Beneficio: Factory Pattern (opcional, avanzado):**
-   - Crear clase `ServiceFactory` que retorne interfaces:
-     ```java
-     public class ServiceFactory {
-         public static IMovementService createMovementService() {
-             return new MovementService();
-         }
-         // ...
-     }
-     ```
-   - En Main: `IMovementService ms = ServiceFactory.createMovementService();`
-   - Ahora cambiar la implementación es solo editar un lugar
+7. **OPCIONAL - Factory Pattern (opcional, Fase 9):**
+   ```
+   Patrón Factory:
+   ├── Propósito: Centralizar creación de objetos
+   ├── Ubicación: Crear com/forestech/factory/ServiceFactory.java
+   ├── Método: public static IMovementService createMovementService()
+   └── Uso: IMovementService ms = ServiceFactory.createMovementService();
+   
+   VENTAJA: Cambiar implementación en UN solo lugar
+   DESVENTAJA: Puede ser over-engineering en Fase 8 (hazlo solo si entiendes)
+   ```
 
 **✅ Resultado esperado:**
 - Todas las clases de servicio implementan una interfaz
@@ -203,140 +234,118 @@ Esto es **duplicación**. Si cambias cómo obtienes la conexión, debes cambiar 
 **Tareas paso a paso:**
 
 1. **Identificar código común:**
-   - Abre `MovementService`, `VehicleService`, `SupplierService`
-   - Anota qué métodos o bloques de código son iguales o muy similares
-   - Comunes típicos:
-     - Obtener conexión
-     - Cerrar conexión (aunque deberías usar try-with-resources)
-     - Logging de errores
-     - Manejo de excepciones
-     - Formateo de mensajes
-
-2. **Crear `BaseService` abstracta:**
-   ```java
-   public abstract class BaseService {
-       // Método abstracto: cada servicio dice quién es (para logging)
-       protected abstract String getServiceName();
-       
-       // Método concreto: todos obtienen conexión igual
-       protected Connection getConnection() throws DatabaseConnectionException {
-           try {
-               return DatabaseConnection.getConnection();
-           } catch (SQLException e) {
-               logError("Error al obtener conexión", e);
-               throw new DatabaseConnectionException(
-                   "No se pudo conectar a BD", 
-                   e, 
-                   DatabaseConnection.DB_URL
-               );
-           }
-       }
-       
-       // Logging consistente
-       protected void logInfo(String message) {
-           System.out.println("[INFO] " + LocalDateTime.now() + 
-                            " [" + getServiceName() + "] " + message);
-       }
-       
-       protected void logError(String message, Exception e) {
-           System.err.println("[ERROR] " + LocalDateTime.now() + 
-                            " [" + getServiceName() + "] " + message);
-           if (e != null) {
-               System.err.println("  Causa: " + e.getMessage());
-           }
-       }
-       
-       // Validación común
-       protected void validateNotNull(Object obj, String fieldName) 
-           throws InvalidMovementException {
-           if (obj == null) {
-               throw new InvalidMovementException(fieldName + " no puede ser null");
-           }
-       }
-       
-       protected void validatePositive(double value, String fieldName) 
-           throws InvalidMovementException {
-           if (value <= 0) {
-               throw new InvalidMovementException(
-                   fieldName + " debe ser mayor a cero: " + value
-               );
-           }
-       }
-   }
+   ```
+   Análisis de servicios:
+   ├── MovementService
+   │   ├── Métodos públicos (negocios)
+   │   ├── Métodos privados/auxiliares
+   │   └── ¿Código duplicado?
+   ├── VehicleService
+   │   ├── Métodos públicos
+   │   ├── Métodos privados
+   │   └── ¿Código duplicado?
+   └── SupplierService, InventoryService (ídem)
+   
+   TAREA: Abre 3 servicios lado a lado y busca:
+   - ¿Todos obtienen conexión igual?
+   - ¿Todos cierran conexión igual?
+   - ¿Todos manejan SQLException igual?
+   - ¿Todos loggean con System.err.println?
+   
+   PREGUNTA: ¿Qué código ves repetido?
+   PISTA: Si copias-pegaste algo entre servicios, va en BaseService.
    ```
 
-3. **Hacer que `MovementService` herede:**
-   ```java
-   public class MovementService extends BaseService implements IMovementService {
-       
-       @Override
-       protected String getServiceName() {
-           return "MovementService";
-       }
-       
-       public void createEntryMovement(Movement movement) 
-           throws InvalidMovementException {
-           
-           // Validaciones usando métodos heredados
-           validateNotNull(movement, "Movement");
-           validatePositive(movement.getQuantity(), "Quantity");
-           validatePositive(movement.getUnitPrice(), "Unit Price");
-           
-           logInfo("Creando entrada de " + movement.getQuantity() + "L");
-           
-           try (Connection conn = getConnection()) {  // Heredado de BaseService
-               // ... lógica de inserción
-               logInfo("Entrada creada exitosamente");
-           } catch (SQLException e) {
-               logError("Error al crear entrada", e);
-               throw new DatabaseConnectionException("...", e, "...");
-           }
-       }
-   }
+2. **Crear `BaseService` clase abstracta:**
+   ```
+   Ubicación: com/forestech/base/BaseService.java
+   ├── Tipo: abstract class
+   ├── Visibilidad: public abstract
+   ├── Métodos abstractos (IMPLEMENTA el usuario):
+   │   └── protected abstract String getServiceName();
+   │       └── Propósito: identificar el servicio en logs
+   │
+   ├── Métodos concretos heredables (ESPECIFICA el usuario):
+   │   ├── protected Connection getConnection() throws DatabaseConnectionException
+   │   │   └── Obtiene conexión, maneja SQLException
+   │   │
+   │   ├── protected void logInfo(String message)
+   │   │   └── Imprime: [INFO] [fecha] [ServicioName] mensaje
+   │   │
+   │   ├── protected void logError(String message, Exception e)
+   │   │   └── Imprime: [ERROR] [fecha] [ServicioName] mensaje + causa
+   │   │
+   │   ├── protected void validateNotNull(Object obj, String fieldName)
+   │   │   └── Lanza InvalidMovementException si obj es null
+   │   │
+   │   └── protected void validatePositive(double value, String fieldName)
+   │       └── Lanza InvalidMovementException si value <= 0
+   │
+   └── 💡 PISTA: Todos estos métodos YA ESCRIBISTE, solo en 4 servicios distintos
+   
+   PREGUNTA: ¿Por qué abstract y no class normal?
+   PISTA: Porque BaseService nunca se instancia directamente, solo sus subclases.
    ```
 
-4. **Repetir para otros servicios:**
-   - `VehicleService extends BaseService implements IVehicleService`
-   - `SupplierService extends BaseService implements ISupplierService`
-   - `InventoryService extends BaseService implements IInventoryService`
-   - Cada uno implementa `getServiceName()` con su nombre
+3. **Hacer que `MovementService` herede de `BaseService`:**
+   ```
+   Cambios de firma:
+   ├── ANTES: public class MovementService implements IMovementService
+   └── DESPUÉS: public class MovementService extends BaseService implements IMovementService
+   
+   Reemplazos en el código (busca y reemplaza):
+   ├── Todo: new DatabaseConnectionException() 
+   │   → Primero haz: logError(...), luego throws
+   │
+   ├── Todo: System.out.println("[INFO]...")
+   │   → Reemplaza con: logInfo("...")
+   │
+   ├── Todo: System.err.println("[ERROR]...")
+   │   → Reemplaza con: logError("mensaje", exception)
+   │
+   └── Todo: if (obj == null) throw new InvalidMovementException()
+       → Reemplaza con: validateNotNull(obj, "fieldName")
+   
+   RESULTADO: El código de MovementService será más corto.
+   ```
 
-5. **Eliminar código duplicado:**
-   - Borra los métodos `getConnection()` de cada servicio individual
-   - Reemplaza `System.out.println` con `logInfo()`
-   - Reemplaza `System.err.println` con `logError()`
-   - Usa métodos de validación heredados
+4. **Repite para otros servicios:**
+   ```
+   Aplica el mismo patrón:
+   ├── VehicleService extends BaseService implements IVehicleService
+   ├── SupplierService extends BaseService implements ISupplierService
+   └── InventoryService extends BaseService implements IInventoryService
+   
+   ACCIÓN: Para cada servicio:
+   - Agrega extends BaseService
+   - Implementa getServiceName()
+   - Reemplaza getConnection() → heredado de BaseService
+   - Reemplaza System.out/err.println → heredados logInfo/logError
+   - Reemplaza validaciones manuales → heredadas validateNotNull/validatePositive
+   ```
 
-6. **Template Method Pattern (opcional avanzado):**
-   - En `BaseService`, crea método template:
-     ```java
-     protected <T> T executeQuery(QueryExecutor<T> executor) 
-         throws DatabaseConnectionException {
-         try (Connection conn = getConnection()) {
-             return executor.execute(conn);
-         } catch (SQLException e) {
-             logError("Error en query", e);
-             throw new DatabaseConnectionException("...", e, "...");
-         }
-     }
-     
-     @FunctionalInterface
-     protected interface QueryExecutor<T> {
-         T execute(Connection conn) throws SQLException;
-     }
-     ```
-   - Uso en servicios:
-     ```java
-     public List<Movement> getAllMovements() {
-         return executeQuery(conn -> {
-             String query = "SELECT * FROM combustibles_movements";
-             try (PreparedStatement stmt = conn.prepareStatement(query);
-                  ResultSet rs = stmt.executeQuery()) {
-                 return mapResultSetToMovements(rs);
-             }
-         });
-     }
-     ```
+5. **OPCIONAL - Template Method Pattern:**
+   ```
+   Patrón Template Method (solo si quieres ir más allá):
+   ├── Ubicación: En BaseService.java
+   ├── Idea: Método genérico para ejecutar queries
+   ├── Nombre: protected <T> T executeQuery(QueryExecutor<T> executor)
+   │   └── Maneja: obtener conexión, catch SQLException, logging
+   │
+   └── Los servicios usan:
+       public List<Movement> getAllMovements() {
+           return executeQuery(conn -> {
+               // Solo la lógica de query, sin manejo de conexión
+               try (PreparedStatement stmt = conn.prepareStatement(...)) {
+                   // ...
+               }
+           });
+       }
+   
+   VENTAJA: Aún menos duplicación.
+   DESVENTAJA: Puede ser complejo si no entiendas functional interfaces.
+   RECOMENDACIÓN: Déjalo para después de dominar Streams (Checkpoint 8.5).
+   ```
 
 **✅ Resultado esperado:**
 - Todos los servicios heredan de `BaseService`
@@ -414,160 +423,147 @@ Beneficios:
 **Tareas paso a paso:**
 
 1. **Crear `MovementType` enum:**
-   ```java
-   public enum MovementType {
-       ENTRADA("Entrada", "📥"),
-       SALIDA("Salida", "📤");
-       
-       private final String description;
-       private final String icon;
-       
-       MovementType(String description, String icon) {
-           this.description = description;
-           this.icon = icon;
-       }
-       
-       public String getDescription() {
-           return description;
-       }
-       
-       public String getIcon() {
-           return icon;
-       }
-       
-       // Método para convertir String a enum de forma segura
-       public static MovementType fromString(String text) {
-           for (MovementType type : MovementType.values()) {
-               if (type.name().equalsIgnoreCase(text) || 
-                   type.description.equalsIgnoreCase(text)) {
-                   return type;
-               }
-           }
-           throw new IllegalArgumentException(
-               "Tipo de movimiento inválido: " + text
-           );
-       }
-       
-       @Override
-       public String toString() {
-           return icon + " " + description;
-       }
-   }
+   ```
+   Ubicación: enums/MovementType.java
+   ├── Tipo: enum (palabra clave enum, no class)
+   ├── Constantes: ENTRADA, SALIDA
+   ├── Atributos (TÚ agrega):
+   │   ├── String description (ejemplo: "Entrada", "Salida")
+   │   └── String icon (ejemplo: "📥", "📤")
+   │
+   ├── Constructor (TÚ implementas):
+   │   └── MovementType(String desc, String icon) { ... }
+   │
+   ├── Métodos públicos (TÚ implementas):
+   │   ├── String getDescription()
+   │   ├── String getIcon()
+   │   ├── static MovementType fromString(String text)
+   │   │   └── Convierte "ENTRADA" o "Entrada" a enum
+   │   │   └── Lanza IllegalArgumentException si no existe
+   │   └── String toString()
+   │       └── Retorna: icon + " " + description
+   │
+   └── PISTA: Mira cómo está hecho FuelType más abajo, sigue el patrón.
+   
+   PREGUNTA: ¿Por qué necesitas el método fromString() si tienes valueOf()?
+   PISTA: valueOf(String) es case-sensitive. fromString() puede aceptar "entrada" o "Entrada".
    ```
 
-2. **Crear `FuelType` enum:**
-   ```java
-   public enum FuelType {
-       DIESEL("Diesel", "⛽", 0.85),
-       GASOLINA_93("Gasolina 93", "⛽", 0.75),
-       GASOLINA_95("Gasolina 95", "⛽", 0.74),
-       GASOLINA_97("Gasolina 97", "⛽", 0.73),
-       MEZCLA("Mezcla 2T", "🛢️", 0.76);
-       
-       private final String description;
-       private final String icon;
-       private final double density; // kg/L (para conversiones futuras)
-       
-       FuelType(String description, String icon, double density) {
-           this.description = description;
-           this.icon = icon;
-           this.density = density;
-       }
-       
-       public String getDescription() {
-           return description;
-       }
-       
-       public String getIcon() {
-           return icon;
-       }
-       
-       public double getDensity() {
-           return density;
-       }
-       
-       public static FuelType fromString(String text) {
-           for (FuelType type : FuelType.values()) {
-               if (type.name().equalsIgnoreCase(text) || 
-                   type.description.equalsIgnoreCase(text)) {
-                   return type;
-               }
-           }
-           throw new IllegalArgumentException(
-               "Tipo de combustible inválido: " + text
-           );
-       }
-       
-       @Override
-       public String toString() {
-           return icon + " " + description;
-       }
-   }
+2. **Crear `FuelType` enum (estructura similar):**
+   ```
+   Ubicación: enums/FuelType.java
+   ├── Constantes: DIESEL, GASOLINA_93, GASOLINA_95, GASOLINA_97, MEZCLA
+   ├── Atributos:
+   │   ├── String description
+   │   ├── String icon
+   │   └── double density (densidad en kg/L, ej: 0.85 para diesel)
+   │
+   ├── Constructor: FuelType(String desc, String icon, double density)
+   ├── Getters: getDescription(), getIcon(), getDensity()
+   ├── Método utilitario: static fromString(String text)
+   └── toString(): retorna icon + " " + description
+   
+   PREGUNTA: ¿Para qué sirve el atributo density?
+   PISTA: En Fase 9 podrías calcular peso = volumen * densidad.
    ```
 
-3. **Modificar clase `Movement`:**
-   - **ANTES:**
-     ```java
-     private String type;  // "ENTRADA" o "SALIDA"
-     private String fuelType;  // "Diesel", etc.
-     ```
-   - **DESPUÉS:**
-     ```java
-     private MovementType type;
-     private FuelType fuelType;
-     ```
-   - Actualizar getters y setters
-   - Actualizar constructor
+3. **Enums opcionales (si quieres practicar más):**
+   ```
+   Crea estos si tienes tiempo:
+   ├── VehicleCategory (EXCAVADORA, CAMION, GRUA, TRACTOR)
+   ├── VehicleStatus (OPERATIVO, EN_MANTENIMIENTO, FUERA_DE_SERVICIO)
+   └── LocationType (BODEGA_A, BODEGA_B, TERRENO, etc.)
+   
+   Para cada uno:
+   - Define constantes
+   - Agrega al menos 1-2 atributos (description, icon, capacity, etc.)
+   - Constructor
+   - Getters
+   - fromString()
+   - toString()
+   ```
 
-4. **Refactorizar servicios:**
-   - En `MovementService.createEntryMovement()`:
-     ```java
-     // Validar tipo
-     if (movement.getType() != MovementType.ENTRADA) {
-         throw new InvalidMovementException(
-             "Este método solo acepta movimientos de tipo ENTRADA"
-         );
-     }
-     ```
-   - En queries SQL, guardar el `name()` del enum:
-     ```java
-     stmt.setString(1, movement.getType().name());  // "ENTRADA" o "SALIDA"
-     ```
-   - Al leer de BD, convertir String a enum:
-     ```java
-     String typeStr = rs.getString("type");
-     movement.setType(MovementType.valueOf(typeStr));
-     ```
+4. **Modificar clase `Movement`:**
+   ```
+   Cambios en src/main/java/com/forestech/Movement.java:
+   ├── ANTES: private String type;
+   └── DESPUÉS: private MovementType type;
+   
+   ├── ANTES: private String fuelType;
+   └── DESPUÉS: private FuelType fuelType;
+   
+   ├── Actualizar getter y setter
+   │   - getType() retorna MovementType (no String)
+   │   - setType(MovementType type)
+   │
+   ├── Actualizar constructor (si acepta parámetros)
+   │   - Parámetro: MovementType type
+   │   - Parámetro: FuelType fuelType
+   │
+   └── toString() (si existe): usa type.getDescription(), fuel.getIcon(), etc.
+   
+   PREGUNTA: ¿Qué cambias en el getter/setter?
+   PISTA: Solo el tipo, la lógica es igual.
+   ```
 
-5. **Actualizar `ConsoleMenu`:**
-   - En wizard de entrada, mostrar enums:
-     ```java
-     System.out.println("Tipos de combustible disponibles:");
-     int i = 1;
-     for (FuelType fuelType : FuelType.values()) {
-         System.out.println(i++ + ". " + fuelType);  // Usa toString()
-     }
-     ```
-   - Al leer opción del usuario:
-     ```java
-     FuelType selectedFuel = FuelType.values()[option - 1];
-     movement.setFuelType(selectedFuel);
-     ```
+5. **Refactorizar servicios para usar enums:**
+   ```
+   En MovementService.createEntryMovement():
+   ├── Validación con enum:
+   │   if (movement.getType() != MovementType.ENTRADA) {
+   │       throw new InvalidMovementException("...");
+   │   }
+   │
+   ├── En SQL, guardar el name():
+   │   stmt.setString(1, movement.getType().name()); // "ENTRADA"
+   │
+   └── En SQL, leer y convertir a enum:
+       String typeStr = rs.getString("type");
+       movement.setType(MovementType.valueOf(typeStr));
+   
+   PREGUNTA: ¿Cuál es la diferencia entre name() y toString()?
+   PISTA: name() retorna "ENTRADA", toString() retorna "📥 Entrada".
+   ```
 
-6. **Manejo de conversión segura:**
-   - Si lees tipo de una fuente externa (archivo, API), usa el método `fromString()`:
-     ```java
-     try {
-         MovementType type = MovementType.fromString(input);
-     } catch (IllegalArgumentException e) {
-         // Manejar tipo inválido
-     }
-     ```
+6. **Actualizar `ConsoleMenu` para mostrar enums:**
+   ```
+   Menú de selección de combustible:
+   ├── Mostrar constantes del enum:
+   │   for (FuelType fuel : FuelType.values()) {
+   │       System.out.println(i++ + ". " + fuel); // Usa toString()
+   │   }
+   │
+   ├── Leer opción del usuario:
+   │   int option = scanner.nextInt();
+   │   FuelType selected = FuelType.values()[option - 1];
+   │
+   └── Asignar a objeto:
+       movement.setFuelType(selected);
+   
+   PREGUNTA: ¿Por qué usas values()[index] en lugar de valueOf()?
+   PISTA: values() retorna array, valueOf() requiere String exacto.
+   ```
 
-7. **Enums opcionales adicionales:**
-   - `VehicleCategory`: EXCAVADORA, CAMION, GRUA, TRACTOR
-   - `VehicleStatus`: OPERATIVO, EN_MANTENIMIENTO, FUERA_DE_SERVICIO
-   - `MovementStatus`: PENDIENTE, COMPLETADO, CANCELADO (si implementas workflow)
+7. **Conversión segura de String a enum:**
+   ```
+   Situación: Lees datos de archivo, API o BD que vienen como String.
+   
+   ❌ FORMA ARRIESGADA:
+   MovementType type = MovementType.valueOf(input); // Puede fallar
+   
+   ✅ FORMA SEGURA (usa el método fromString del enum):
+   try {
+       MovementType type = MovementType.fromString(input);
+       // usar type
+   } catch (IllegalArgumentException e) {
+       logError("Tipo inválido: " + input, e);
+       // Manejar error, pedir re-entrada, etc.
+   }
+   
+   PREGUNTA: ¿Cuándo usas valueOf() vs fromString()?
+   PISTA: valueOf() si SABES que el string es exacto. 
+          fromString() si viene de usuario/archivo (entrada externa).
+   ```
 
 **✅ Resultado esperado:**
 - Todos los "tipos" son enums, no Strings

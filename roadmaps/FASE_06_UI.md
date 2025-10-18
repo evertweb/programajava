@@ -48,47 +48,118 @@ Sin un menú claro, tu aplicación solo sirve para desarrolladores. Con un menú
 
 **Tareas paso a paso:**
 
-1. **Crear la estructura básica:**
-   - Crear paquete `ui`
-   - Crear clase `ConsoleMenu` con atributo `Scanner` y atributos para los servicios (MovementService, InventoryService, etc.)
-   - Constructor que inicialice el Scanner y reciba los servicios como parámetros
+1. **Estructura de clases:** 📐
 
-2. **Método `displayMainMenu()`:**
-   - Imprimir encabezado con bordes ASCII (ejemplo: `========== FORESTECH CLI ==========`)
-   - Mostrar información del sistema (versión, fecha actual)
-   - Listar opciones numeradas:
-     - 1. Gestión de Movimientos (submenú)
-     - 2. Ver Inventario
-     - 3. Gestión de Vehículos (submenú)
-     - 4. Gestión de Proveedores (submenú)
-     - 5. Reportes (submenú)
-     - 0. Salir
-   - Solicitar al usuario que ingrese una opción
+```
+Clase: ConsoleMenu
+├── Atributos:
+│   ├── scanner: Scanner (para leer entrada del usuario)
+│   ├── movementService: MovementService
+│   ├── inventoryService: InventoryService
+│   ├── vehicleService: VehicleService
+│   └── supplierService: SupplierService
+├── Constructor:
+│   └── Recibe los servicios como parámetros y los almacena
+└── Métodos principales:
+    ├── start(): void
+    ├── displayMainMenu(): void
+    ├── handleMovementsMenu(): void
+    ├── handleVehiclesMenu(): void
+    └── (otros submenús)
+```
 
-3. **Método `start()`:**
-   - Crear bucle `while(true)`
-   - Dentro del bucle: llamar a `displayMainMenu()`
-   - Leer opción del usuario con `scanner.nextInt()`
-   - Usar `switch` para manejar cada opción
-   - Para cada case, llamar al método correspondiente (ej: `handleMovementsMenu()`)
-   - Case 0: mostrar mensaje de despedida y hacer `break` para salir del bucle
-   - Default: mostrar mensaje de opción inválida
+2. **Método `displayMainMenu()`:** 📋
 
-4. **Manejo de excepciones:**
-   - Envolver `scanner.nextInt()` en `try-catch` para capturar `InputMismatchException`
-   - Si ocurre la excepción: mostrar mensaje claro tipo "❌ Por favor ingrese un número válido"
-   - **CRÍTICO:** Limpiar el buffer con `scanner.nextLine()` después del catch
-   - Sin esta limpieza, el scanner queda en estado inválido y crea un loop infinito
+```
+Especificación (TÚ IMPLEMENTAS):
+├── Paso 1: Imprimir encabezado visual
+│   └── Usa bordes ASCII: ========== FORESTECH CLI ==========
+│
+├── Paso 2: Mostrar información del sistema
+│   ├── Versión actual: 1.0
+│   └── Fecha/Hora: LocalDateTime.now()
+│
+├── Paso 3: Listar opciones principales
+│   ├── 1. Gestión de Movimientos
+│   ├── 2. Ver Inventario
+│   ├── 3. Gestión de Vehículos
+│   ├── 4. Gestión de Proveedores
+│   ├── 5. Reportes
+│   └── 0. Salir
+│
+└── Paso 4: Solicitar entrada
+    └── System.out.print("Seleccione opción: ")
+```
 
-5. **Submenús:**
-   - Crear método `handleMovementsMenu()` con estructura similar (while, opciones, switch)
-   - Opciones: 1. Registrar Entrada, 2. Registrar Salida, 3. Ver Historial, 0. Volver
-   - Repetir patrón para otros submenús (vehículos, proveedores, reportes)
+3. **Método `start()`:** 🔄
 
-6. **Confirmación al salir:**
-   - Antes del `break` en case 0, preguntar: "¿Está seguro que desea salir? (S/N)"
-   - Leer respuesta y solo salir si es 'S' o 's'
-   - Esto evita salidas accidentales
+```
+Flujo (TÚ LO ESCRIBES):
+├── Bucle externo:
+│   └── while (true) { ... }
+│
+├── Dentro del bucle:
+│   ├── 1. Llamar displayMainMenu()
+│   ├── 2. Leer opción con scanner.nextInt()
+│   ├── 3. (IMPORTANTE) Limpiar buffer con scanner.nextLine()
+│   └── 4. Usar switch para cada opción:
+│       ├── case 1: handleMovementsMenu()
+│       ├── case 2: displayInventory()
+│       ├── case 3: handleVehiclesMenu()
+│       ├── case 4: handleSuppliersMenu()
+│       ├── case 5: handleReports()
+│       ├── case 0: salir (break)
+│       └── default: mostrar "❌ Opción inválida"
+│
+└── IMPORTANTE: Estructura del try-catch
+    ├── try {
+    │   └── scanner.nextInt()
+    │
+    ├── catch (InputMismatchException e) {
+    │   ├── System.out.println("❌ Por favor ingrese un número válido")
+    │   └── scanner.nextLine()  ⚠️ CRÍTICO: Limpiar buffer
+    │
+    └── }
+```
+
+4. **Patrón de submenús:** 🌳
+
+```
+Método: handleMovementsMenu()
+├── Estructura (IGUAL que start()):
+│   ├── while (true) { ... }
+│   ├── Mostrar opciones del submenú
+│   ├── Leer opción con try-catch
+│   ├── switch para cada opción:
+│   │   ├── case 1: registerEntryWizard()
+│   │   ├── case 2: registerExitWizard()
+│   │   ├── case 3: viewMovementHistory()
+│   │   └── case 0: return (volver atrás)
+│   │
+│   └── No uses break para salir, usa return
+│       (porque no quieres romper el loop externo)
+│
+├── Opciones del menú:
+│   ├── 1. Registrar Entrada
+│   ├── 2. Registrar Salida
+│   ├── 3. Ver Historial
+│   └── 0. Volver al menú principal
+│
+└── 💡 PISTA: Reutiliza el try-catch del método start()
+```
+
+5. **Confirmación al salir:** ⚠️
+
+```
+En case 0 del menú principal:
+├── System.out.print("¿Está seguro que desea salir? (S/N): ")
+├── Leer respuesta
+├── if (respuesta.equalsIgnoreCase("S")) {
+│   └── break (salir del bucle)
+│
+└── else {
+    └── continue (volver a mostrar menú)
+```
 
 **✅ Resultado esperado:**
 Al ejecutar `ConsoleMenu.start()`, debes ver un menú limpio que:
@@ -151,92 +222,152 @@ Si le pides al usuario todos estos datos de una vez, es abrumador y propenso a e
 
 **Tareas paso a paso:**
 
-1. **Estructura del método:**
-   - Crear método `registerEntryWizard()` que no retorne nada (void)
-   - Imprimir encabezado del wizard: `========== REGISTRAR ENTRADA DE COMBUSTIBLE ==========`
-   - Declarar variables para almacenar cada dato recolectado
+1. **Estructura básica del wizard:** 📐
 
-2. **Paso 1: Seleccionar proveedor**
-   - Invocar `supplierService.getAllSuppliers()` para obtener lista de proveedores
-   - Mostrar lista numerada de proveedores con formato:
-     ```
-     Proveedores disponibles:
-     1. PetroSur (RUT: 12345678-9)
-     2. Distribuidora Norte (RUT: 98765432-1)
-     0. Cancelar
-     ```
-   - Solicitar al usuario que elija un número
-   - Validar que el número esté en el rango válido
-   - Si elige 0, mostrar "Operación cancelada" y retornar
-   - Guardar el proveedor seleccionado
+```
+Método: registerEntryWizard()
+├── Tipo: void
+├── Inicialización:
+│   ├── Mostrar encabezado
+│   └── Declarar variables para almacenar datos
+└── Estructura: 7 pasos secuenciales
+    ├── Paso 1: Seleccionar proveedor
+    ├── Paso 2: Seleccionar combustible
+    ├── Paso 3: Ingresar cantidad
+    ├── Paso 4: Ingresar precio unitario
+    ├── Paso 5: Seleccionar ubicación
+    ├── Paso 6: Mostrar resumen y confirmar
+    └── Paso 7: Ejecutar la operación
+```
 
-3. **Paso 2: Seleccionar tipo de combustible**
-   - Mostrar lista de tipos de combustible disponibles (puedes hardcodear por ahora o consultar desde la BD)
-   - Ejemplo: 1. Diesel, 2. Gasolina 93, 3. Gasolina 95, 4. Mezcla
-   - Permitir cancelar con 0
-   - Guardar el tipo seleccionado
+2. **Paso 1: Seleccionar proveedor** 📋
 
-4. **Paso 3: Ingresar cantidad**
-   - Solicitar: "Ingrese cantidad en litros:"
-   - Leer como `double`
-   - Validar que sea > 0
-   - Si no es válido, mostrar error y volver a pedir
-   - Permitir escribir "cancelar" para abortar (requiere leer como String primero)
+```
+Especificación (TÚ IMPLEMENTAS):
+├── Invocar: supplierService.getAllSuppliers()
+├── Mostrar lista numerada:
+│   └── Cada proveedor con su identificador
+├── Permitir opción 0 para cancelar
+├── Validación:
+│   ├── ¿Número en rango válido?
+│   ├── ¿Es 0? → Mostrar "Operación cancelada" + return
+│   └── ¿Es válido? → Guardar proveedor, continuar
+└── 💡 PISTA: Usa un loop pequeño aquí para re-pedir si entra mal
+```
 
-5. **Paso 4: Ingresar precio unitario**
-   - Solicitar: "Ingrese precio unitario: $"
-   - Leer como `double`
-   - Validar que sea > 0
-   - Calcular y mostrar el total: `Total: $XXX.XX`
+3. **Paso 2: Seleccionar combustible** ⛽
 
-6. **Paso 5: Seleccionar ubicación**
-   - Mostrar lista de ubicaciones/bodegas disponibles
-   - Ejemplo: 1. Bodega Central, 2. Bodega Norte, 3. Bodega Sur
-   - Permitir cancelar
-   - Guardar ubicación seleccionada
+```
+Especificación (TÚ IMPLEMENTAS):
+├── Mostrar lista de tipos disponibles
+│   ├── Opción 1: Diesel
+│   ├── Opción 2: Gasolina 93
+│   ├── Opción 3: Gasolina 95
+│   └── Opción 4: Mezcla (o consultar BD)
+├── Permitir opción 0 para cancelar
+├── Validación:
+│   ├── ¿Número válido?
+│   ├── ¿Es 0? → Cancelar operación
+│   └── ¿Válido? → Guardar tipo, continuar
+└── 💡 PISTA: Si usas enums, mejor; por ahora puedes hardcodear
+```
 
-7. **Paso 6: Resumen y confirmación**
-   - Mostrar resumen completo:
-     ```
-     ========== RESUMEN DE ENTRADA ==========
-     Proveedor: PetroSur
-     Combustible: Diesel
-     Cantidad: 500.00 litros
-     Precio unitario: $3.45
-     Total: $1,725.00
-     Ubicación: Bodega Central
-     ¿Confirma el registro? (S/N):
-     ```
-   - Leer respuesta
-   - Si es 'N', mostrar "Operación cancelada" y retornar
+4. **Paso 3 y 4: Cantidad y Precio** 💰
 
-8. **Paso 7: Ejecutar operación**
-   - Crear objeto `Movement` con todos los datos recolectados
-   - Invocar `movementService.createEntryMovement(movement)`
-   - Si tiene éxito, mostrar: `✅ Entrada registrada exitosamente. ID: [uuid]`
-   - Si falla, mostrar: `❌ Error al registrar entrada: [mensaje]`
+```
+Especificación (TÚ IMPLEMENTAS):
+├── Paso 3: Ingresar cantidad en litros
+│   ├── Solicitar entrada
+│   ├── Leer como double
+│   ├── Validación:
+│   │   ├── ¿Es > 0?
+│   │   ├── Si NO → mostrar error, volver a pedir
+│   │   └── Si SÍ → guardar, continuar
+│   └── 💡 Usa try-catch para InputMismatchException
+│
+├── Paso 4: Ingresar precio unitario
+│   ├── Solicitar entrada
+│   ├── Leer como double
+│   ├── Validación similar a Paso 3
+│   ├── Calcular total: cantidad × precio
+│   └── Mostrar total calculado
+└── 💡 PISTA: Estos pasos comparten la misma lógica de validación
+```
 
-9. **Manejo de errores:**
-   - Todo el wizard debe estar en un `try-catch` amplio
-   - Capturar `InputMismatchException` y mostrar mensaje claro
-   - Capturar excepciones de la capa de servicios y mostrarlas amigablemente
+5. **Paso 5: Seleccionar ubicación** 📍
+
+```
+Especificación (TÚ IMPLEMENTAS):
+├── Mostrar lista de ubicaciones (bodegas)
+├── Permitir cancelar con 0
+├── Validación de opción elegida
+└── Guardar ubicación seleccionada
+```
+
+6. **Paso 6: Resumen y confirmación** 📊
+
+```
+Especificación (TÚ IMPLEMENTAS):
+├── Mostrar tabla con todos los datos:
+│   ├── Proveedor seleccionado
+│   ├── Tipo de combustible
+│   ├── Cantidad en litros
+│   ├── Precio unitario
+│   ├── Total (cantidad × precio)
+│   └── Ubicación de destino
+├── Preguntar: "¿Confirma el registro? (S/N):"
+├── Leer respuesta
+└── Si es 'N' o 'n' → Mostrar "Operación cancelada" + return
+```
+
+7. **Paso 7: Ejecutar operación** ✅
+
+```
+Especificación (TÚ IMPLEMENTAS):
+├── Crear nuevo objeto Movement con todos los datos
+├── Try-catch para capturar excepciones:
+│   ├── Invocar: movementService.createEntryMovement(movement)
+│   ├── Si ÉXITO:
+│   │   └── Mostrar: "✅ Entrada registrada. ID: [uuid]"
+│   └── Si FALLO:
+│       └── Mostrar: "❌ Error al registrar: [mensaje]"
+└── 💡 NO muestres el stacktrace completo, solo mensaje amigable
+```
+
+8. **Manejo global de errores:** 🛡️
+
+```
+Estructura (TÚ IMPLEMENTAS):
+├── TODO el método envuelto en try-catch externo
+├── Capturar InputMismatchException
+│   └── Mostrar: "❌ Ingrese un número válido"
+├── Capturar SQLException (excepciones de base de datos)
+│   └── Mostrar: "❌ Error de base de datos. Intente más tarde."
+└── Capturar Exception genérica (catch-all)
+    └── Mostrar: "❌ Error inesperado. Intente nuevamente."
+```
 
 **✅ Resultado esperado:**
-Al ejecutar el wizard, el usuario:
-- Ve claramente qué se espera en cada paso
-- Puede cancelar en cualquier momento sin dejar datos inconsistentes
+
+- Usuario ve cada paso claramente
+- Puede cancelar en cualquier momento
 - Ve un resumen antes de confirmar
-- Recibe confirmación clara del ID generado
-- No ve errores técnicos (SQLExceptions, etc.), solo mensajes amigables
+- Recibe mensajes claros de éxito o error
+- No ve excepciones técnicas
 
-**💡 Patrón común:**
-Este mismo patrón de wizard lo vas a repetir para salidas, registro de vehículos, proveedores, etc. Considera crear métodos auxiliares como `selectFromList(List items, String prompt)` que puedan reutilizarse.
+**💡 Métodos auxiliares sugeridos:**
 
-**⚠️ CUIDADO con el estado a medias:**
-Si el usuario cancela o hay un error, NO debes dejar datos guardados a medias. Por eso construyes el objeto `Movement` completo ANTES de llamar al servicio, y solo lo guardas si todos los datos están listos.
-
-**🔍 Depuración:**
-Si algo falla, agrega prints después de cada paso: `System.out.println("DEBUG: Proveedor seleccionado: " + proveedor.getName());` para rastrear en qué punto ocurre el problema.
+```
+selectFromList(List items, String prompt): Object
+├── Mostrar lista numerada
+├── Validar selección
+└── Retornar elemento seleccionado
+   
+validatePositiveDouble(String prompt): double
+├── Solicitar entrada
+├── Validar > 0
+├── Retornar double válido
+```
 
 **⏱️ Tiempo estimado:** 4-5 horas
 
@@ -277,105 +408,167 @@ Si permites una salida sin stock, tu inventario quedará negativo (¡desastre!).
 
 **Tareas paso a paso:**
 
-1. **Estructura del método:**
-   - Crear método `registerExitWizard()` void
-   - Imprimir encabezado: `========== REGISTRAR SALIDA DE COMBUSTIBLE ==========`
-   - Declarar variables para almacenar datos
+1. **Estructura básica del wizard:** 📐
 
-2. **Paso 1: Seleccionar vehículo**
-   - Invocar `vehicleService.getAllVehicles()` para obtener lista
-   - Mostrar lista numerada con información clave:
-     ```
-     Vehículos disponibles:
-     1. Excavadora CAT-320 (Horómetro: 1,250 hrs)
-     2. Camión Volvo FH (Horómetro: 45,890 hrs)
-     3. Grúa Liebherr (Horómetro: 8,432 hrs)
-     0. Cancelar
-     ```
-   - Permitir cancelar
-   - Guardar vehículo seleccionado
-   - Mostrar el horómetro actual del vehículo seleccionado
+```
+Método: registerExitWizard()
+├── Tipo: void
+├── Inicialización:
+│   ├── Mostrar encabezado
+│   └── Declarar variables para almacenar datos
+└── Estructura: 7 pasos secuenciales
+    ├── Paso 1: Seleccionar vehículo
+    ├── Paso 2: Validar e ingresar nuevo horómetro
+    ├── Paso 3: Mostrar combustibles disponibles
+    ├── Paso 4: Seleccionar combustible y cantidad
+    ├── Paso 5: Seleccionar ubicación de origen
+    ├── Paso 6: Mostrar resumen y confirmar
+    └── Paso 7: Ejecutar la operación
+```
 
-3. **Paso 2: Ingresar nueva lectura de horómetro**
-   - Solicitar: "Ingrese nueva lectura de horómetro:"
-   - Leer como `double`
-   - **VALIDACIÓN CRÍTICA:** Verificar que nuevo horómetro > horómetro actual
-   - Si es menor o igual, mostrar: `❌ Error: El horómetro nuevo (XXX) debe ser mayor que el actual (YYY)`
-   - Volver a solicitar hasta que sea válido o cancelar
-   - Calcular horas trabajadas: `horasT trabajadas = nuevoHorometro - horometroActual`
-   - Mostrar: `✅ Horas trabajadas desde última carga: XX.X hrs`
+2. **Paso 1: Seleccionar vehículo** 🚗
 
-4. **Paso 3: Mostrar combustibles con stock disponible**
-   - Invocar `inventoryService.getAllInventory()` para ver qué hay disponible
-   - Mostrar solo combustibles con stock > 0:
-     ```
-     Combustibles disponibles:
-     1. Diesel - 500.00 litros disponibles (Bodega Central)
-     2. Gasolina 93 - 300.00 litros disponibles (Bodega Norte)
-     0. Cancelar
-     ```
-   - Si NO hay stock de nada, mostrar: `⚠️ No hay combustibles disponibles. Registre una entrada primero.`
-   - Retornar sin permitir continuar
+```
+Especificación (TÚ IMPLEMENTAS):
+├── Invocar: vehicleService.getAllVehicles()
+├── Mostrar lista con horómetro actual:
+│   ├── 1. Excavadora CAT-320 (Horómetro: 1,250 hrs)
+│   ├── 2. Camión Volvo FH (Horómetro: 45,890 hrs)
+│   └── 0. Cancelar
+├── Leer opción del usuario
+├── Validación:
+│   ├── ¿Es 0? → Cancelar operación + return
+│   ├── ¿Es válido? → Guardar vehículo + horómetro actual
+│   └── 💡 Extrae y guarda el horómetro actual para paso 2
+└── Mostrar horómetro actual al usuario
+```
 
-5. **Paso 4: Seleccionar combustible y validar cantidad**
-   - Usuario elige el combustible
-   - Guardar el stock disponible de ese combustible
-   - Solicitar: "Ingrese cantidad a retirar (disponible: XXX litros):"
-   - Leer cantidad
-   - **VALIDACIÓN CRÍTICA:** Verificar que cantidad <= stock disponible
-   - Si excede, mostrar: `❌ Error: Solo hay XXX litros disponibles`
-   - Volver a solicitar o cancelar
+3. **Paso 2: Validar horómetro nuevo** ⚠️
 
-6. **Paso 5: Seleccionar ubicación de origen**
-   - Mostrar ubicaciones donde hay stock de ese combustible
-   - Permitir elegir una
-   - Guardar ubicación
+```
+Especificación (TÚ IMPLEMENTAS):
+├── Solicitar: "Ingrese nueva lectura de horómetro:"
+├── Leer como double
+├── Validación CRÍTICA (loop hasta válido):
+│   ├── ¿Es > 0?
+│   ├── ¿Es > horómetro_actual?
+│   │   ├── SÍ → Calcular horas: nuevo - actual
+│   │   ├── Mostrar: "✅ Horas trabajadas: XX.X hrs"
+│   │   └── Guardar nuevo horómetro + horas trabajadas + continuar
+│   └── NO → Mostrar: "❌ Debe ser mayor que XXX" + volver a pedir
+└── 💡 Este paso es CRÍTICO: validar antes de continuar
+```
 
-7. **Paso 6: Resumen y confirmación**
-   - Mostrar resumen completo:
-     ```
-     ========== RESUMEN DE SALIDA ==========
-     Vehículo: Excavadora CAT-320
-     Horómetro anterior: 1,250 hrs
-     Horómetro nuevo: 1,268 hrs
-     Horas trabajadas: 18.0 hrs
-     Combustible: Diesel
-     Cantidad: 45.00 litros
-     Ubicación: Bodega Central
-     Stock después de salida: 455.00 litros
-     ¿Confirma el registro? (S/N):
-     ```
-   - Leer confirmación
+4. **Paso 3: Mostrar combustibles con stock** ⛽
 
-8. **Paso 7: Ejecutar operación**
-   - Crear objeto `Movement` con todos los datos
-   - Invocar `movementService.createExitMovement(movement, vehicleId)`
-   - Si tiene éxito, mostrar: `✅ Salida registrada exitosamente. ID: [uuid]`
-   - Mostrar también: `📊 Nuevo stock de [combustible]: XXX litros`
-   - Si falla por falta de stock (aunque ya validaste), mostrar mensaje claro
+```
+Especificación (TÚ IMPLEMENTAS):
+├── Invocar: inventoryService.getAllInventory()
+├── Filtrar: solo combustibles con stock > 0
+├── Si NO hay combustibles disponibles:
+│   ├── Mostrar: "⚠️ No hay combustibles. Registre una entrada primero."
+│   └── return (cancelar wizard)
+├── Si HAY combustibles, mostrar lista:
+│   ├── 1. Diesel - 500.00 litros (Bodega Central)
+│   ├── 2. Gasolina 93 - 300.00 litros (Bodega Norte)
+│   └── 0. Cancelar
+└── Leer selección del usuario
+```
 
-9. **Manejo de errores:**
-   - Try-catch amplio
-   - Capturar `InsufficientInventoryException` específicamente (cuando la implementes en Fase 7)
-   - Mostrar mensaje: `❌ Stock insuficiente: Se requieren XXX litros pero solo hay YYY disponibles`
+5. **Paso 4: Seleccionar cantidad a retirar** 💨
+
+```
+Especificación (TÚ IMPLEMENTAS):
+├── Guardar stock disponible del combustible seleccionado
+├── Solicitar: "Ingrese cantidad a retirar (disponible: XXX L):"
+├── Leer como double
+├── Validación (loop si falla):
+│   ├── ¿Es > 0?
+│   ├── ¿Es <= stock_disponible?
+│   │   ├── SÍ → Guardar cantidad + continuar
+│   │   └── NO → Mostrar error + volver a pedir
+│   └── Mostrar: "Stock después de salida: YYY litros"
+└── 💡 Este es otro punto crítico de validación
+```
+
+6. **Paso 5: Seleccionar ubicación de origen** 📍
+
+```
+Especificación (TÚ IMPLEMENTAS):
+├── Mostrar ubicaciones donde existe ese combustible
+├── Usuario elige una
+├── Guardar ubicación seleccionada
+└── 💡 Podría ser que mismo combustible esté en varias bodegas
+```
+
+7. **Paso 6: Resumen completo** 📊
+
+```
+Especificación (TÚ IMPLEMENTAS):
+├── Mostrar tabla con TODOS los datos:
+│   ├── Vehículo: [nombre]
+│   ├── Horómetro anterior: XXX hrs
+│   ├── Horómetro nuevo: YYY hrs
+│   ├── Horas trabajadas: ZZZ hrs  ← CALCULADO
+│   ├── Combustible: [tipo]
+│   ├── Cantidad a retirar: NNN litros
+│   ├── Ubicación de origen: [bodega]
+│   └── Stock después de salida: MMM litros  ← CALCULADO
+├── Preguntar: "¿Confirma el registro? (S/N):"
+└── Si responde 'N' → Cancelar y return
+```
+
+8. **Paso 7: Ejecutar transacción** ✅
+
+```
+Especificación (TÚ IMPLEMENTAS):
+├── Crear objeto Movement con todos los datos
+├── Crear objeto actualización de vehículo (horómetro nuevo)
+├── Try-catch para capturar excepciones:
+│   ├── Invocar: movementService.createExitMovement(movement)
+│   ├── Invocar: vehicleService.updateOdometer(vehicleId, newHorometer)
+│   ├── Si ÉXITO:
+│   │   ├── Mostrar: "✅ Salida registrada. ID: [uuid]"
+│   │   └── Mostrar: "📊 Nuevo stock: XXX litros"
+│   └── Si FALLO (stock insuficiente):
+│       └── Mostrar: "❌ Stock insuficiente: necesarios XXX, disponibles YYY"
+└── ⚠️ IMPORTANTE: ambas operaciones deben estar en la MISMA transacción
+```
+
+9. **Validaciones adicionales** 🛡️
+
+```
+Especificación (TÚ IMPLEMENTAS):
+├── Try-catch general envuelve todo el método
+├── Capturar InputMismatchException
+│   └── Mostrar: "❌ Ingrese un número válido"
+├── Capturar InsufficientInventoryException (Fase 7)
+│   └── Mostrar: "❌ Stock insuficiente para esta operación"
+├── Capturar SQLException
+│   └── Mostrar: "❌ Error de base de datos. Intente más tarde."
+└── Capturar Exception (catch-all)
+    └── Mostrar: "❌ Error inesperado."
+```
 
 **✅ Resultado esperado:**
-Al ejecutar el wizard:
-- El usuario solo ve combustibles que realmente tienen stock
-- No puede ingresar cantidades mayores al stock disponible
-- No puede ingresar un horómetro menor al actual
+
+- Usuario ve solo combustibles que realmente tienen stock
+- No puede ingresar cantidad mayor al stock disponible
+- No puede usar horómetro menor al actual
 - Ve claramente cuántas horas trabajó el vehículo
 - Ve el stock resultante antes de confirmar
-- La operación es atómica: si algo falla, nada se guarda
+- Si falla, nada se guarda (transacción atómica)
 
-**💡 Double validation:**
-Aunque valides el stock en la UI, SIEMPRE debes validar también en el servicio. ¿Por qué? Porque en el futuro podrías tener múltiples UIs (web, móvil) o APIs, y todas deben pasar por la misma validación del servicio.
+**💡 Diferencia clave entrada vs salida:**
 
-**⚠️ RECUERDA: Race conditions:**
-Si dos usuarios intentan sacar combustible al mismo tiempo, ambos podrían pasar la validación de stock en la UI, pero uno de ellos debería fallar en el servicio. Por eso la validación de stock en el servicio debe hacerse DENTRO de la transacción.
+Entrada: agregar combustible (menor riesgo)
+Salida: restar combustible + actualizar vehículo + validar stock (MAYOR riesgo)
 
-**🔍 Depuración:**
-Si el horómetro no se actualiza, verifica que estés pasando el `vehicleId` correctamente al servicio y que el UPDATE de vehículos esté dentro de la misma transacción que el movimiento.
+**⚠️ Race condition importante:**
+
+Aunque valides en UI, DOS usuarios podrían intentar sacar combustible simultáneamente.
+Ambos pasan la validación en UI, pero UNO falla en el servicio.
+Por eso SIEMPRE valida también en el servicio dentro de la transacción.
 
 **⏱️ Tiempo estimado:** 5-6 horas
 

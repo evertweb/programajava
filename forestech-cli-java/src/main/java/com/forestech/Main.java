@@ -25,6 +25,8 @@ public class Main {
         System.out.println("Estado: " + (AppConfig.ACTIVE ? "Activo" : "Inactivo"));
         System.out.println("=================================");
 
+
+
         //VALIDAR SI UN MOVIMIENTO ES VALIDO
         boolean movimiento1 = MovementCalculator.isValidMovement("DIESEL", 0, 10.6);
         String isValid = movimiento1 ? "movimiento valido" : "movimiento invalido";
