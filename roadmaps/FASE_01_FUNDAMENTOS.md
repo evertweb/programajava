@@ -418,10 +418,10 @@ Prueba 4: Validar tipo de movimiento
 
 **🎯 AUTO-EVALUACIÓN:**
 Antes de continuar, pregúntate:
-- [ ] ¿Entiendo la diferencia entre switch e if-else?
-- [ ] ¿Sé por qué es importante el `break` en switch?
-- [ ] ¿Puedo explicar por qué uso `.equals()` en vez de `==`?
-- [ ] ¿Mi código está en MenuHelper, NO en Main?
+- [x] ¿Entiendo la diferencia entre switch e if-else?
+- [x] ¿Sé por qué es importante el `break` en switch?
+- [x] ¿Puedo explicar por qué uso `.equals()` en vez de `==`?
+- [x] ¿Mi código está en MenuHelper, NO en Main?
 
 **⏱️ Tiempo estimado:** 2 horas
 
