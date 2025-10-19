@@ -903,11 +903,11 @@ Principio aplicado: SEPARACIÓN DE RESPONSABILIDADES
 
 **🎯 AUTO-EVALUACIÓN:**
 Antes de continuar, pregúntate:
-- [ ] ¿Puedo explicar qué es el buffer y por qué causa problemas?
-- [ ] ¿Sé cuándo necesito limpiar el buffer y cuándo no?
-- [ ] ¿Entiendo por qué uso `print()` vs `println()` para prompts?
-- [ ] ¿Puedo explicar por qué el Scanner es `static` en InputHelper?
-- [ ] ¿Entiendo cómo Main.java orquesta el flujo sin tener lógica?
+- [X] ¿Puedo explicar qué es el buffer y por qué causa problemas?
+- [X] ¿Sé cuándo necesito limpiar el buffer y cuándo no?
+- [X] ¿Entiendo por qué uso `print()` vs `println()` para prompts?
+- [X] ¿Puedo explicar por qué el Scanner es `static` en InputHelper?
+- [X] ¿Entiendo cómo Main.java orquesta el flujo sin tener lógica?
 
 **🔍 DEPURACIÓN - Si el programa "salta" preguntas:**
 
@@ -936,38 +936,38 @@ SOLUCIÓN:
 Antes de pasar a Fase 2, verifica que puedes responder SÍ a todo:
 
 **Comprensión de conceptos:**
-- [ ] Puedo explicar con mis palabras qué es el método `main()` y por qué es necesario
-- [ ] Entiendo la diferencia entre `int` e `Integer`, `double` y `Double`
-- [ ] Sé cuándo usar `final` y qué significa "inmutable"
-- [ ] Puedo explicar por qué `==` no funciona bien con Strings
-- [ ] Entiendo cuándo usar `if/else` vs `switch`
-- [ ] Sé la diferencia entre `while` y `do-while`
-- [ ] Entiendo qué es el buffer de Scanner y cómo limpiarlo
-- [ ] Entiendo por qué separé el código en múltiples clases
+- [x] Puedo explicar con mis palabras qué es el método `main()` y por qué es necesario
+- [x] Entiendo la diferencia entre `int` e `Integer`, `double` y `Double`
+- [x] Sé cuándo usar `final` y qué significa "inmutable"
+- [x] Puedo explicar por qué `==` no funciona bien con Strings
+- [x] Entiendo cuándo usar `if/else` vs `switch`
+- [x] Sé la diferencia entre `while` y `do-while`
+- [x] Entiendo qué es el buffer de Scanner y cómo limpiarlo
+- [x] Entiendo por qué separé el código en múltiples clases
 
 **Habilidades prácticas:**
-- [ ] Compilé y ejecuté código desde terminal con Maven
-- [ ] Usé el debugger al menos 3 veces con breakpoints
-- [ ] Creé commits de Git por cada checkpoint completado
-- [ ] Documenté aprendizajes en `JAVA_LEARNING_LOG.md`
+- [x] Compilé y ejecuté código desde terminal con Maven
+- [x] Usé el debugger al menos 3 veces con breakpoints
+- [x] Creé commits de Git por cada checkpoint completado
+- [x] Documenté aprendizajes en `JAVA_LEARNING_LOG.md`
 
 **Estructura del proyecto:**
-- [ ] Tengo Main.java CORTO (menos de 40 líneas)
-- [ ] Tengo AppConfig.java con las constantes
-- [ ] Tengo MovementCalculator.java con los cálculos
-- [ ] Tengo MenuHelper.java con la lógica del menú
-- [ ] Tengo DataDisplay.java con visualización de datos
-- [ ] Tengo InputHelper.java con captura de inputs
-- [ ] **NINGUNA** de mis clases tiene más de 100 líneas
-- [ ] Mi código NO tiene duplicación (DRY principle)
+- [x] Tengo Main.java CORTO (menos de 40 líneas)
+- [x] Tengo AppConfig.java con las constantes
+- [x] Tengo MovementCalculator.java con los cálculos
+- [x] Tengo MenuHelper.java con la lógica del menú
+- [x] Tengo DataDisplay.java con visualización de datos
+- [x] Tengo InputHelper.java con captura de inputs
+- [x] **NINGUNA** de mis clases tiene más de 100 líneas
+- [x] Mi código NO tiene duplicación (DRY principle)
 
 **Entregable funcional:**
-- [ ] Mi programa muestra un menú interactivo
-- [ ] Captura datos del usuario con Scanner
-- [ ] Si elige opción 1 o 2, pide datos del movimiento
-- [ ] Valida que los datos sean correctos
-- [ ] Calcula y muestra el total con IVA
-- [ ] Se cierra sin errores
+- [x] Mi programa muestra un menú interactivo
+- [x] Captura datos del usuario con Scanner
+- [x] Si elige opción 1 o 2, pide datos del movimiento
+- [x] Valida que los datos sean correctos
+- [x] Calcula y muestra el total con IVA
+- [x] Se cierra sin errores
 
 **🎯 Auto-evaluación:**
 Abre Main.java. Si tiene MÁS de 40 líneas o ves mucha lógica ahí, algo está mal. Main debe ser solo el "director de orquesta" que llama a otros.

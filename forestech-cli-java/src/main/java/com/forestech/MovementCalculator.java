@@ -1,10 +1,13 @@
 package com.forestech;
 
+import java.lang.reflect.Type;
 import java.security.PublicKey;
 
 public class MovementCalculator {
     public static final double IVA = 0.19;
-    public static  final String TXTCALCULO = "=====DESGLOSE DE LA OPERACION=====";
+    public static  final String TXTCALCULO = "╔═══════════════════════════════════════════════════════════╗\n" +
+                                              "║            💰 DESGLOSE DE LA OPERACIÓN                   ║\n" +
+                                              "╚═══════════════════════════════════════════════════════════╝";
 
 
 
@@ -45,19 +48,22 @@ public class MovementCalculator {
     }
 
 
-    public static void  printMovementSummary(String tipoDeCombustible, int quantity, double unitPrice){
+    public static void  printMovementSummary(String fuelType, double quantity, double unitPrice){
         double subTotal = calculateSubtotal(quantity, unitPrice);
         double iva = calculateIVA(subTotal);
         double total = calculateTotal(subTotal, iva);
 
 
-        System.out.println(TXTCALCULO);
-        System.out.println("TIPO DE COMBUSTIBLE: " + tipoDeCombustible);
-        System.out.println("CANTIDAD: " + quantity);
-        System.out.println("EL SUBTOTAL DE TU COMPRA ES " + String.format("%.2f", subTotal));
-        System.out.println("EL IVA DE TU COMPRA ES " + String.format("%.2f", iva));
-        System.out.println("EL TOTAL DE TU COMPRA ES " + String.format("%.2f", total));
-        System.out.println("=================================");
+        System.out.println("\n" + TXTCALCULO);
+        System.out.println("┌───────────────────────────────────────────────────────────┐");
+        System.out.println("│  ⛽ Tipo de combustible: " + fuelType);
+        System.out.println("│  📦 Cantidad: " + quantity + " galones");
+        System.out.println("├───────────────────────────────────────────────────────────┤");
+        System.out.println("│  💵 Subtotal: $" + String.format("%.2f", subTotal));
+        System.out.println("│  📊 IVA (19%): $" + String.format("%.2f", iva));
+        System.out.println("├───────────────────────────────────────────────────────────┤");
+        System.out.println("│  💰 TOTAL A PAGAR: $" + String.format("%.2f", total));
+        System.out.println("└───────────────────────────────────────────────────────────┘");
 //        System.out.println(txtCalculo);
 
 

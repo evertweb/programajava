@@ -5,50 +5,50 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        //condición? ValorSiTrue: valorSiFalse;
+        /*
+        ┌──────────────────┐
+        │    Main.java     │  ← ORQUESTADOR (coordina el flujo)
+        └────────┬─────────┘
+                 │
+                 ├─→ AppConfig.java          (constantes del sistema)
+                 |-->BannerMenu.java              (Encabezado del programa)
+                 ├─→ MovementCalculator.java (lógica de cálculos)
+                 ├─→ MenuHelper.java         (lógica del menú)
+                 ├─→ DataDisplay.java        (visualización de datos)
+                 └─→ InputHelper.java        (captura de inputs)
+         */
+        BannerMenu.header();
+        MenuHelper.displayMenu();
+        int option = InputHelper.readInt("\n👉 SELECCIONE UNA OPCIÓN: ");
+        MenuHelper.proccessMenuOption(option);
+        if (option == 1 || option == 2) {
 
-//
-//        System.out.println("=================================");
-//        System.out.println("Hello, Forestech CLI!");
-//        System.out.println("=================================");
-//        System.out.println("Proyecto: " + AppConfig.PROJECT_NAME);
-//        System.out.println("Versión: " + AppConfig.VERSION);
-//        System.out.println("Año: " + AppConfig.CURRENT_YEAR);
-//        System.out.println("Base de datos: " + AppConfig.DATABASE);
-//        System.out.println("Estado: " + (AppConfig.ACTIVE ? "Activo" : "Inactivo"));
-//        System.out.println("=================================");
+            //2. Capturar tipo de combustible:
+            String fuelType = InputHelper.readFuelType();
+            //3. Capturar cantidad:
+            double quantity = InputHelper.readDouble("\n📦 INGRESE LA CANTIDAD DE GALONES: ");
+            //4. Capturar precio:
+            Double unitPrice = InputHelper.readDouble("\n💵 INGRESE PRECIO UNITARIO POR GALÓN: ");
 
-
-
-//        MenuHelper.displayMenu();
-//        int opcioUsuario = 2;
-//        MenuHelper.proccessMenuOption(opcioUsuario);
-//        MenuHelper.validateMovementType("ENTRADA");
-//
-        DataDisplay.showFuelTypes();
-        DataDisplay.showMenuWithForEach(new String[]{"ACPM", "GASOLINA"});
-        DataDisplay.simulateProcessing(5);
-
-
-
-
-
-
-
-
-
+            if (MovementCalculator.isValidMovement(fuelType, quantity, unitPrice)) {
+                System.out.println("\n┌───────────────────────────────────────────────────────────┐");
+                System.out.println("│  ✅ DATOS VÁLIDOS - Procesando movimiento...                │");
+                System.out.println("└─────────────────────────────────────────────────────────────┘");
+                MovementCalculator.printMovementSummary(fuelType, quantity, unitPrice);
 
 
+            } else {
+                System.out.println("\n┌───────────────────────────────────────────────────────────┐");
+                System.out.println("│  ❌ MOVIMIENTO NO VÁLIDO - Verifique los datos              │");
+                System.out.println("└─────────────────────────────────────────────────────────────┘");
 
+            }
 
-
-
-
-
-
-
-
-
+        } else {
+            System.out.println("\n┌───────────────────────────────────────────────────────────┐");
+            System.out.println("│  ⚠️  TIPO DE MOVIMIENTO NO VÁLIDO                           │");
+            System.out.println("└─────────────────────────────────────────────────────────────┘");
+        }
 
 
     }
