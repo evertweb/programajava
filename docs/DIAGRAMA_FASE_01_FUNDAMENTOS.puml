@@ -1,0 +1,172 @@
+@startuml FASE_01_FUNDAMENTOS
+!theme plain
+skinparam backgroundColor #F8F9FA
+skinparam classFontSize 12
+skinparam classAttributeFontSize 11
+skinparam stereotypeCBackgroundColor #E3F2FD
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #2196F3
+
+title 🎓 FASE 1: FUNDAMENTOS - ARQUITECTURA PROCEDURAL\nLo que YA construiste (Programación Estructurada)
+
+package "com.forestech" <<Rectangle>> #E8F5E9 {
+
+    class Main <<Orquestador>> {
+        {static} +main(String[] args) : void
+        --
+        **FLUJO PRINCIPAL:**
+        1. Mostrar banner
+        2. Mostrar menú
+        3. Capturar opción
+        4. Procesar según opción
+        5. Si opción 1 o 2:
+           - Capturar tipo combustible
+           - Capturar cantidad
+           - Capturar precio
+           - Validar movimiento
+           - Mostrar resumen
+    }
+
+    class BannerMenu <<Utilidad>> {
+        {static} +header() : void
+        --
+        **Responsabilidad:**
+        Mostrar encabezado ASCII art
+        del programa
+    }
+
+    class MenuHelper <<Lógica de Menú>> {
+        {static} +displayMenu() : void
+        {static} +proccessMenuOption(int) : void
+        {static} +validateMovementType(String) : void
+        --
+        **Responsabilidad:**
+        - Mostrar opciones del menú
+        - Procesar la opción seleccionada
+        - Validar tipo de movimiento
+    }
+
+    class InputHelper <<Captura de Datos>> {
+        {static} -scanner : Scanner
+        --
+        {static} +readInt(String prompt) : int
+        {static} +readDouble(String prompt) : double
+        {static} +readString(String prompt) : String
+        {static} +readFuelType() : String
+        --
+        **Responsabilidad:**
+        Centralizar toda la captura
+        de entrada del usuario
+    }
+
+    class DataDisplay <<Visualización>> {
+        {static} +showFuelTypes() : void
+        {static} +showMenuWithForEach(String[]) : void
+        {static} +simulateProcessing(int) : void
+        --
+        **Responsabilidad:**
+        Mostrar información formateada
+        al usuario (tablas, listas)
+    }
+
+    class MovementCalculator <<Lógica de Negocio>> {
+        {static} +IVA : double = 0.19
+        {static} +TXTCALCULO : String
+        --
+        {static} +calculateSubtotal(double, double) : double
+        {static} +calculateIVA(double) : double
+        {static} +calculateTotal(double, double) : double
+        {static} +isValidMovement(String, double, double) : boolean
+        {static} +isBigPurchase(double) : boolean
+        {static} +requiresApproval(String, double, double) : boolean
+        {static} +printMovementSummary(String, double, double) : void
+        --
+        **Responsabilidad:**
+        Realizar TODOS los cálculos
+        relacionados con movimientos
+    }
+
+    class AppConfig <<Configuración>> {
+        {static} +APP_NAME : String
+        {static} +VERSION : String
+        {static} +DB_CONNECTION : String
+        --
+        **Responsabilidad:**
+        Almacenar constantes
+        del sistema
+    }
+
+    class Movement <<Clase Vacía>> {
+        +Movement()
+        --
+        **Estado:**
+        Solo constructor vacío
+        (se desarrollará en Fase 2)
+        --
+        ⚠️ NO SE USA AÚN
+    }
+}
+
+' Relaciones de dependencia (Main orquesta todo)
+Main ..> BannerMenu : << usa >>
+Main ..> MenuHelper : << usa >>
+Main ..> InputHelper : << usa >>
+Main ..> MovementCalculator : << usa >>
+
+InputHelper ..> DataDisplay : << usa >>
+MovementCalculator ..> DataDisplay : << podría usar >>
+
+note right of Main
+  **PATRÓN: Programación Procedural**
+
+  ✅ **Ventajas que aprendiste:**
+  - Separación de responsabilidades
+  - Métodos estáticos reutilizables
+  - Código organizado en clases
+
+  ⚠️ **Limitaciones:**
+  - Variables sueltas (no persisten)
+  - No hay "objetos Movement"
+  - Datos y comportamiento separados
+  - Difícil manejar múltiples movimientos
+
+  🎯 **Próximo paso:** POO (Fase 2)
+end note
+
+note bottom of Movement
+  **Clase preparada para Fase 2**
+
+  Por ahora está vacía, pero en
+  la Fase 2 se convertirá en el
+  **corazón del sistema**.
+end note
+
+note top of MovementCalculator
+  **🔄 Esta clase EVOLUCIONARÁ:**
+
+  Fase 1: Métodos estáticos
+  Fase 2: Sus métodos se moverán
+          a la clase Movement
+  Fase 5: Probablemente se elimine
+end note
+
+legend right
+  |<#E3F2FD>| << Orquestador >> | Controla el flujo principal |
+  |<#FFF3E0>| << Lógica de Negocio >> | Cálculos y validaciones |
+  |<#E8F5E9>| << Utilidad >> | Funciones auxiliares |
+  |<#FCE4EC>| << Clase Vacía >> | Preparada para evolucionar |
+
+  **Conceptos Java aplicados:**
+  ✅ Variables primitivas (int, double)
+  ✅ Strings y concatenación
+  ✅ Condicionales (if/else, switch)
+  ✅ Bucles (for, while, for-each)
+  ✅ Arrays
+  ✅ Métodos estáticos
+  ✅ Clases como contenedores de métodos
+  ✅ Scanner para entrada
+  ✅ Validaciones básicas
+end legend
+
+@enduml
+

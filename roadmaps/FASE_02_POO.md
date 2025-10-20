@@ -128,10 +128,10 @@ Movement.java
    - `private double cantidad;` (pero usa el nombre del diagrama)
    
    **Tareas:**
-   - [ ] Declara todos los 6 atributos
-   - [ ] Cada uno en una línea separada
-   - [ ] Todos marcados como `private`
-   - [ ] Tipos correctos (String, double, etc.)
+   - [x] Declara todos los 6 atributos
+   - [x] Cada uno en una línea separada
+   - [x] Todos marcados como `private`
+   - [x] Tipos correctos (String, double, etc.)
    
    **Validación:** Cuando termines, cada atributo debe aparecer una sola vez en la clase.
 

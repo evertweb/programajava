@@ -1,0 +1,143 @@
+@startuml EVOLUCION_FASE1_A_FASE2
+!theme plain
+skinparam backgroundColor #FAFAFA
+skinparam packageStyle rectangle
+
+title 🔄 EVOLUCIÓN DEL PROYECTO: De Programación Procedural a POO\nCómo la Fase 1 se transforma en Fase 2
+
+together {
+  package "🎓 FASE 1: FUNDAMENTOS\n(Lo que YA hiciste)" <<Rectangle>> #FFE0B2 {
+
+    class "Main" as Main1 {
+      Variables sueltas
+      ----
+      String tipo
+      double cantidad
+      double precio
+      double total
+    }
+
+    class "MovementCalculator" as MC1 <<static>> {
+      +calculateSubtotal()
+      +calculateIVA()
+      +calculateTotal()
+      +isValidMovement()
+    }
+
+    note "❌ Problemas:\n- Variables no persisten\n- Difícil manejar varios movimientos\n- Datos separados del comportamiento" as N1
+
+    Main1 -right-> MC1 : llama métodos\nestáticos
+  }
+}
+
+together {
+  package "🚀 FASE 2: POO\n(Lo que VAS a hacer)" <<Rectangle>> #C8E6C9 {
+
+    class "Main" as Main2 {
+      ArrayList<Movement> movements
+      ----
+      Crea objetos Movement
+      Los guarda en la lista
+      Los consulta cuando necesita
+    }
+
+    class "Movement" as Mov2 <<object>> {
+      -id: String
+      -type: String
+      -quantity: double
+      -price: double
+      -total: double
+      ----
+      +Movement(...)
+      +calculateTotal()
+      +isValid()
+      +toString()
+      +getters/setters
+    }
+
+    note "✅ Ventajas:\n- Objetos persisten en memoria\n- Fácil manejar 100+ movimientos\n- Datos y comportamiento juntos" as N2
+
+    Main2 --> "1..*" Mov2 : crea y\ngestiona
+    Mov2 -up-> Mov2 : cada objeto\nse gestiona\na sí mismo
+  }
+}
+
+' Conexión entre fases
+Main1 .down.> Main2 : <size:14><b>EVOLUCIONA A</b></size>\n\n<color:blue>• Misma lógica de negocio\n• Mismos cálculos\n• Misma validación\n\n<color:green>+ Objetos\n+ Persistencia\n+ Reutilización
+
+MC1 .down.> Mov2 : <size:14><b>MÉTODOS SE MUEVEN</b></size>\n\n<color:red>De: métodos static\n<color:green>A: métodos de instancia
+
+note top of Main1
+  **Ejemplo Fase 1:**
+  ```java
+  // Variables sueltas
+  String tipo = "ENTRADA";
+  double qty = 100.0;
+  double precio = 15000.0;
+
+  // Llamada estática
+  double total = MovementCalculator
+    .calculateTotal(qty, precio);
+
+  // Imprimir y olvidar
+  System.out.println(total);
+  // ❌ Datos perdidos después
+  ```
+end note
+
+note top of Main2
+  **Ejemplo Fase 2:**
+  ```java
+  // Crear objeto
+  Movement mov = new Movement(
+    "ENTRADA", "ACPM", 100.0, 15000.0
+  );
+
+  // El objeto se calcula a sí mismo
+  mov.calculateTotal();
+
+  // Guardar para usar después
+  movements.add(mov);
+
+  // ✅ Puedo consultarlo cuando quiera
+  // ✅ Puedo listar todos los movimientos
+  // ✅ Puedo buscar por ID
+  ```
+end note
+
+note bottom
+  **🎯 CONCEPTOS QUE REUTILIZAS DE FASE 1:**
+
+  ✅ **Validaciones:** La lógica de `isValidMovement()` se mantiene
+  ✅ **Cálculos:** Las fórmulas matemáticas son las mismas
+  ✅ **IVA:** Sigue siendo 19%, solo cambia dónde se almacena
+  ✅ **Tipos de combustible:** Misma lista, mismo enum (posiblemente)
+  ✅ **Entrada de usuario:** InputHelper sigue funcionando igual
+
+  **🆕 LO QUE CAMBIA (MEJORA):**
+
+  🔄 **De variables → A atributos de objeto**
+  🔄 **De métodos static → A métodos de instancia**
+  🔄 **De datos temporales → A objetos persistentes**
+  🔄 **De procesar uno → A gestionar múltiples**
+
+  **🧠 APRENDIZAJE:**
+
+  📚 Fase 1: "¿Cómo funciona Java?" → Variables, métodos, clases
+  📚 Fase 2: "¿Cómo se diseña en Java?" → Objetos, encapsulamiento, responsabilidades
+end note
+
+legend center
+  |= Símbolo |= Significado |
+  | <#FFE0B2> | Fase 1 - Programación Procedural |
+  | <#C8E6C9> | Fase 2 - Programación Orientada a Objetos |
+  | .> | Evolución / Transformación |
+  | --> | Relación de uso |
+
+  **Tiempo estimado de transición:** 2-3 sesiones de aprendizaje
+  **Dificultad:** Media (ya tienes las bases de Fase 1)
+  **Recompensa:** Entenderás el VERDADERO poder de Java
+end legend
+
+@enduml
+
