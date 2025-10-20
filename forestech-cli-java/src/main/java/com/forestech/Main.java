@@ -1,55 +1,48 @@
 package com.forestech;
 
-import javax.xml.crypto.Data;
-import java.util.Scanner;
-
+/**
+ * Punto de entrada principal del sistema Forestech CLI.
+ * Orquesta el flujo de trabajo: renderizado UI, captura de datos y procesamiento de movimientos.
+ */
 public class Main {
+    /**
+     * Método main - ejecuta el flujo completo de la aplicación.
+     * @param args argumentos de línea de comandos (no utilizados)
+     */
     public static void main(String[] args) {
-        /*
-        ┌──────────────────┐
-        │    Main.java     │  ← ORQUESTADOR (coordina el flujo)
-        └────────┬─────────┘
-                 │
-                 ├─→ AppConfig.java          (constantes del sistema)
-                 |-->BannerMenu.java              (Encabezado del programa)
-                 ├─→ MovementCalculator.java (lógica de cálculos)
-                 ├─→ MenuHelper.java         (lógica del menú)
-                 ├─→ DataDisplay.java        (visualización de datos)
-                 └─→ InputHelper.java        (captura de inputs)
-         */
+        // Renderizar header y menú principal
         BannerMenu.header();
         MenuHelper.displayMenu();
+        
+        // Capturar selección del usuario (1: ENTRADA, 2: SALIDA)
         int option = InputHelper.readInt("\n👉 SELECCIONE UNA OPCIÓN: ");
         MenuHelper.proccessMenuOption(option);
+        
+        // Validar opción: solo procesar si es ENTRADA (1) o SALIDA (2)
         if (option == 1 || option == 2) {
-
-            //2. Capturar tipo de combustible:
+            // Capturar datos del movimiento: tipo, cantidad y precio
             String fuelType = InputHelper.readFuelType();
-            //3. Capturar cantidad:
             double quantity = InputHelper.readDouble("\n📦 INGRESE LA CANTIDAD DE GALONES: ");
-            //4. Capturar precio:
             Double unitPrice = InputHelper.readDouble("\n💵 INGRESE PRECIO UNITARIO POR GALÓN: ");
 
+            // Validar integridad de los datos ingresados
             if (MovementCalculator.isValidMovement(fuelType, quantity, unitPrice)) {
+                // Datos válidos: mostrar confirmación y resumen del movimiento
                 System.out.println("\n┌───────────────────────────────────────────────────────────┐");
                 System.out.println("│  ✅ DATOS VÁLIDOS - Procesando movimiento...                │");
                 System.out.println("└─────────────────────────────────────────────────────────────┘");
                 MovementCalculator.printMovementSummary(fuelType, quantity, unitPrice);
-
-
             } else {
+                // Datos inválidos: mostrar error
                 System.out.println("\n┌───────────────────────────────────────────────────────────┐");
                 System.out.println("│  ❌ MOVIMIENTO NO VÁLIDO - Verifique los datos              │");
                 System.out.println("└─────────────────────────────────────────────────────────────┘");
-
             }
-
         } else {
+            // Opción inválida: mostrar advertencia
             System.out.println("\n┌───────────────────────────────────────────────────────────┐");
             System.out.println("│  ⚠️  TIPO DE MOVIMIENTO NO VÁLIDO                           │");
             System.out.println("└─────────────────────────────────────────────────────────────┘");
         }
-
-
     }
 }
