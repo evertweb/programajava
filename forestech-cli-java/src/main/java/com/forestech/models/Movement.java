@@ -99,18 +99,18 @@ public class Movement {
     }
 
 
-    public double getTotalvalue() {
+    public double getSubtotalvalue() {
         return this.quantity * this.unitPrice;
 
     }
 
     public double getIva() {
-        return getTotalvalue() * AppConfig.IVA_RATE;
+        return getSubtotalvalue() * AppConfig.IVA_RATE;
 
     }
 
     public double getTotalWithIva() {
-        return getTotalvalue() + getIva();
+        return getSubtotalvalue() + getIva();
     }
 
 
@@ -127,7 +127,7 @@ public class Movement {
                 "│ 📦 Cantidad:     " + quantity + " galones\n" +
                 "│ 💵 Precio Unit:  $" + unitPrice + "\n" +
                 "├─────────────────────────────────────────────────────┤\n" +
-                "│ 💰 Subtotal:     $" + getTotalvalue() + "\n" +
+                "│ 💰 Subtotal:     $" + getSubtotalvalue() + "\n" +
                 "│ 📊 IVA:          $" + getIva() + "\n" +
                 "│ 🏦 TOTAL c/IVA:  $" + getTotalWithIva() + "\n" +
                 "├─────────────────────────────────────────────────────┤\n" +

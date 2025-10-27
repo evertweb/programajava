@@ -1,18 +1,20 @@
-# 🔌 FASE 3: CONEXIÓN A SQL SERVER (Semana 5)
+# 🔌 FASE 3: CONEXIÓN A MYSQL LOCAL (Semana 5)
 
-> Objetivo general: comprender JDBC, conectar Java con SQL Server y ejecutar las primeras consultas.
+> Objetivo general: instalar MySQL en tu PC, comprender JDBC, conectar Java con MySQL y ejecutar las primeras consultas.
 
 ---
 
 ## 🧠 Antes de empezar
 
-- 📚 **Fundamentos SQL:** antes de tocar JDBC, repasa manualmente en SQL Server Management Studio o Azure Data Studio:
+- 💿 **Instalar MySQL:** Primero instalarás MySQL Server en tu computadora local
+- 📚 **Fundamentos SQL:** Practicarás consultas básicas directamente en MySQL:
   - Consultas básicas `SELECT`, `INSERT`, `UPDATE`, `DELETE`
   - Conceptos de tablas, columnas, tipos de datos, PK/FK, normalización ligera
   - Cláusulas `WHERE`, `ORDER BY`, `GROUP BY`
+- 🛠️ **Comandos básicos MySQL:** Aprenderás a crear bases de datos, tablas y gestionar usuarios
 - 📝 Documenta en `JAVA_LEARNING_LOG.md` las consultas manuales que ejecutaste y resultados
 - 🧪 Practica consultas con `FORESTECH` para tener contexto cuando programes
-- 🔁 **Git loop:** al completar cada checkpoint crea un commit con mensaje claro (`git commit -m "fase3 checkpoint 3.1"`).
+- 🔁 **Git loop:** al completar cada checkpoint crea un commit con mensaje claro (`git commit -m "fase3 checkpoint 3.0"`).
 - 🎯 **ORGANIZACIÓN CLARA:** Introduciremos nuevos paquetes (`config`, `services`) para mantener la arquitectura profesional
 - ✍️ **APRENDIZAJE ACTIVO:** Recibirás DIRECTIVAS, no código completo. TÚ escribirás y entenderás cada línea.
 
@@ -41,6 +43,359 @@ com.forestech/
 
 ---
 
+## ✅ Checkpoint 3.0: Instalar MySQL y Crear Base de Datos
+
+**Concepto clave:** MySQL es un sistema de gestión de bases de datos relacional de código abierto. Es una de las bases de datos más populares del mundo y perfecta para aprender.
+
+**📍 DÓNDE:** 
+- **Instalación:** En tu computadora local (Windows)
+- **Herramienta:** MySQL Command Line Client o MySQL Workbench
+- **Base de datos:** FORESTECH (la crearemos)
+
+**🎯 PARA QUÉ:** 
+- ✅ **Tener control total:** Base de datos en tu PC, sin depender de servicios externos
+- ✅ **Aprender sin límites:** Puedes crear, modificar y eliminar sin restricciones
+- ✅ **Velocidad:** Sin latencia de red, todo es instantáneo
+- ✅ **Gratuito:** MySQL Community Edition es totalmente gratis
+- ✅ **Portabilidad:** Fácil de respaldar y restaurar
+
+**🎓 Analogía:**
+- **Base de datos remota (DigitalOcean):** Arrendar un depósito lejos de tu casa
+- **Base de datos local (MySQL):** Tener tu propio depósito en casa (acceso 24/7, sin pagar renta)
+
+**Prompts sugeridos:**
+```text
+"¿Qué diferencia hay entre MySQL Server y MySQL Workbench?"
+"¿Qué es el puerto 3306 y por qué MySQL lo usa?"
+"Explícame qué es un usuario 'root' en MySQL."
+"¿Qué diferencia hay entre MySQL y SQL Server?"
+```
+
+---
+
+### 📥 PASO 1: Descargar e Instalar MySQL
+
+**Tareas:**
+
+1. **Descargar MySQL Community Server:**
+   - Ve a: https://dev.mysql.com/downloads/mysql/
+   - Selecciona: **Windows (x86, 64-bit), MySQL Installer MSI**
+   - Descarga: **mysql-installer-community** (versión más reciente)
+   - Tamaño aproximado: 450 MB
+
+2. **Ejecutar el instalador:**
+   - Doble clic en el archivo descargado
+   - Tipo de instalación: Selecciona **"Developer Default"**
+     - Esto instala: MySQL Server, MySQL Workbench, MySQL Shell, conectores
+   - **Pregunta:** ¿Por qué "Developer Default" y no "Server only"?
+
+3. **Configuración del servidor:**
+   
+   a) **Tipo y red:**
+      - Config Type: **Development Computer**
+      - Port: **3306** (default, déjalo así)
+      - ✅ Marca: "Open Windows Firewall port for network access"
+   
+   b) **Autenticación:**
+      - Método: **Use Strong Password Encryption** (recomendado)
+   
+   c) **Contraseña root:**
+      - Usuario: **root** (viene por defecto)
+      - Password: Elige una contraseña FÁCIL DE RECORDAR
+      - Ejemplo: `root123` o `forestech2025`
+      - ⚠️ **IMPORTANTE:** Anota esta contraseña, la usarás en Java
+   
+   d) **Windows Service:**
+      - ✅ Marca: "Configure MySQL Server as a Windows Service"
+      - Service Name: **MySQL80** (o la versión que instalaste)
+      - ✅ Marca: "Start the MySQL Server at System Startup"
+      - **Pregunta:** ¿Por qué es útil que inicie automáticamente?
+   
+   e) **Aplicar configuración:**
+      - Clic en "Execute" y espera a que termine
+      - Deberías ver ✅ en todos los pasos
+
+4. **Verificar instalación:**
+   
+   **Opción A - Por Command Line:**
+   - Abre CMD (Símbolo del sistema)
+   - Ejecuta:
+     ```
+     mysql --version
+     ```
+   - Resultado esperado: `mysql  Ver 8.x.x for Win64 on x86_64`
+   
+   **Opción B - Por Workbench:**
+   - Abre MySQL Workbench
+   - Deberías ver una conexión "Local instance MySQL80"
+   - Haz clic para conectar
+   - Ingresa tu contraseña root
+
+**✅ Resultado esperado:** 
+- MySQL Server instalado y corriendo
+- Puedes conectarte con usuario root
+- MySQL Workbench instalado y funcional
+
+---
+
+### 🗄️ PASO 2: Conceptos Básicos de MySQL
+
+**Antes de crear la base de datos, entiende estos conceptos:**
+
+**🎓 Jerarquía en MySQL:**
+```
+MySQL Server (el servicio que corre en tu PC)
+│
+├── Base de datos 1: FORESTECH
+│   ├── Tabla: combustibles_products
+│   ├── Tabla: combustibles_movements
+│   └── Tabla: combustibles_vehicles
+│
+├── Base de datos 2: mysql (sistema)
+└── Base de datos 3: sys (sistema)
+```
+
+**🎓 Comandos básicos que aprenderás:**
+
+| Comando | Para qué sirve |
+|---------|----------------|
+| `SHOW DATABASES;` | Ver todas las bases de datos |
+| `CREATE DATABASE nombre;` | Crear una nueva base de datos |
+| `USE nombre;` | Seleccionar una base de datos para trabajar |
+| `SHOW TABLES;` | Ver todas las tablas de la BD actual |
+| `DESCRIBE tabla;` | Ver estructura de una tabla |
+| `SELECT * FROM tabla;` | Ver todos los datos de una tabla |
+
+**Prompts sugeridos:**
+```text
+"¿Qué diferencia hay entre una base de datos y una tabla?"
+"¿Por qué necesito usar USE antes de crear tablas?"
+"¿Qué significa el ; al final de cada comando SQL?"
+```
+
+---
+
+### 🏗️ PASO 3: Crear Base de Datos FORESTECH
+
+**Tareas (TÚ ejecutas cada comando):**
+
+1. **Abrir MySQL Command Line Client:**
+   - Busca en el menú inicio: "MySQL Command Line Client"
+   - O abre CMD y ejecuta: `mysql -u root -p`
+   - Ingresa tu contraseña root
+
+2. **Ver bases de datos existentes:**
+   ```sql
+   SHOW DATABASES;
+   ```
+   - Resultado esperado: Verás mysql, information_schema, performance_schema, sys
+   - **Pregunta:** ¿Qué son estas bases de datos del sistema?
+
+3. **Crear base de datos FORESTECH:**
+   ```sql
+   CREATE DATABASE FORESTECH;
+   ```
+   - Resultado esperado: `Query OK, 1 row affected`
+
+4. **Verificar que se creó:**
+   ```sql
+   SHOW DATABASES;
+   ```
+   - Resultado esperado: Ahora deberías ver FORESTECH en la lista
+
+5. **Seleccionar FORESTECH para trabajar:**
+   ```sql
+   USE FORESTECH;
+   ```
+   - Resultado esperado: `Database changed`
+   - **Pregunta:** ¿Por qué necesito hacer USE?
+
+6. **Verificar que no tiene tablas (está vacía):**
+   ```sql
+   SHOW TABLES;
+   ```
+   - Resultado esperado: `Empty set (0.00 sec)`
+
+**✅ Resultado esperado:** 
+- Base de datos FORESTECH creada
+- Actualmente seleccionada (puedes confirmar con `SELECT DATABASE();`)
+- Sin tablas (las crearemos en el siguiente paso)
+
+---
+
+### 📋 PASO 4: Crear Tabla de Productos
+
+**Concepto clave:** Una tabla es como una hoja de Excel con columnas (campos) y filas (registros).
+
+**Diagrama de la tabla combustibles_products:**
+```
+combustibles_products
+├── id (VARCHAR(10), PRIMARY KEY) - Identificador único
+├── name (VARCHAR(100)) - Nombre del producto
+├── type (VARCHAR(50)) - Tipo (Diesel, Gasolina, etc.)
+└── unit (VARCHAR(20)) - Unidad de medida (litros, galones)
+```
+
+**Tareas (TÚ ejecutas):**
+
+1. **Crear la tabla combustibles_products:**
+   
+   ```sql
+   CREATE TABLE combustibles_products (
+       id VARCHAR(10) PRIMARY KEY,
+       name VARCHAR(100) NOT NULL,
+       type VARCHAR(50) NOT NULL,
+       unit VARCHAR(20) NOT NULL
+   );
+   ```
+   
+   - Resultado esperado: `Query OK, 0 rows affected`
+   - **Pregunta:** ¿Qué significa PRIMARY KEY? ¿Por qué id es PRIMARY KEY?
+   - **Pregunta:** ¿Qué hace NOT NULL?
+
+2. **Verificar estructura de la tabla:**
+   ```sql
+   DESCRIBE combustibles_products;
+   ```
+   
+   - Resultado esperado:
+   ```
+   +-------+--------------+------+-----+---------+-------+
+   | Field | Type         | Null | Key | Default | Extra |
+   +-------+--------------+------+-----+---------+-------+
+   | id    | varchar(10)  | NO   | PRI | NULL    |       |
+   | name  | varchar(100) | NO   |     | NULL    |       |
+   | type  | varchar(50)  | NO   |     | NULL    |       |
+   | unit  | varchar(20)  | NO   |     | NULL    |       |
+   +-------+--------------+------+-----+---------+-------+
+   ```
+
+3. **Insertar datos de prueba:**
+   
+   ```sql
+   INSERT INTO combustibles_products (id, name, type, unit) VALUES
+   ('P001', 'Diesel Regular', 'Diesel', 'litros'),
+   ('P002', 'Gasolina 93', 'Gasolina', 'litros'),
+   ('P003', 'Gasolina 95', 'Gasolina', 'litros');
+   ```
+   
+   - Resultado esperado: `Query OK, 3 rows affected`
+   - **Pregunta:** ¿Por qué van entre comillas simples ' los valores?
+
+4. **Verificar que se insertaron:**
+   ```sql
+   SELECT * FROM combustibles_products;
+   ```
+   
+   - Resultado esperado:
+   ```
+   +------+-----------------+----------+---------+
+   | id   | name            | type     | unit    |
+   +------+-----------------+----------+---------+
+   | P001 | Diesel Regular  | Diesel   | litros  |
+   | P002 | Gasolina 93     | Gasolina | litros  |
+   | P003 | Gasolina 95     | Gasolina | litros  |
+   +------+-----------------+----------+---------+
+   ```
+
+5. **Practicar consultas básicas (TÚ ejecutas cada una):**
+   
+   a) **Filtrar por tipo:**
+   ```sql
+   SELECT * FROM combustibles_products WHERE type = 'Diesel';
+   ```
+   
+   b) **Ordenar por nombre:**
+   ```sql
+   SELECT * FROM combustibles_products ORDER BY name;
+   ```
+   
+   c) **Contar productos:**
+   ```sql
+   SELECT COUNT(*) FROM combustibles_products;
+   ```
+   
+   d) **Actualizar un producto:**
+   ```sql
+   UPDATE combustibles_products SET unit = 'galones' WHERE id = 'P001';
+   SELECT * FROM combustibles_products WHERE id = 'P001';
+   ```
+   
+   e) **Volver a litros:**
+   ```sql
+   UPDATE combustibles_products SET unit = 'litros' WHERE id = 'P001';
+   ```
+   
+   **Pregunta:** ¿Qué pasaría si olvidas el WHERE en un UPDATE?
+
+**✅ Resultado esperado:** 
+- Tabla combustibles_products creada con 4 columnas
+- 3 productos de prueba insertados
+- Entiendes las consultas básicas SELECT, INSERT, UPDATE
+- Estás listo para conectar desde Java
+
+---
+
+### 🛠️ PASO 5: Comandos Útiles para el Día a Día
+
+**Guarda estos comandos, los usarás constantemente:**
+
+**Ver qué base de datos estás usando:**
+```sql
+SELECT DATABASE();
+```
+
+**Cambiar a otra base de datos:**
+```sql
+USE nombre_base_datos;
+```
+
+**Ver todas las tablas:**
+```sql
+SHOW TABLES;
+```
+
+**Ver estructura de tabla:**
+```sql
+DESCRIBE nombre_tabla;
+```
+
+**Eliminar todos los datos de tabla (¡CUIDADO!):**
+```sql
+DELETE FROM nombre_tabla;
+```
+
+**Eliminar tabla completa (¡CUIDADO!):**
+```sql
+DROP TABLE nombre_tabla;
+```
+
+**Eliminar base de datos (¡MUCHO CUIDADO!):**
+```sql
+DROP DATABASE nombre_base_datos;
+```
+
+**Salir de MySQL:**
+```sql
+EXIT;
+```
+o
+```sql
+QUIT;
+```
+
+---
+
+### 💡 Conceptos Clave de MySQL
+
+**🎓 Tipos de datos más comunes:**
+
+| Tipo SQL | Para qué sirve | Ejemplo |
+|----------|----------------|---------|
+| `INT` | Números enteros | 42, -10, 0 |
+| `DOUBLE` | Números decimales | 3.14, -0.5 |
+| `VARCHAR(n)` | Texto corto (máx n caracteres) | "Diesel", "Juan" |
+| `TEXT` | Texto largo | Descripciones, comentarios |
 ## 🎯 ESTRUCTURA AL TERMINAR FASE 3
 
 Al finalizar esta fase tendrás:
@@ -1139,11 +1494,11 @@ pstmt.setDouble(2, 3.0);         // Configura segundo ?
 pstmt.setString(1, "texto");     // Para VARCHAR, TEXT
 pstmt.setInt(2, 100);            // Para INT
 pstmt.setDouble(3, 3.45);        // Para DECIMAL, FLOAT, DOUBLE
-pstmt.setBoolean(4, true);       // Para BIT, BOOLEAN
+pstmt.setBoolean(4, true);       // Para BOOLEAN, TINYINT(1)
 pstmt.setDate(5, sqlDate);       // Para DATE
 pstmt.setTimestamp(6, timestamp);// Para DATETIME, TIMESTAMP
 
-// IMPORTANTE: El tipo en Java debe coincidir con el tipo en SQL Server
+// IMPORTANTE: El tipo en Java debe coincidir con el tipo en MySQL
 ```
 
 **⚠️ CUIDADOS:**
