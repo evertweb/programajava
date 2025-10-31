@@ -8,13 +8,16 @@ public class Vehicle {
     private String category;
     private double capacity;
     private String fuelType;
+    private  boolean haveHorometer;
 
-    public Vehicle(String name, String category, double capacity, String fuelType) {
+    public Vehicle(String name, String category, double capacity, String fuelType, boolean haveHorometer) {
         this.id = IdGenerator.generateVehicleId();
         this.name = name;
         this.category = category;
         this.capacity = capacity;
         this.fuelType = fuelType;
+        this.haveHorometer = haveHorometer;
+
 
     }
 
@@ -53,6 +56,14 @@ public class Vehicle {
 
     public void setCapacity(double capacity) {
         this.capacity = capacity;
+    }
+
+    public boolean isHaveHorometer() {
+        return haveHorometer;
+    }
+
+    public void setHaveHorometer(boolean haveHorometer) {
+        this.haveHorometer = haveHorometer;
     }
 
     @Override

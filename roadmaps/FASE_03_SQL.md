@@ -1,12 +1,12 @@
-# 🔌 FASE 3: CONEXIÓN A MYSQL LOCAL (Semana 5)
+# 🔌 FASE 3: CONEXIÓN A MYSQL LOCAL EN WSL (Semana 5)
 
-> Objetivo general: instalar MySQL en tu PC, comprender JDBC, conectar Java con MySQL y ejecutar las primeras consultas.
+> Objetivo general: instalar MySQL en tu entorno WSL (Ubuntu), comprender JDBC, conectar Java con MySQL y ejecutar las primeras consultas.
 
 ---
 
 ## 🧠 Antes de empezar
 
-- 💿 **Instalar MySQL:** Primero instalarás MySQL Server en tu computadora local
+- 💿 **Instalar MySQL en WSL:** Instalarás MySQL Server en tu Ubuntu dentro de WSL
 - 📚 **Fundamentos SQL:** Practicarás consultas básicas directamente en MySQL:
   - Consultas básicas `SELECT`, `INSERT`, `UPDATE`, `DELETE`
   - Conceptos de tablas, columnas, tipos de datos, PK/FK, normalización ligera
@@ -17,6 +17,132 @@
 - 🔁 **Git loop:** al completar cada checkpoint crea un commit con mensaje claro (`git commit -m "fase3 checkpoint 3.0"`).
 - 🎯 **ORGANIZACIÓN CLARA:** Introduciremos nuevos paquetes (`config`, `services`) para mantener la arquitectura profesional
 - ✍️ **APRENDIZAJE ACTIVO:** Recibirás DIRECTIVAS, no código completo. TÚ escribirás y entenderás cada línea.
+
+---
+
+## ⚡ IMPORTANTE: Estrategia de Bases de Datos en Forestech
+
+### 🎯 **DOS BASES DE DATOS, DOS FASES**
+
+En este proyecto usarás **DOS bases de datos diferentes** en momentos distintos:
+
+```
+┌───────────────────────────────────────────────────┐
+│ 🎓 FASE 3-5: APRENDIZAJE                          │
+│                                                   │
+│ Base de datos: MySQL                             │
+│ Ubicación: WSL (localhost)                       │
+│ Puerto: 3306                                     │
+│                                                   │
+│ ✅ Gratis (100%)                                  │
+│ ✅ Local (sin internet)                           │
+│ ✅ Control total                                  │
+│ ✅ Experimentos sin miedo                         │
+│ ✅ Velocidad máxima                               │
+└───────────────────────────────────────────────────┘
+                        ↓
+          (Al terminar Fase 5: CRUD completo)
+                        ↓
+┌───────────────────────────────────────────────────┐
+│ 🚀 FASE 6+: PRODUCCIÓN                            │
+│                                                   │
+│ Base de datos: SQL Server                        │
+│ Ubicación: DigitalOcean (remoto)                 │
+│ Host: 24.199.89.134                              │
+│ Puerto: 1433                                     │
+│                                                   │
+│ ✅ Acceso desde cualquier lugar                   │
+│ ✅ Datos persistentes en la nube                  │
+│ ✅ Base de datos profesional                      │
+│ ✅ Proyecto "real" y escalable                    │
+└───────────────────────────────────────────────────┘
+```
+
+### 🤔 **¿Por qué empezar con MySQL y no directo con SQL Server?**
+
+**Razones pedagógicas:**
+
+1. **Instalación más simple:**
+   - MySQL en WSL: `sudo apt install mysql-server` → Listo en 2 minutos
+   - SQL Server en Windows: Descarga pesada (varios GB), configuración compleja
+
+2. **Sin costos ni dependencias:**
+   - MySQL: Gratis, funciona offline
+   - SQL Server remoto: Requiere internet, eventual costo de servidor
+
+3. **Ambiente de práctica seguro:**
+   - Puedes borrar, recrear, experimentar sin consecuencias
+   - No afectas datos "reales" en producción
+
+4. **Sintaxis SQL 95% idéntica:**
+   - Lo que aprendas en MySQL funciona en SQL Server
+   - Solo cambiarán detalles menores (tipos de datos específicos)
+
+5. **Migración sencilla:**
+   - Solo cambiarás `DatabaseConnection.java` (URL, driver, credenciales)
+   - El resto del código será IDÉNTICO
+
+### 🎓 **Analogía:**
+
+```
+MySQL en WSL (Fase 3-5):
+→ Cuaderno de práctica donde haces borradores
+→ Cometes errores, tachas, corriges
+→ Nadie lo ve, es TU espacio de aprendizaje
+
+SQL Server remoto (Fase 6+):
+→ Cuaderno oficial donde presentas el trabajo final
+→ Datos organizados, persistentes, accesibles
+→ Tu proyecto "en producción"
+```
+
+### 📋 **Guía de Migración (Fase 6)**
+
+Cuando llegue el momento, la migración será sencilla:
+
+**Cambio 1: Driver JDBC en pom.xml**
+```xml
+<!-- De: -->
+<dependency>
+    <groupId>com.mysql</groupId>
+    <artifactId>mysql-connector-j</artifactId>
+</dependency>
+
+<!-- A: -->
+<dependency>
+    <groupId>com.microsoft.sqlserver</groupId>
+    <artifactId>mssql-jdbc</artifactId>
+</dependency>
+```
+
+**Cambio 2: DatabaseConnection.java**
+```java
+// De:
+private static final String URL = "jdbc:mysql://localhost:3306/FORESTECH";
+
+// A:
+private static final String URL = "jdbc:sqlserver://24.199.89.134:1433;databaseName=DBforestech";
+```
+
+**¡Eso es todo!** El resto del código (Services, Models, Managers) NO cambia.
+
+### ⚠️ **IMPORTANTE para Fase 3:**
+
+**En esta Fase 3 trabajarás EXCLUSIVAMENTE con MySQL local.**
+
+Si ves alguna referencia a:
+- SQL Server
+- DigitalOcean
+- Puerto 1433
+- SQL Server Management Studio
+
+→ **IGNÓRALA por ahora.** Son notas para el futuro.
+
+**Tu enfoque:**
+1. Instalar MySQL en WSL ✅
+2. Conectar Java con MySQL ✅
+3. Dominar JDBC con queries básicas ✅
+4. Prepararte para Fase 4 (CRUD) ✅
 
 ---
 
@@ -43,108 +169,148 @@ com.forestech/
 
 ---
 
-## ✅ Checkpoint 3.0: Instalar MySQL y Crear Base de Datos
+## ✅ Checkpoint 3.0: Instalar MySQL en WSL y Crear Base de Datos
 
 **Concepto clave:** MySQL es un sistema de gestión de bases de datos relacional de código abierto. Es una de las bases de datos más populares del mundo y perfecta para aprender.
 
 **📍 DÓNDE:** 
-- **Instalación:** En tu computadora local (Windows)
-- **Herramienta:** MySQL Command Line Client o MySQL Workbench
+- **Instalación:** En tu entorno WSL (Ubuntu)
+- **Herramienta:** MySQL Command Line Client
 - **Base de datos:** FORESTECH (la crearemos)
 
 **🎯 PARA QUÉ:** 
-- ✅ **Tener control total:** Base de datos en tu PC, sin depender de servicios externos
+- ✅ **Tener control total:** Base de datos en tu entorno local, sin depender de servicios externos
 - ✅ **Aprender sin límites:** Puedes crear, modificar y eliminar sin restricciones
 - ✅ **Velocidad:** Sin latencia de red, todo es instantáneo
 - ✅ **Gratuito:** MySQL Community Edition es totalmente gratis
 - ✅ **Portabilidad:** Fácil de respaldar y restaurar
+- ✅ **Integración con WSL:** Todo tu proyecto en un mismo entorno
 
 **🎓 Analogía:**
 - **Base de datos remota (DigitalOcean):** Arrendar un depósito lejos de tu casa
-- **Base de datos local (MySQL):** Tener tu propio depósito en casa (acceso 24/7, sin pagar renta)
+- **Base de datos local en WSL:** Tener tu propio depósito en casa (acceso 24/7, sin pagar renta)
 
 **Prompts sugeridos:**
 ```text
-"¿Qué diferencia hay entre MySQL Server y MySQL Workbench?"
+"¿Qué diferencia hay entre instalar MySQL en Windows vs WSL?"
 "¿Qué es el puerto 3306 y por qué MySQL lo usa?"
 "Explícame qué es un usuario 'root' en MySQL."
-"¿Qué diferencia hay entre MySQL y SQL Server?"
+"¿Puedo acceder a MySQL de WSL desde Windows?"
 ```
 
 ---
 
-### 📥 PASO 1: Descargar e Instalar MySQL
+### 📥 PASO 1: Instalar MySQL en WSL (Ubuntu)
 
 **Tareas:**
 
-1. **Descargar MySQL Community Server:**
-   - Ve a: https://dev.mysql.com/downloads/mysql/
-   - Selecciona: **Windows (x86, 64-bit), MySQL Installer MSI**
-   - Descarga: **mysql-installer-community** (versión más reciente)
-   - Tamaño aproximado: 450 MB
+1. **Abrir terminal de Ubuntu (WSL):**
+   - Abre Windows Terminal
+   - Selecciona la pestaña de Ubuntu (o abre "Ubuntu" desde el menú inicio)
 
-2. **Ejecutar el instalador:**
-   - Doble clic en el archivo descargado
-   - Tipo de instalación: Selecciona **"Developer Default"**
-     - Esto instala: MySQL Server, MySQL Workbench, MySQL Shell, conectores
-   - **Pregunta:** ¿Por qué "Developer Default" y no "Server only"?
+2. **Actualizar repositorios de paquetes:**
+   ```bash
+   sudo apt update
+   ```
+   - Esto actualiza la lista de paquetes disponibles
+   - **Pregunta:** ¿Por qué es importante actualizar antes de instalar?
 
-3. **Configuración del servidor:**
-   
-   a) **Tipo y red:**
-      - Config Type: **Development Computer**
-      - Port: **3306** (default, déjalo así)
-      - ✅ Marca: "Open Windows Firewall port for network access"
-   
-   b) **Autenticación:**
-      - Método: **Use Strong Password Encryption** (recomendado)
-   
-   c) **Contraseña root:**
-      - Usuario: **root** (viene por defecto)
-      - Password: Elige una contraseña FÁCIL DE RECORDAR
-      - Ejemplo: `root123` o `forestech2025`
-      - ⚠️ **IMPORTANTE:** Anota esta contraseña, la usarás en Java
-   
-   d) **Windows Service:**
-      - ✅ Marca: "Configure MySQL Server as a Windows Service"
-      - Service Name: **MySQL80** (o la versión que instalaste)
-      - ✅ Marca: "Start the MySQL Server at System Startup"
-      - **Pregunta:** ¿Por qué es útil que inicie automáticamente?
-   
-   e) **Aplicar configuración:**
-      - Clic en "Execute" y espera a que termine
-      - Deberías ver ✅ en todos los pasos
+3. **Instalar MySQL Server:**
+   ```bash
+   sudo apt install mysql-server -y
+   ```
+   - Esto instalará MySQL Server y sus dependencias
+   - Tamaño aproximado de descarga: ~30-40 MB
+   - **Pregunta:** ¿Qué significa `sudo` y por qué es necesario?
 
-4. **Verificar instalación:**
-   
-   **Opción A - Por Command Line:**
-   - Abre CMD (Símbolo del sistema)
-   - Ejecuta:
-     ```
-     mysql --version
-     ```
-   - Resultado esperado: `mysql  Ver 8.x.x for Win64 on x86_64`
-   
-   **Opción B - Por Workbench:**
-   - Abre MySQL Workbench
-   - Deberías ver una conexión "Local instance MySQL80"
-   - Haz clic para conectar
-   - Ingresa tu contraseña root
+4. **Verificar que MySQL se instaló correctamente:**
+   ```bash
+   mysql --version
+   ```
+   - Resultado esperado: `mysql  Ver 8.0.xx for Linux on x86_64`
+   - Si ves la versión, ¡la instalación fue exitosa!
+
+5. **Iniciar el servicio MySQL:**
+   ```bash
+   sudo service mysql start
+   ```
+   - Resultado esperado: `* Starting MySQL database server mysqld`
+   - **Pregunta:** ¿Qué es un "servicio" en Linux?
+
+6. **Verificar que el servicio está corriendo:**
+   ```bash
+   sudo service mysql status
+   ```
+   - Deberías ver algo como: `* MySQL is running`
+   - Si ves "stopped", ejecuta de nuevo: `sudo service mysql start`
 
 **✅ Resultado esperado:** 
-- MySQL Server instalado y corriendo
-- Puedes conectarte con usuario root
-- MySQL Workbench instalado y funcional
+- MySQL Server instalado en WSL
+- Servicio MySQL corriendo
+- Comando `mysql` disponible en terminal
 
 ---
 
-### 🗄️ PASO 2: Conceptos Básicos de MySQL
+### 🔐 PASO 2: Configurar Seguridad de MySQL
+
+**Concepto clave:** Por defecto, MySQL en Ubuntu viene con configuración básica. Necesitamos configurar el usuario root con contraseña.
+
+**Tareas:**
+
+1. **Acceder a MySQL como root (sin contraseña inicial):**
+   ```bash
+   sudo mysql
+   ```
+   - Esto te conecta a MySQL usando autenticación del sistema
+   - Deberías ver el prompt: `mysql>`
+
+2. **Establecer contraseña para el usuario root:**
+   ```sql
+   ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'tu_contraseña';
+   ```
+   - **Reemplaza `tu_contraseña`** por una contraseña FÁCIL DE RECORDAR
+   - Ejemplo: `'root123'` o `'forestech2025'`
+   - ⚠️ **IMPORTANTE:** Anota esta contraseña, la usarás en Java
+   - Resultado esperado: `Query OK, 0 rows affected`
+
+3. **Aplicar los cambios:**
+   ```sql
+   FLUSH PRIVILEGES;
+   ```
+   - Esto recarga los permisos de usuarios
+   - Resultado esperado: `Query OK, 0 rows affected`
+
+4. **Salir de MySQL:**
+   ```sql
+   EXIT;
+   ```
+   - O presiona `Ctrl + D`
+
+5. **Probar nueva autenticación:**
+   ```bash
+   mysql -u root -p
+   ```
+   - Te pedirá la contraseña que estableciste
+   - Ingresa tu contraseña
+   - Si entras correctamente, ¡funcionó!
+   - Sal de nuevo con `EXIT;`
+
+**✅ Resultado esperado:** 
+- Usuario root configurado con contraseña
+- Puedes conectarte con: `mysql -u root -p`
+
+**🎓 Nota sobre WSL:**
+- A diferencia de Windows, en WSL no hay "Windows Service" automático
+- Cada vez que reinicies WSL, necesitarás iniciar MySQL con: `sudo service mysql start`
+- **Tip:** Puedes agregar este comando a tu `~/.bashrc` para que se inicie automáticamente
+
+### 🗄️ PASO 3: Conceptos Básicos de MySQL
 
 **Antes de crear la base de datos, entiende estos conceptos:**
 
 **🎓 Jerarquía en MySQL:**
 ```
-MySQL Server (el servicio que corre en tu PC)
+MySQL Server (el servicio que corre en WSL)
 │
 ├── Base de datos 1: FORESTECH
 │   ├── Tabla: combustibles_products
@@ -175,14 +341,16 @@ MySQL Server (el servicio que corre en tu PC)
 
 ---
 
-### 🏗️ PASO 3: Crear Base de Datos FORESTECH
+### 🏗️ PASO 4: Crear Base de Datos FORESTECH
 
 **Tareas (TÚ ejecutas cada comando):**
 
-1. **Abrir MySQL Command Line Client:**
-   - Busca en el menú inicio: "MySQL Command Line Client"
-   - O abre CMD y ejecuta: `mysql -u root -p`
-   - Ingresa tu contraseña root
+1. **Abrir MySQL desde terminal WSL:**
+   ```bash
+   mysql -u root -p
+   ```
+   - Ingresa tu contraseña cuando te la pida
+   - Deberías ver el prompt: `mysql>`
 
 2. **Ver bases de datos existentes:**
    ```sql
@@ -223,7 +391,7 @@ MySQL Server (el servicio que corre en tu PC)
 
 ---
 
-### 📋 PASO 4: Crear Tabla de Productos
+### 📋 PASO 5: Crear Tabla de Productos
 
 **Concepto clave:** Una tabla es como una hoja de Excel con columnas (campos) y filas (registros).
 
@@ -388,14 +556,499 @@ QUIT;
 
 ### 💡 Conceptos Clave de MySQL
 
-**🎓 Tipos de datos más comunes:**
+**🎓 Tipos de datos SQL - Guía Completa**
 
-| Tipo SQL | Para qué sirve | Ejemplo |
-|----------|----------------|---------|
-| `INT` | Números enteros | 42, -10, 0 |
-| `DOUBLE` | Números decimales | 3.14, -0.5 |
-| `VARCHAR(n)` | Texto corto (máx n caracteres) | "Diesel", "Juan" |
-| `TEXT` | Texto largo | Descripciones, comentarios |
+**Analogía:** Los tipos de datos son como **contenedores específicos** para diferentes cosas:
+- No guardarías agua en una caja de cartón (necesitas una botella)
+- No guardarías un libro en un vaso (necesitas un estante)
+- Cada dato necesita el "contenedor" correcto en la base de datos
+
+**Tabla completa de tipos de datos:**
+
+| Tipo SQL | Para qué sirve | Tamaño/Límite | Ejemplo en Java | Ejemplo de uso en Forestech |
+|----------|----------------|---------------|-----------------|------------------------------|
+| **TIPOS NUMÉRICOS** |||||
+| `INT` | Números enteros | -2,147,483,648 a 2,147,483,647 | `int` | Cantidad de productos: 100 |
+| `BIGINT` | Números enteros grandes | Hasta 19 dígitos | `long` | ID de transacción: 9223372036854775807 |
+| `DOUBLE` | Números decimales | Hasta 15 decimales | `double` | Cantidad litros: 150.75 |
+| `DECIMAL(p,s)` | Números decimales exactos | p=total dígitos, s=decimales | `BigDecimal` | Dinero: DECIMAL(10,2) → 99999999.99 |
+| **TIPOS DE TEXTO** |||||
+| `VARCHAR(n)` | Texto variable hasta n caracteres | 1 a 65,535 caracteres | `String` | Nombre producto: VARCHAR(100) → "Diesel Regular" |
+| `CHAR(n)` | Texto fijo de n caracteres | Siempre ocupa n caracteres | `String` | Código país: CHAR(2) → "CL" |
+| `TEXT` | Texto largo | Hasta 65,535 caracteres | `String` | Descripción extensa, comentarios |
+| **TIPOS DE FECHA/HORA** |||||
+| `DATE` | Solo fecha | YYYY-MM-DD | `LocalDate` | Fecha: 2025-01-15 |
+| `DATETIME` | Fecha y hora | YYYY-MM-DD HH:MM:SS | `LocalDateTime` | Movimiento: 2025-01-15 14:30:00 |
+| `TIMESTAMP` | Marca de tiempo | Se actualiza automáticamente | `Timestamp` | Última modificación registrada |
+| **TIPOS BOOLEANOS** |||||
+| `BOOLEAN` | Verdadero/Falso | 0 (false) o 1 (true) | `boolean` | Activo: TRUE/FALSE |
+
+**🎯 REGLAS para elegir el tipo correcto:**
+
+**1. Para IDs únicos:**
+- ¿Usas formato texto como "MOV-12345"? → `VARCHAR(20)`
+- ¿Usas números secuenciales (1, 2, 3...)? → `INT` con AUTO_INCREMENT
+- ¿Usas UUIDs largos? → `VARCHAR(36)`
+
+**2. Para nombres y descripciones:**
+- ¿Texto corto conocido (nombre producto, tipo)? → `VARCHAR(100)`
+- ¿Texto largo o desconocido (comentarios, observaciones)? → `TEXT`
+- ¿Texto de longitud fija (códigos ISO, placas)? → `CHAR(n)`
+
+**3. Para cantidades:**
+- ¿Números enteros (cantidad productos, unidades)? → `INT`
+- ¿Números con decimales (litros, kilogramos)? → `DOUBLE`
+- ¿Números que pueden ser negativos? → Usa INT o DOUBLE (permiten negativos)
+
+**4. Para dinero (¡MUY IMPORTANTE!):**
+- ⚠️ **NUNCA uses DOUBLE para dinero** (tiene errores de redondeo)
+- ✅ **SIEMPRE usa DECIMAL(10,2)** (exacto, sin errores de redondeo)
+- Ejemplo: precio total = 1234.56 → DECIMAL(10,2)
+
+**5. Para fechas:**
+- ¿Solo necesitas la fecha? → `DATE`
+- ¿Necesitas fecha Y hora específica? → `DATETIME`
+- ¿Quieres registrar automáticamente modificaciones? → `TIMESTAMP`
+
+**Ejemplo práctico: Tabla combustibles_movements**
+
+```sql
+CREATE TABLE combustibles_movements (
+    -- ID único del movimiento (formato: "MOV-XXXXXXXX")
+    id VARCHAR(20) PRIMARY KEY,
+
+    -- Tipo de movimiento (solo "ENTRADA" o "SALIDA")
+    movement_type VARCHAR(10) NOT NULL,
+
+    -- Cantidad en litros (puede tener decimales: 150.75)
+    quantity DOUBLE NOT NULL,
+
+    -- Precio por litro (¡DINERO! Usa DECIMAL para exactitud)
+    price_per_unit DECIMAL(10,2) NOT NULL,
+
+    -- Total del movimiento (cantidad × precio)
+    total_amount DECIMAL(12,2) NOT NULL,
+
+    -- Fecha y hora exacta del movimiento
+    movement_date DATETIME DEFAULT NOW(),
+
+    -- ID del vehículo relacionado
+    vehicle_id VARCHAR(20),
+
+    -- ¿Está activo este registro?
+    is_active BOOLEAN DEFAULT TRUE
+);
+```
+
+**🎓 Explicación detallada:**
+
+**¿Por qué VARCHAR(20) para el ID?**
+- Porque usamos formato: "MOV-12345678" (texto, no número)
+- Si usáramos INT, no podríamos tener el prefijo "MOV-"
+- VARCHAR(20) permite hasta 20 caracteres (tenemos espacio de sobra)
+
+**¿Por qué DOUBLE para quantity?**
+- Porque los litros pueden tener decimales: 150.75 litros
+- INT solo permite enteros (150, 151, 152...) → perdemos precisión
+
+**¿Por qué DECIMAL para precios?**
+- Ejemplo con DOUBLE (INCORRECTO):
+  ```
+  3.10 + 0.05 = 3.1499999999999 ❌ (error de redondeo)
+  ```
+- Ejemplo con DECIMAL (CORRECTO):
+  ```
+  3.10 + 0.05 = 3.15 ✅ (exacto)
+  ```
+
+**¿Por qué DATETIME y no DATE?**
+- Porque queremos saber la hora exacta del movimiento
+- DATE solo guarda: 2025-01-15
+- DATETIME guarda: 2025-01-15 14:30:00
+
+**¿Por qué BOOLEAN para is_active?**
+- Más claro que INT (TRUE/FALSE vs 0/1)
+- Ocupa menos espacio (1 byte)
+- Se lee mejor en las queries: `WHERE is_active = TRUE`
+
+**🔍 Comparación: Tipos de datos en acción**
+
+```sql
+-- ❌ INCORRECTO
+CREATE TABLE products (
+    id INT,                    -- ❌ No podemos usar "P001"
+    name CHAR(10),             -- ❌ "Diesel Regular" tiene 14 caracteres
+    price DOUBLE,              -- ❌ Errores de redondeo con dinero
+    created_date VARCHAR(50)   -- ❌ No puedes hacer cálculos con texto
+);
+
+-- ✅ CORRECTO
+CREATE TABLE products (
+    id VARCHAR(10),            -- ✅ Permite "P001", "P002"...
+    name VARCHAR(100),         -- ✅ Suficiente espacio para nombres largos
+    price DECIMAL(10,2),       -- ✅ Exacto para dinero
+    created_date DATETIME      -- ✅ Tipo correcto para fechas
+);
+```
+
+**⚠️ Errores comunes al elegir tipos:**
+
+| Error | Consecuencia | Solución |
+|-------|--------------|----------|
+| Usar VARCHAR muy corto (ej: VARCHAR(10) para nombres) | Datos se truncan: "Christopher" → "Christophe" | Usa VARCHAR(100) para nombres |
+| Usar INT para IDs alfanuméricos | No puedes guardar "MOV-001" | Usa VARCHAR(20) |
+| Usar DOUBLE para dinero | 10.10 + 0.05 = 10.149999 (error) | Usa DECIMAL(10,2) |
+| Usar TEXT para todo | Consumo excesivo de memoria | Usa VARCHAR(n) si conoces el tamaño |
+| Olvidar decimales en cantidad | 150.75 litros → 150 litros (pierdes 0.75) | Usa DOUBLE para cantidades con decimales |
+
+**Pregunta para reflexionar:**
+¿Qué pasaría si usas VARCHAR(5) para guardar un ID con formato "MOV-12345678"? (Pista: cuenta los caracteres)
+
+---
+
+### 📚 Fundamentos SQL que DEBES Entender
+
+**Antes de conectar Java con MySQL, domina estos conceptos fundamentales:**
+
+---
+
+#### 1️⃣ ¿Qué es una Base de Datos Relacional?
+
+**🎓 Analogía: Una biblioteca organizada**
+
+```
+Base de Datos = La biblioteca completa
+│
+├── Tablas = Estantes diferentes (ficción, ciencia, historia)
+│   │
+│   ├── Filas (registros) = Libros individuales en el estante
+│   │
+│   └── Columnas (campos) = Datos de cada libro (título, autor, año)
+│
+└── Relaciones = Referencias entre estantes ("ver también...")
+```
+
+**Ejemplo con Forestech:**
+
+```
+Base de Datos: FORESTECH
+│
+├── Tabla: combustibles_products (Estante de productos)
+│   ├── Fila 1: [P001, Diesel Regular, Diesel, litros]
+│   ├── Fila 2: [P002, Gasolina 93, Gasolina, litros]
+│   └── Columnas: id, name, type, unit
+│
+├── Tabla: combustibles_movements (Estante de movimientos)
+│   ├── Fila 1: [MOV-001, ENTRADA, 100.5, P001, ...]
+│   ├── Fila 2: [MOV-002, SALIDA, 50.0, P002, ...]
+│   └── Columnas: id, type, quantity, product_id, ...
+│
+└── Tabla: combustibles_vehicles (Estante de vehículos)
+    ├── Fila 1: [VEH-001, Camión Volvo, ABC-123, ...]
+    └── Columnas: id, model, plate, ...
+```
+
+**¿Por qué "relacional"?**
+- Las tablas se **relacionan** entre sí mediante IDs
+- Un movimiento tiene un `product_id` que apunta a un producto específico
+- Un movimiento tiene un `vehicle_id` que apunta a un vehículo específico
+
+---
+
+#### 2️⃣ PRIMARY KEY (Llave Primaria)
+
+**¿Qué es?** Un campo que identifica de forma **ÚNICA** cada fila de la tabla.
+
+**🎓 Analogía:**
+```
+PRIMARY KEY = Cédula de identidad de una persona
+- No puede haber dos personas con la misma cédula
+- No puede estar vacía (todos tienen cédula)
+- Sirve para identificar a alguien sin ambigüedad
+```
+
+**Ejemplo visual:**
+
+```
+Tabla: combustibles_products
+
+┌──────────┬──────────────────┬──────────┬────────┐
+│ id (PK)  │ name             │ type     │ unit   │
+├──────────┼──────────────────┼──────────┼────────┤
+│ P001     │ Diesel Regular   │ Diesel   │ litros │ ← Esta fila es única por P001
+│ P002     │ Gasolina 93      │ Gasolina │ litros │ ← Esta fila es única por P002
+│ P003     │ Gasolina 95      │ Gasolina │ litros │ ← Esta fila es única por P003
+└──────────┴──────────────────┴──────────┴────────┘
+         ↑
+    PRIMARY KEY
+```
+
+**Sintaxis SQL:**
+
+```sql
+CREATE TABLE combustibles_products (
+    id VARCHAR(10) PRIMARY KEY,  -- ← Esto define la PK
+    name VARCHAR(100) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    unit VARCHAR(20) NOT NULL
+);
+```
+
+**Reglas de PRIMARY KEY:**
+- ✅ Debe ser **ÚNICA** (no puede haber duplicados)
+- ✅ **NO puede ser NULL** (obligatoria)
+- ✅ Solo puede haber **UNA** primary key por tabla
+- ✅ Generalmente es el campo `id`
+- ✅ Se usa para identificar filas sin ambigüedad
+
+**❌ Intentos inválidos:**
+
+```sql
+-- ❌ Intento 1: Insertar ID duplicado
+INSERT INTO combustibles_products VALUES ('P001', 'Diesel', 'Diesel', 'litros');
+INSERT INTO combustibles_products VALUES ('P001', 'Otro', 'Otro', 'litros');
+-- ERROR: Duplicate entry 'P001' for key 'PRIMARY'
+
+-- ❌ Intento 2: Insertar ID NULL
+INSERT INTO combustibles_products VALUES (NULL, 'Diesel', 'Diesel', 'litros');
+-- ERROR: Column 'id' cannot be null
+```
+
+**Pregunta:** ¿Por qué en Forestech usamos VARCHAR(10) para el ID y no INT?
+
+---
+
+#### 3️⃣ FOREIGN KEY (Llave Foránea)
+
+**¿Qué es?** Un campo que **referencia** la PRIMARY KEY de **OTRA** tabla.
+
+**🎓 Analogía:**
+```
+FOREIGN KEY = Referencia en un libro a otro libro
+- "Ver también: Libro en estante C, posición 5"
+- Crea una conexión entre dos datos relacionados
+```
+
+**Ejemplo visual:**
+
+```
+Tabla: combustibles_products          Tabla: combustibles_movements
+┌──────────┬─────────────┐            ┌────────────┬────────────┬────────────┐
+│ id (PK)  │ name        │            │ id (PK)    │ product_id │ quantity   │
+├──────────┼─────────────┤            │            │    (FK)    │            │
+│ P001     │ Diesel      │ ◄──────────┼ MOV-001    │ P001       │ 100.5      │
+│ P002     │ Gasolina 93 │ ◄──────────┼ MOV-002    │ P002       │ 50.0       │
+│ P003     │ Gasolina 95 │            │ MOV-003    │ P001       │ 75.0       │
+└──────────┴─────────────┘            └────────────┴────────────┴────────────┘
+                                                        ↑
+                                                   FOREIGN KEY
+                                           (apunta al id de products)
+```
+
+**Sintaxis SQL:**
+
+```sql
+CREATE TABLE combustibles_movements (
+    id VARCHAR(20) PRIMARY KEY,
+    movement_type VARCHAR(10) NOT NULL,
+    quantity DOUBLE NOT NULL,
+    product_id VARCHAR(10),  -- ← Esta será la FK
+
+    -- Definición de la FOREIGN KEY:
+    FOREIGN KEY (product_id) REFERENCES combustibles_products(id)
+    --           ↑                                           ↑
+    --    Campo local                              Campo en otra tabla
+);
+```
+
+**¿Para qué sirve?**
+
+1. **Mantener integridad de datos:**
+   ```sql
+   -- ❌ Esto fallará porque P999 no existe
+   INSERT INTO combustibles_movements
+   VALUES ('MOV-100', 'ENTRADA', 100.0, 'P999');
+   -- ERROR: Cannot add or update a child row:
+   -- a foreign key constraint fails
+   ```
+
+2. **Relacionar datos entre tablas:**
+   ```sql
+   -- ✅ Buscar todos los movimientos de Diesel
+   SELECT m.id, m.quantity, p.name
+   FROM combustibles_movements m
+   JOIN combustibles_products p ON m.product_id = p.id
+   WHERE p.type = 'Diesel';
+   ```
+
+3. **Evitar datos huérfanos:**
+   - No puedes eliminar un producto si hay movimientos que lo referencian
+   - Protege la consistencia de la base de datos
+
+**Ejemplo completo con múltiples FKs:**
+
+```sql
+CREATE TABLE combustibles_movements (
+    id VARCHAR(20) PRIMARY KEY,
+    movement_type VARCHAR(10) NOT NULL,
+    quantity DOUBLE NOT NULL,
+
+    -- FK 1: Referencia a productos
+    product_id VARCHAR(10),
+    FOREIGN KEY (product_id) REFERENCES combustibles_products(id),
+
+    -- FK 2: Referencia a vehículos
+    vehicle_id VARCHAR(20),
+    FOREIGN KEY (vehicle_id) REFERENCES combustibles_vehicles(id),
+
+    -- FK 3: Referencia a proveedores
+    supplier_id VARCHAR(20),
+    FOREIGN KEY (supplier_id) REFERENCES combustibles_suppliers(id)
+);
+```
+
+**Pregunta:** ¿Qué pasaría si intentas eliminar un producto que tiene 50 movimientos asociados?
+
+---
+
+#### 4️⃣ NOT NULL (Campo Obligatorio)
+
+**¿Qué es?** Una restricción que **NO permite valores vacíos** en ese campo.
+
+**🎓 Analogía:**
+```
+NOT NULL = Campos obligatorios en un formulario
+- Nombre: __________ (obligatorio)
+- Email: __________ (obligatorio)
+- Teléfono: __________ (opcional)
+```
+
+**Ejemplo:**
+
+```sql
+CREATE TABLE combustibles_products (
+    id VARCHAR(10) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,      -- ← Obligatorio
+    type VARCHAR(50) NOT NULL,       -- ← Obligatorio
+    description TEXT                 -- ← Opcional (puede estar vacío)
+);
+```
+
+**Diferencia visual:**
+
+```
+Tabla: combustibles_products
+
+┌──────────┬─────────────────┬──────────┬─────────────────────┐
+│ id (PK)  │ name (NOT NULL) │ type     │ description (NULL)  │
+├──────────┼─────────────────┼──────────┼─────────────────────┤
+│ P001     │ Diesel Regular  │ Diesel   │ Combustible diésel  │ ✅
+│ P002     │ Gasolina 93     │ Gasolina │ NULL                │ ✅
+│ P003     │ NULL            │ Diesel   │ Descripción...      │ ❌ ERROR
+└──────────┴─────────────────┴──────────┴─────────────────────┘
+                  ↑
+            NO puede estar vacío
+```
+
+**Ejemplo de intento inválido:**
+
+```sql
+-- ❌ Intentar insertar sin nombre (campo NOT NULL)
+INSERT INTO combustibles_products (id, type)
+VALUES ('P004', 'Diesel');
+-- ERROR: Field 'name' doesn't have a default value
+
+-- ✅ Insertar con nombre
+INSERT INTO combustibles_products (id, name, type)
+VALUES ('P004', 'Diesel Premium', 'Diesel');
+-- Query OK, 1 row affected
+```
+
+**¿Cuándo usar NOT NULL?**
+
+✅ **Usa NOT NULL cuando:**
+- El campo es esencial para la entidad (nombre, tipo, cantidad)
+- Sin ese dato, el registro no tiene sentido
+- Quieres prevenir datos incompletos
+
+❌ **NO uses NOT NULL cuando:**
+- El campo es realmente opcional (comentarios, observaciones)
+- Se llenará después (campos calculados, fechas de finalización)
+- Puede no aplicar en algunos casos
+
+**Ejemplo aplicado a Forestech:**
+
+```sql
+CREATE TABLE combustibles_movements (
+    -- Campos obligatorios (NOT NULL)
+    id VARCHAR(20) PRIMARY KEY,
+    movement_type VARCHAR(10) NOT NULL,   -- Siempre debe tener tipo
+    quantity DOUBLE NOT NULL,             -- Siempre debe tener cantidad
+    movement_date DATETIME NOT NULL,      -- Siempre debe tener fecha
+
+    -- Campos opcionales (pueden ser NULL)
+    vehicle_id VARCHAR(20),               -- Puede no tener vehículo asociado
+    supplier_id VARCHAR(20),              -- Solo aplica en ENTRADA
+    notes TEXT,                           -- Comentarios opcionales
+
+    FOREIGN KEY (vehicle_id) REFERENCES combustibles_vehicles(id),
+    FOREIGN KEY (supplier_id) REFERENCES combustibles_suppliers(id)
+);
+```
+
+**Pregunta:** En la tabla `combustibles_movements`, ¿qué campos de Forestech crees que deberían ser NOT NULL y por qué?
+
+---
+
+#### 5️⃣ DEFAULT (Valor por Defecto)
+
+**¿Qué es?** Un valor que se asigna automáticamente si no proporcionas ninguno.
+
+**Ejemplo:**
+
+```sql
+CREATE TABLE combustibles_movements (
+    id VARCHAR(20) PRIMARY KEY,
+    quantity DOUBLE NOT NULL,
+    movement_date DATETIME DEFAULT NOW(),      -- ← Fecha actual automática
+    is_active BOOLEAN DEFAULT TRUE             -- ← TRUE por defecto
+);
+```
+
+**Uso práctico:**
+
+```sql
+-- Si no especificas movement_date, se usa NOW()
+INSERT INTO combustibles_movements (id, quantity)
+VALUES ('MOV-001', 100.5);
+-- movement_date se guardará con la fecha/hora actual
+
+-- Si no especificas is_active, se usa TRUE
+SELECT * FROM combustibles_movements WHERE id = 'MOV-001';
+-- Resultado: is_active = TRUE (por defecto)
+```
+
+---
+
+### 🎯 Resumen de Conceptos Fundamentales
+
+| Concepto | Propósito | Ejemplo | Cuándo usarlo |
+|----------|-----------|---------|---------------|
+| **PRIMARY KEY** | Identificar fila única | `id VARCHAR(10) PRIMARY KEY` | Siempre (toda tabla necesita una) |
+| **FOREIGN KEY** | Relacionar tablas | `FOREIGN KEY (product_id) REFERENCES products(id)` | Cuando vinculas con otra tabla |
+| **NOT NULL** | Campo obligatorio | `name VARCHAR(100) NOT NULL` | Datos esenciales |
+| **DEFAULT** | Valor automático | `is_active BOOLEAN DEFAULT TRUE` | Valores predeterminados comunes |
+
+**Ejercicio mental:**
+
+Diseña en tu mente la tabla `combustibles_vehicles`:
+- ¿Qué campos debería tener?
+- ¿Cuál sería la PRIMARY KEY?
+- ¿Qué campos deberían ser NOT NULL?
+- ¿Necesita alguna FOREIGN KEY?
+
+---
+
 ## 🎯 ESTRUCTURA AL TERMINAR FASE 3
 
 Al finalizar esta fase tendrás:
@@ -429,22 +1082,22 @@ com.forestech/
 
 ---
 
-## ✅ Checkpoint 3.1: Configurar JDBC Driver
+## ✅ Checkpoint 3.1: Configurar JDBC Driver de MySQL
 
 **Concepto clave:** JDBC es la API estándar de Java para comunicarse con bases de datos.
 
 **📍 DÓNDE:** 
 - **Archivo:** `pom.xml` en la raíz del proyecto `forestech-cli-java/`
-- **Terminal:** Para ejecutar Maven
+- **Terminal WSL:** Para ejecutar Maven
 - **Main.java:** NO tocar (todavía no usaremos la BD)
 
 **🎯 PARA QUÉ:** 
-Sin el driver JDBC de SQL Server, Java no puede "hablar" con tu base de datos. Es como tener un teléfono sin SIM card.
+Sin el driver JDBC de MySQL (Connector/J), Java no puede "hablar" con tu base de datos. Es como tener un teléfono sin SIM card.
 
 El driver JDBC:
-- ✅ **Traduce** las llamadas de Java a comandos que SQL Server entiende
-- ✅ **Gestiona** la conexión de red entre tu aplicación y el servidor
-- ✅ **Maneja** el protocolo de comunicación específico de SQL Server (TDS - Tabular Data Stream)
+- ✅ **Traduce** las llamadas de Java a comandos que MySQL entiende
+- ✅ **Gestiona** la conexión de red entre tu aplicación y el servidor MySQL
+- ✅ **Maneja** el protocolo de comunicación específico de MySQL
 
 **🔗 CONEXIÓN FUTURA:**
 - **Fase 4:** Usarás este driver para INSERT, UPDATE, DELETE de movimientos
@@ -453,15 +1106,16 @@ El driver JDBC:
 
 **🎓 Analogía:**
 - **Tu aplicación Java**: Turista que solo habla español
-- **SQL Server**: Local que solo habla alemán
-- **Driver JDBC**: Traductor que permite la comunicación
+- **MySQL**: Local que solo habla alemán
+- **Driver JDBC (Connector/J)**: Traductor que permite la comunicación
 
 **Prompts sugeridos:**
 ```text
-"Explícame con analogía cómo funciona JDBC como puente entre Java y SQL Server."
+"Explícame con analogía cómo funciona JDBC como puente entre Java y MySQL."
 "¿Dónde guarda Maven las dependencias y cómo puedo verificarlo?"
-"¿Qué diferencia hay entre JDBC (API) y el driver de SQL Server (implementación)?"
+"¿Qué diferencia hay entre JDBC (API) y el driver de MySQL (implementación)?"
 "¿Por qué cada base de datos (MySQL, PostgreSQL, SQL Server) necesita su propio driver?"
+"¿Qué es mysql-connector-j y por qué reemplazó a mysql-connector-java?"
 ```
 
 **Diagrama de tareas - Configurar JDBC Driver:**
@@ -472,11 +1126,11 @@ pom.xml
 └── Sección <dependencies>
     │
     └── Nueva dependencia <dependency>
-        ├── <groupId>: com.microsoft.sqlserver
-        ├── <artifactId>: mssql-jdbc
-        └── <version>: 12.8.1.jre11 (o superior)
+        ├── <groupId>: com.mysql
+        ├── <artifactId>: mysql-connector-j
+        └── <version>: 8.0.33 (o superior)
 
-Propósito: Esto permite que Maven descargue el driver de SQL Server
+Propósito: Esto permite que Maven descargue el MySQL Connector/J
 ```
 
 **Tareas paso a paso (TÚ completas cada una):**
@@ -485,54 +1139,55 @@ Propósito: Esto permite que Maven descargue el driver de SQL Server
    - Localiza la sección `<dependencies>`
    - Si no existe, debes crearla dentro de `<project>` (antes de `</project>`)
 
-2. **Agregar la dependencia:**
+2. **Agregar la dependencia de MySQL:**
    - Estructura de una dependencia:
-     ```
+     ```xml
      <dependency>
          <groupId>...</groupId>
          <artifactId>...</artifactId>
          <version>...</version>
      </dependency>
      ```
-   - **TÚ completas:** Coloca el groupId, artifactId y version para el driver de SQL Server
-   - **Pregunta:** ¿Por qué `jre11` en la versión? ¿Qué pasa si tu proyecto usa Java 17?
+   - **TÚ completas:** Coloca el groupId, artifactId y version para MySQL Connector/J
+   - **Datos necesarios:**
+     - groupId: `com.mysql`
+     - artifactId: `mysql-connector-j`
+     - version: `8.0.33` (o la más reciente)
+   - **Pregunta:** ¿Por qué cambió de `mysql-connector-java` a `mysql-connector-j`?
 
 3. **Guardar** el archivo pom.xml
 
-4. **Descargar la dependencia desde terminal:**
-   - Comando a ejecutar:
+4. **Descargar la dependencia desde terminal WSL:**
+   - Abre terminal de Ubuntu
+   - Navega al proyecto:
      ```bash
-     cd forestech-cli-java/
+     cd ~/forestechOil/forestech-cli-java/
+     ```
+   - Ejecuta Maven:
+     ```bash
      mvn clean install
      ```
-   - Deberías ver líneas en la salida mencionando la descarga del JAR
+   - Deberías ver líneas como: `Downloading from central: https://repo.maven.apache.org/maven2/com/mysql/mysql-connector-j/...`
 
 5. **Verificar descarga exitosa:**
    
-   **Opción A - Por terminal:**
-   - Ejecuta:
-     ```
-     ls ~/.m2/repository/com/microsoft/sqlserver/mssql-jdbc/
-     ```
-   - Resultado esperado: Carpeta con tu versión (ej: `12.8.1.jre11/`)
-   
-   **Opción B - En IntelliJ:**
-   - Ve a: View → Tool Windows → Maven
-   - Expande: Dependencies → compile
-   - Busca: `com.microsoft.sqlserver:mssql-jdbc`
-   - Resultado esperado: Debes verlo en la lista
+   **Por terminal WSL:**
+   ```bash
+   ls ~/.m2/repository/com/mysql/mysql-connector-j/
+   ```
+   - Resultado esperado: Carpeta con tu versión (ej: `8.0.33/`)
+   - Dentro debe haber un archivo JAR: `mysql-connector-j-8.0.33.jar`
 
 6. **Compilar el proyecto:**
-   - Ejecuta:
-     ```
-     mvn clean compile
-     ```
-   - Resultado esperado: Compilación exitosa SIN errores
+   ```bash
+   mvn clean compile
+   ```
+   - Resultado esperado: `BUILD SUCCESS`
 
 **✅ Resultado esperado:** 
-- Maven descarga el driver sin errores
+- Maven descarga el driver MySQL sin errores
 - El proyecto compila exitosamente con `mvn clean compile`
-- Puedes ver el JAR del driver en tu repositorio local Maven
+- Puedes ver el JAR del driver en tu repositorio local Maven (`~/.m2/repository/`)
 - En IntelliJ, la dependencia aparece en el árbol de Maven
 
 **💡 Concepto clave:** Las dependencias de Maven se descargan UNA VEZ y se reutilizan en todos tus proyectos. Por eso se guardan en `~/.m2/repository/` (repositorio local compartido).
@@ -541,11 +1196,11 @@ Propósito: Esto permite que Maven descargue el driver de SQL Server
 
 | Problema | Causa | Solución |
 |----------|-------|----------|
-| "Could not resolve dependencies" | Sin internet o proxy | Verifica conexión y configuración de Maven |
-| "Unsupported class version" | Driver para Java superior | Usa versión jre11 o jre8 |
+| "Could not resolve dependencies" | Sin internet o Maven no configurado | Verifica conexión y `mvn -version` |
+| "BUILD FAILURE" | Error en pom.xml | Verifica sintaxis XML (etiquetas cerradas) |
 | Dependencia no aparece en IntelliJ | Cache desactualizado | Reimport: clic derecho en proyecto → Maven → Reload Project |
 
-**⏱️ Tiempo estimado:** 30 minutos
+**⏱️ Tiempo estimado:** 20 minutos
 
 ---
 
@@ -590,6 +1245,7 @@ Con DatabaseConnection:
 "Explícame qué hace try-with-resources y por qué es importante para conexiones."
 "¿Qué es un constructor privado y para qué sirve?"
 "¿Por qué DatabaseConnection tiene métodos static?"
+"¿Qué diferencia hay entre la URL de MySQL y la de SQL Server?"
 ```
 
 **Diagrama de estructura - Clase DatabaseConnection:**
@@ -601,9 +1257,9 @@ DatabaseConnection.java
 │   └── Sin parámetros, cuerpo vacío
 │
 ├── Constantes de configuración (private static final)
-│   ├── URL → "jdbc:sqlserver://localhost:1433;databaseName=FORESTECH"
-│   ├── USER → Tu usuario SQL Server (ej: "sa")
-│   └── PASSWORD → Tu contraseña SQL Server
+│   ├── URL → "jdbc:mysql://localhost:3306/FORESTECH"
+│   ├── USER → "root"
+│   └── PASSWORD → Tu contraseña configurada en MySQL
 │
 ├── Método: getConnection()
 │   ├── Tipo retorno: Connection
@@ -650,29 +1306,42 @@ DatabaseConnection.java
 4. **Declarar constantes de configuración (TÚ las escribes):**
    - Tres constantes: URL, USER, PASSWORD
    - Modificadores: `private static final`
-   - **URL formato:** `jdbc:sqlserver://localhost:1433;databaseName=FORESTECH`
-   - **Pregunta:** ¿Qué significa cada parte de la URL? Investiga: `jdbc`, `sqlserver`, `1433`, `databaseName`
+   - **URL formato MySQL:** `jdbc:mysql://localhost:3306/FORESTECH`
+   - **USER:** `"root"`
+   - **PASSWORD:** Tu contraseña (la que configuraste en PASO 2)
+   - **Pregunta:** ¿Qué significa cada parte de la URL? 
+     - `jdbc` = Protocolo Java Database Connectivity
+     - `mysql` = Driver específico (MySQL)
+     - `localhost` = Servidor (tu PC en WSL)
+     - `3306` = Puerto por defecto de MySQL
+     - `FORESTECH` = Nombre de la base de datos
 
 5. **Implementar getConnection() (TÚ lo escribes):**
    - Usar `DriverManager.getConnection(URL, USER, PASSWORD)`
    - Retornar la Connection obtenida
    - Agregar los tres imports de java.sql
+   - Firma completa:
+     ```java
+     public static Connection getConnection() throws SQLException {
+         // Tu código aquí
+     }
+     ```
 
 6. **Implementar testConnection() (TÚ lo escribes):**
    
    a) **Estructura try-with-resources:**
-      - Patrón:
-        ```
-        try (Connection conn = getConnection()) {
-            // Tu código aquí
-        } catch (SQLException e) {
-            // Tu código aquí
-        }
-        ```
+      ```java
+      try (Connection conn = getConnection()) {
+          // Tu código aquí
+      } catch (SQLException e) {
+          // Tu código aquí
+      }
+      ```
    
    b) **En el try:**
       - Extrae metadata: `conn.getMetaData()`
       - Imprime nombre de BD: `metadata.getDatabaseProductName()`
+      - Imprime versión: `metadata.getDatabaseProductVersion()`
       - Imprime mensaje de éxito
    
    c) **En el catch:**
@@ -680,16 +1349,34 @@ DatabaseConnection.java
    
    d) **Pregunta:** ¿Por qué try-with-resources vs try-finally manual?
 
-7. **Probar en Main.java:**
-   - Agrega esta línea (donde corresponda):
+7. **Asegurarte que MySQL está corriendo en WSL:**
+   - Abre terminal Ubuntu
+   - Ejecuta:
+     ```bash
+     sudo service mysql status
      ```
+   - Si está "stopped", inicia el servicio:
+     ```bash
+     sudo service mysql start
+     ```
+
+8. **Probar en Main.java:**
+   - Agrega esta línea en el método main (al inicio, como prueba):
+     ```java
      DatabaseConnection.testConnection();
      ```
-   - Compila: `mvn clean compile`
-   - Ejecuta: `mvn exec:java -Dexec.mainClass="com.forestech.Main"`
+   - Compila:
+     ```bash
+     mvn clean compile
+     ```
+   - Ejecuta:
+     ```bash
+     mvn exec:java -Dexec.mainClass="com.forestech.Main"
+     ```
 
 **✅ Resultado esperado:** 
-- Ver mensaje "✅ Conexión exitosa a FORESTECH (o el nombre de tu BD)" en consola
+- Ver mensaje "✅ Conexión exitosa a MySQL" en consola
+- Ver versión de MySQL (ej: "8.0.39-0ubuntu0.22.04.1")
 - Si falla, ver mensaje de error claro indicando el problema específico
 - Archivo DatabaseConnection.java en el paquete `config`
 - Estructura actualizada:
@@ -703,7 +1390,7 @@ DatabaseConnection.java
   ```
 
 **💡 Concepto clave - try-with-resources:**
-```
+```java
 SIN try-with-resources (antiguo):
 Connection conn = null;
 try {
@@ -716,12 +1403,12 @@ try {
 CON try-with-resources (moderno):
 try (Connection conn = getConnection()) {
     // usar conexión
-}  // ✅ Se cierra automáticamente
+}  // ✅ Se cierra automáticamente, incluso si hay excepción
 ```
 
 **⚠️ PREREQUISITOS:**
-- SQL Server debe estar corriendo (verifica con SQL Server Management Studio)
-- El puerto 1433 debe estar abierto
+- MySQL debe estar corriendo en WSL (`sudo service mysql status`)
+- El puerto 3306 debe estar abierto (por defecto lo está)
 - La base de datos FORESTECH debe existir
 - Usuario/contraseña deben ser correctos
 
@@ -729,13 +1416,13 @@ try (Connection conn = getConnection()) {
 
 | Error | Causa probable | Solución |
 |-------|---------------|----------|
-| "Cannot connect to server" | SQL Server no está corriendo | Inicia el servicio SQL Server |
-| "Login failed for user" | Credenciales incorrectas | Verifica usuario/contraseña |
-| "Database 'FORESTECH' does not exist" | BD no creada | Crea la BD en SQL Server Management Studio |
-| "Connection timed out" | Firewall o puerto cerrado | Verifica firewall y que puerto 1433 esté abierto |
-| "No suitable driver found" | Driver no descargado | Ejecuta `mvn clean install` |
+| "Communications link failure" | MySQL no está corriendo | `sudo service mysql start` en WSL |
+| "Access denied for user" | Contraseña incorrecta | Verifica PASSWORD en DatabaseConnection |
+| "Unknown database 'FORESTECH'" | No creaste la BD | Ejecuta: `CREATE DATABASE FORESTECH;` |
+| "No suitable driver found" | Driver no descargado | Ejecuta: `mvn clean install` |
+| "Connection refused" | Puerto incorrecto | Verifica que sea 3306 en la URL |
 
-**⏱️ Tiempo estimado:** 2 horas
+**⏱️ Tiempo estimado:** 45 minutos
 
 ---
 
@@ -748,9 +1435,9 @@ try (Connection conn = getConnection()) {
 - **Crear archivo:** `ProductService.java` en `forestech-cli-java/src/main/java/com/forestech/services/`
 - **Main.java:** Para PROBAR el servicio (llamar al método)
 
-**🎯 PARA QUÉ:** 
+**🎯 PARA QUÉ:**
 Hasta ahora solo probaste la conexión. Ahora necesitas:
-- ✅ **Leer datos** de las tablas existentes en SQL Server
+- ✅ **Leer datos** de las tablas existentes en MySQL
 - ✅ **Ejecutar queries SQL** desde Java
 - ✅ **Procesar resultados** con ResultSet
 - ✅ **Separar responsabilidades** (Service se encarga de BD, no el Manager ni Main)
@@ -763,7 +1450,7 @@ ProductService.java (acceso a BD)
     ↓ usa
 DatabaseConnection.java (obtiene conexión)
     ↓ conecta con
-SQL Server (base de datos)
+MySQL (base de datos en WSL)
 ```
 
 **🔗 CONEXIÓN FUTURA:**
@@ -775,7 +1462,7 @@ SQL Server (base de datos)
 **🎓 Analogía:**
 - **ProductService**: Bibliotecario que busca libros en el sistema
 - **DatabaseConnection**: Llave de acceso a la biblioteca
-- **SQL Server**: Los estantes con todos los libros
+- **MySQL en WSL**: Los estantes con todos los libros
 - **Main.java**: Persona que le pide al bibliotecario "muéstrame todos los productos"
 
 **Prompts sugeridos:**
@@ -874,9 +1561,11 @@ ProductService.java → getAllProducts()
    
    **Pregunta clave:** ¿Por qué `rs.next()` retorna `boolean`? ¿Qué sucede cuando no hay más filas?
 
-5. **Verificar tabla en SQL Server:**
-   - Ejecuta manualmente en SQL Server Management Studio:
-     ```
+5. **Verificar tabla en MySQL:**
+   - Ejecuta manualmente en MySQL desde terminal WSL:
+     ```bash
+     mysql -u root -p
+     USE FORESTECH;
      SELECT * FROM combustibles_products;
      ```
    - Si no existe, créala o ajusta el nombre en la query
@@ -916,13 +1605,13 @@ ProductService.java → getAllProducts()
 **💡 Concepto clave - Ciclo de vida JDBC:**
 
 ```
-1. Connection conn = DatabaseConnection.getConnection()  
-   → Abre canal de comunicación con SQL Server
+1. Connection conn = DatabaseConnection.getConnection()
+   → Abre canal de comunicación con MySQL
 
-2. Statement stmt = conn.createStatement()  
+2. Statement stmt = conn.createStatement()
    → Crea "mensajero" que llevará tu query
 
-3. ResultSet rs = stmt.executeQuery("SELECT ...")  
+3. ResultSet rs = stmt.executeQuery("SELECT ...")
    → Ejecuta query y obtiene cursor sobre los resultados
 
 4. while (rs.next()) { ... }  
@@ -954,7 +1643,7 @@ String name = rs.getString("name");
 | Problema común | Causa | Solución |
 |----------------|-------|----------|
 | NullPointerException en rs.getString() | Columna no existe en la query | Verifica nombre exacto en SELECT |
-| No imprime nada (while no se ejecuta) | Tabla vacía | Inserta datos de prueba en SQL Server |
+| No imprime nada (while no se ejecuta) | Tabla vacía | Inserta datos de prueba en MySQL |
 | "Invalid object name 'combustibles_products'" | Tabla no existe | Crea la tabla o usa el nombre correcto |
 | Muchas conexiones abiertas | No cerrar recursos | Usa try-with-resources (cierra automático) |
 
@@ -1691,9 +2380,9 @@ forestech-cli-java/
 | Problema | Posible causa | Solución |
 |----------|--------------|----------|
 | "No suitable driver found" | Driver no descargado | Ejecuta `mvn clean install` |
-| "Cannot connect to server" | SQL Server no corriendo | Inicia el servicio SQL Server |
-| "Login failed for user" | Credenciales incorrectas | Verifica usuario/contraseña en DatabaseConnection |
-| "Database does not exist" | BD no creada | Crea BD FORESTECH en SQL Server Management Studio |
+| "Cannot connect to server" | MySQL no está corriendo en WSL | Ejecuta `sudo service mysql start` |
+| "Access denied for user" | Credenciales incorrectas | Verifica usuario/contraseña en DatabaseConnection |
+| "Unknown database 'FORESTECH'" | BD no creada | Crea BD FORESTECH con `CREATE DATABASE FORESTECH;` |
 | NullPointerException en Service | Olvidaste inicializar lista/objeto | Revisa que creas `new ArrayList<>()` o retornas objeto |
 | "Column not found" | Nombre incorrecto en ResultSet | Verifica que coincida con SELECT (mayúsculas/minúsculas) |
 | SQL Injection (vulnerable) | Usaste concatenación + Statement | SIEMPRE usa PreparedStatement con parámetros |
@@ -1709,10 +2398,10 @@ En la siguiente fase aprenderás a:
 - ✅ **Transacciones** para operaciones que deben ser atómicas (todo o nada)
 - ✅ **MovementService completo** con todas las operaciones CRUD
 
-**¿Por qué CRUD es importante?** 
+**¿Por qué CRUD es importante?**
 
 Ahora solo LEES datos (operación R de CRUD). Con las operaciones CREATE, UPDATE y DELETE completas:
-- Podrás **crear movimientos** desde tu aplicación (no solo desde SQL Server)
+- Podrás **crear movimientos** desde tu aplicación (no solo desde MySQL manualmente)
 - Podrás **editar movimientos** si hay errores en los datos
 - Podrás **eliminar movimientos** incorrectos o duplicados
 - Forestech será una aplicación **completamente funcional** (no solo de consulta)
