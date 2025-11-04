@@ -2,14 +2,23 @@ package com.forestech.models;
 
 import com.forestech.utils.IdGenerator;
 
-public class Products {
+public class Product {
     private final String id;
     private String name;
     private String unidadDeMedida;
     private double priceXUnd;
 
-    public Products(String name, String unidadDeMedida, double priceXUnd) {
+    // Constructor para CREAR nuevos productos (genera ID automático)
+    public Product(String name, String unidadDeMedida, double priceXUnd) {
         this.id = IdGenerator.generateFuelId();
+        this.name = name;
+        this.unidadDeMedida = unidadDeMedida;
+        this.priceXUnd = priceXUnd;
+    }
+
+    // Constructor para CARGAR productos desde la BD (usa ID existente)
+    public Product(String id, String name, String unidadDeMedida, double priceXUnd) {
+        this.id = id;
         this.name = name;
         this.unidadDeMedida = unidadDeMedida;
         this.priceXUnd = priceXUnd;

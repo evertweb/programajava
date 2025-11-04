@@ -1,7 +1,7 @@
 package com.forestech.models;
-
 import com.forestech.AppConfig;
 import com.forestech.utils.IdGenerator;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
 
@@ -49,7 +49,7 @@ public class Movement {
         return movementType;
     }
 
-    public void setMovementType(String movementType) {
+    public void setMovementType(@NotNull String movementType) {
         if (movementType.equals("ENTRADA") || movementType.equals("SALIDA")) {
             this.movementType = movementType;
 
