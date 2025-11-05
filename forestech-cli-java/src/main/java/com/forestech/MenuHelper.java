@@ -22,6 +22,8 @@ public class MenuHelper {
                 System.out.println("\n┌───────────────────────────────────────────────────────────┐");
                 System.out.println("│  ⬇️  MÓDULO DE ENTRADA DE COMBUSTIBLE SELECCIONADO       │");
                 System.out.println("└───────────────────────────────────────────────────────────┘");
+
+
                 break;
             case 2:
                 System.out.println("\n┌───────────────────────────────────────────────────────────┐");
