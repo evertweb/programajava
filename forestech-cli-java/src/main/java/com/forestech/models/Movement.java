@@ -11,16 +11,16 @@ public class Movement {
     // Atributos
     private final String id;
     private String movementType;
-    private String fuelType;
+    private String productType;
     private double quantity;
     private double unitPrice;
     private final String movementDate;
 
     // Constructor completo
-    public Movement(String movementType, String fuelType, double quantity, double unitPrice) {
+    public Movement(String movementType, String productType, double quantity, double unitPrice) {
         this.id = IdGenerator.generateMovementId();  // ✅ Ahora genera: MOV-A1B2C3D4
         this.movementType = movementType;
-        this.fuelType = fuelType;
+        this.productType = productType;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
         this.movementDate = LocalDateTime.now().toString();
@@ -31,7 +31,7 @@ public class Movement {
         this.id = IdGenerator.generateMovementId();  // ✅ Ahora genera: MOV-A1B2C3D4
         this.movementDate = LocalDateTime.now().toString();
         this.movementType = null;
-        this.fuelType = null;
+        this.productType = null;
         this.quantity = 0.0;  // ✅ Mejor usar 0.0 que parsear null
         this.unitPrice = 0.0;  // ✅ Mejor usar 0.0 que parsear null
     }
@@ -61,11 +61,11 @@ public class Movement {
     }
 
     public String getFuelType() {
-        return fuelType;
+        return productType;
     }
 
     public void setFuelType(String fuelType) {
-        this.fuelType = fuelType;
+        this.productType = productType;
     }
 
     public double getQuantity() {
@@ -123,7 +123,7 @@ public class Movement {
                 "├─────────────────────────────────────────────────────┤\n" +
                 "│ 🆔 ID:           " + id + "\n" +
                 "│ 📌 Tipo:         " + movementType + "\n" +
-                "│ ⛽ Combustible:  " + fuelType + "\n" +
+                "│ ⛽ Tipo de producto:  " + productType + "\n" +
                 "│ 📦 Cantidad:     " + quantity + " galones\n" +
                 "│ 💵 Precio Unit:  $" + unitPrice + "\n" +
                 "├─────────────────────────────────────────────────────┤\n" +

@@ -16,7 +16,9 @@ public class Main {
 
 //        List<Movement> datosInicialesDataBase = new ArrayList<>();
 //        datosInicialesDataBase.add(new Movement("ENTRADA", "ACPM", 20, 2));
-//        MovementManagers managerConCopia = new MovementManagers(datosInicialesDataBase);
+//        MovementManagers managerConCopia = new MovementManagers(datosInicialesDataBas
+        ProductServices.getAllProducts();
+        ProductServices.getProductsByUnidadDeMedida("GALON");
 
 
 

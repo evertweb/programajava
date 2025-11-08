@@ -36,13 +36,13 @@ public class MovementManagers {
      * → Crear, agregar movimiento a la lista y retornar el movimiento
      *
      * @param movementType tipo de movimiento Entrada o Salida
-     * @param fuelType     tipo de combustible (ACPM, GASOLINA, 20W50, 15W40, VALVULINA, LIGA, GRASA)
+     * @param productType     tipo de combustible (ACPM, GASOLINA, 20W50, 15W40, VALVULINA, LIGA, GRASA)
      * @param quantity     cantidad de combustible
      * @param price        precio por galon
      * @return retorna el objecto movimiento
      */
-    public Movement addMovements(String movementType, String fuelType, double quantity, double price) {
-        Movement newMovement = new Movement(movementType, fuelType, quantity, price);
+    public Movement addMovements(String movementType, String productType , double quantity, double price) {
+        Movement newMovement = new Movement(movementType, productType, quantity, price);
         movements.add(newMovement);
         return newMovement;
 
