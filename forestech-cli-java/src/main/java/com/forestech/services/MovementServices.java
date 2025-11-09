@@ -1,4 +1,4 @@
 package com.forestech.services;
 
-public class ProductServices {
+public class MovementServices {
 }
