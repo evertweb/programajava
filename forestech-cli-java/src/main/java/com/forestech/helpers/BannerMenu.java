@@ -1,4 +1,6 @@
-package com.forestech;
+package com.forestech.helpers;
+
+import com.forestech.AppConfig;
 
 public class BannerMenu {
     public static void header() {

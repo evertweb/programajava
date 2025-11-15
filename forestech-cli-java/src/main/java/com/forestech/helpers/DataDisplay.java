@@ -1,38 +1,16 @@
-package com.forestech;
+package com.forestech.helpers;
 
-public  class DataDisplay {
-    public static void showFuelTypes(){
-        String[] fuelTypes = {"DIESEL", "GASOLINA"};
-        System.out.println("\n╔═══════════════════════════════════════════════════════════╗");
-        System.out.println("║              ⛽ TIPOS DE COMBUSTIBLES                     ║");
-        System.out.println("╠═══════════════════════════════════════════════════════════╣");
-        for (int i = 0; i < fuelTypes.length; i++) {
-            System.out.println("║  " + (i + 1) + ". " + fuelTypes[i]);
+public class DataDisplay {
 
-
-        }
-        System.out.println("╚═══════════════════════════════════════════════════════════╝");
+    /**
+     * Muestra los tipos de combustible disponibles.
+     */
+    public static void showFuelTypes() {
+        System.out.println("\n=== TIPOS DE COMBUSTIBLE ===");
+        System.out.println("1. Diesel");
+        System.out.println("2. Gasolina 93");
+        System.out.println("3. ACPM");
+        System.out.println("4. Aceite");
+        System.out.println("============================\n");
     }
-
-    public static void showMenuWithForEach(String[] options){
-        int counter = 1;
-        for (String option : options){
-            System.out.println("  " + counter + ". " + option);
-            counter++;
-        }
-    }
-    public static void simulateProcessing(int totalMovements){
-        System.out.println("\n╔═══════════════════════════════════════════════════════════╗");
-        System.out.println("║            ⚙️  PROCESANDO MOVIMIENTOS...                  ║");
-        System.out.println("╚═══════════════════════════════════════════════════════════╝");
-        int processed = 0;
-        while (processed < totalMovements){
-            processed++;
-            System.out.println("  🔄 PROCESANDO MOVIMIENTO #" + processed);
-        }
-        System.out.println("\n┌───────────────────────────────────────────────────────────┐");
-        System.out.println("│  ✅ Total procesado: " + processed + " movimientos               │");
-        System.out.println("└───────────────────────────────────────────────────────────┘");
-    }
-
 }

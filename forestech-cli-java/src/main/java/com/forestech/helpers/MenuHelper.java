@@ -1,4 +1,4 @@
-package com.forestech;
+package com.forestech.helpers;
 
 public class MenuHelper {
     public static void displayMenu() {

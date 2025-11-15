@@ -1,4 +1,4 @@
-package com.forestech;
+package com.forestech.helpers;
 import java.util.Scanner;
 
 public class InputHelper {

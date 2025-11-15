@@ -94,31 +94,32 @@
             </plugin>
             
             <!-- ================================= -->
-            <!-- Maven Assembly Plugin             -->
+            <!-- Maven Shade Plugin                -->
             <!-- ================================= -->
             <!-- Crea JAR ejecutable con todas las dependencias -->
+            <!-- MEJOR que Assembly Plugin para Swing apps -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.6.0</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <!-- Clase principal (punto de entrada) -->
-                            <mainClass>com.forestech.Main</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <transformers>
+                                <!-- Especificar la clase principal -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.forestech.ui.ForestechProfessionalApp</mainClass>
+                                </transformer>
+                            </transformers>
+                            <!-- Nombre del archivo JAR final -->
+                            <finalName>forestech-app</finalName>
+                            <!-- Incluir todas las dependencias -->
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -132,7 +133,8 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>com.forestech.Main</mainClass>
+                    <!-- ACTUALIZADO: Ahora ejecuta ForestechProfessionalApp por defecto -->
+                    <mainClass>com.forestech.ui.ForestechProfessionalApp</mainClass>
                 </configuration>
             </plugin>
             

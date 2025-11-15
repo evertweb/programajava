@@ -12,6 +12,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Teaching Approach (Mandatory)
 
+**⚠️ METODOLOGÍA INVERTIDA (Fase 9+):**
+A partir de la Fase 09 (Swing GUI), se adopta una nueva estrategia pedagógica:
+1. **Código primero** - Claude implementa el código funcional completo
+2. **Documentación después** - Se actualiza el roadmap con referencias al código real
+3. **Estudio posterior** - El usuario estudia el código implementado para entender los conceptos
+
+**Razón del cambio:** Swing GUI es extenso y tedioso de escribir manualmente. El aprendizaje ocurre al leer y entender código funcional existente, no al escribirlo desde cero.
+
+**Fases 1-8 (metodología tradicional):**
 1. **NEVER generate complete code** - Guide step-by-step with explanations
 2. **Validate understanding before advancing** - Ask questions frequently
 3. **Respect the learning roadmap** - Don't jump phases (see `roadmaps/`)
@@ -19,13 +28,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 5. **Errors are learning opportunities** - Guide users to discover fixes themselves
 6. **Use Forestech context** - Relate abstract concepts to real project scenarios
 
-### Anti-Patterns to Avoid
+### Anti-Patterns to Avoid (Fases 1-8)
 
 - ❌ Delivering complete code snippets ready to copy-paste
 - ❌ Solving problems without letting the user try first
 - ❌ Using advanced concepts before teaching fundamentals
 - ❌ Assuming prior Java knowledge
 - ❌ Being impatient or condescending
+
+**Nota:** Estos anti-patterns NO aplican para Fase 9+ bajo metodología invertida.
 
 ## Build and Run Commands
 
@@ -104,14 +115,15 @@ The project follows a 10-phase structured learning path documented in `roadmaps/
 **Phase 0:** Setup and tools (COMPLETED)
 **Phase 1:** Java fundamentals - variables, loops, methods (COMPLETED)
 **Phase 2:** Object-Oriented Programming - classes, encapsulation (COMPLETED)
-**Phase 2.5:** Manager pattern and collections (IN PROGRESS)
-**Phase 2.9:** Defensive copying (CURRENT FOCUS)
-**Phase 3:** MySQL/JDBC connection (NEXT)
-**Phase 4:** CRUD operations
-**Phase 5:** Business logic and transactions
-**Phase 6:** Interactive CLI interface
-**Phase 7:** Exception handling
-**Phase 8:** Advanced concepts (Streams, Lambdas)
+**Phase 2.5:** Manager pattern and collections (COMPLETED)
+**Phase 2.9:** Defensive copying (COMPLETED)
+**Phase 3:** MySQL/JDBC connection (COMPLETED)
+**Phase 4:** CRUD operations (COMPLETED)
+**Phase 5:** Business logic and transactions (COMPLETED)
+**Phase 6:** Interactive CLI interface (COMPLETED)
+**Phase 7:** Exception handling (COMPLETED)
+**Phase 8:** Advanced concepts (Streams, Lambdas) (COMPLETED)
+**Phase 9:** Swing GUI (CURRENT FOCUS - IN PROGRESS)
 
 ### Before Making Changes
 
@@ -151,25 +163,43 @@ All manager methods use detailed Javadoc with:
 
 ## Database Information
 
-### Current: MySQL (WSL Local)
+### Current: MySQL (WSL Local) - ACTIVA
 
 - **Host:** localhost (WSL Ubuntu)
 - **Port:** 3306
-- **Database:** (to be created in Phase 3)
-- **User:** (to be configured in Phase 3)
+- **Database:** FORESTECHOIL
+- **User:** root
+- **Password:** hp (solo para desarrollo local)
 
-### Future: SQL Server (DigitalOcean)
+**IMPORTANTE:**
+1. **SIEMPRE consulta la base de datos real** con `mysql -u root -p'hp'`
+2. **NUNCA confíes en archivos .sql antiguos** - pueden estar desactualizados
+3. **Documentación oficial:** Ver `.claude/DB_SCHEMA_REFERENCE.md` (generado desde BD real)
+
+### Tablas Existentes (6 tablas):
+1. **oil_products** - Catálogo de productos (sin dependencias)
+2. **suppliers** - Proveedores (sin dependencias)
+3. **vehicles** - Flota vehicular (depende de oil_products)
+4. **facturas** - Facturas de compra (depende de suppliers)
+5. **Movement** - Movimientos de combustible (depende de oil_products, vehicles, facturas)
+6. **detalle_factura** - Detalles de facturas (depende de facturas)
+
+### Claves Foráneas Críticas:
+- `Movement.product_id` → `oil_products.id` (RESTRICT)
+- `Movement.vehicle_id` → `vehicles.id` (SET NULL)
+- `Movement.numero_factura` → `facturas.numero_factura` (SET NULL)
+- `vehicles.fuel_product_id` → `oil_products.id` (SET NULL)
+- `facturas.supplier_id` → `suppliers.id` (RESTRICT)
+- `detalle_factura.numero_factura` → `facturas.numero_factura` (CASCADE)
+
+**Ver detalles completos:** `.claude/DB_SCHEMA_REFERENCE.md`
+
+### Future: SQL Server (DigitalOcean) - PENDIENTE
 
 - **Host:** 24.199.89.134
 - **Port:** 1433
 - **Database:** DBforestech
 - **User:** SA
-- **Tables:**
-  - `combustibles_movements`
-  - `combustibles_inventory`
-  - `combustibles_vehicles`
-  - `combustibles_suppliers`
-  - `combustibles_products`
 
 **Important:** Never hardcode credentials. Use `config.properties` (in `.gitignore`).
 
@@ -278,9 +308,14 @@ Currently no tests exist. When the time comes:
 
 ## Current Work Focus
 
-**Main.java** is currently demonstrating defensive copying concepts with `MovementManagers`. The code shows:
-- Creating a manager with initial database movements
-- Adding movements through the manager
-- Demonstrating that clearing the original list doesn't affect the manager's internal copy
+**Fase 09: Swing GUI** - Transformando Forestech CLI en aplicación de escritorio con interfaz gráfica.
 
-**Next steps:** Complete Phase 2.9 (defensive copying) before moving to Phase 3 (MySQL connection).
+**Estado actual:**
+- Implementando 12 checkpoints de Swing (ventanas, tablas, formularios, menús)
+- Integrando GUI con Services existentes (ProductServices, VehicleServices, MovementServices)
+- Validando Foreign Keys mediante JComboBox poblados desde BD
+- Manejando excepciones con JOptionPane
+
+**Paquete nuevo:** `com.forestech.ui/` (contiene 14 archivos Java de interfaz gráfica)
+
+**Próximos pasos:** Completar todos los checkpoints 9.1-9.12 y generar JAR ejecutable con maven-shade-plugin.

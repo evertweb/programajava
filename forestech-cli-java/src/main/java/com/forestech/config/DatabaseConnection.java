@@ -1,8 +1,8 @@
 package com.forestech.config;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
 import java.net.URL;
 
 public class DatabaseConnection {
@@ -11,6 +11,11 @@ public class DatabaseConnection {
     private static final String USER = "root";
     private static final String PASSWORD = "hp";
 
+    /**
+     * Método estático para obtener una conexión a la base de datos.
+     * @return
+     * @throws SQLException
+     */
     public static Connection getConnection() throws SQLException{
         Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
         return conn;
@@ -22,21 +27,25 @@ public class DatabaseConnection {
      * indicando si la conexión fue exitosa o si ocurrió algún error.
      * Útil para diagnóstico durante el desarrollo y configuración inicial.
      */
-    public static void testConnection(){
-        try {
-            // Intenta obtener una conexión activa a la base de datos
-            Connection conn = getConnection();
+    public static void testConnection() throws SQLException {
+        // Intenta obtener una conexión activa a la base de datos
+        Connection conn = getConnection();
 
-            // Si llegamos aquí, la conexión se estableció correctamente
-            System.out.println("CONEXION EXITOSA ;)");
+        // DatabaseMetaData: interfaz que proporciona información sobre la BD
+        DatabaseMetaData metaData = conn.getMetaData();
 
-            // ✅ IMPORTANTE: Cerrar la conexión cuando terminamos de usarla
-            conn.close();
+        System.out.println("✅ Conexión exitosa!");
+        System.out.println("─────────────────────────────────────────");
+        System.out.println("🗄️  Producto BD    : " + metaData.getDatabaseProductName());
+        System.out.println("📦 Versión BD     : " + metaData.getDatabaseProductVersion());
+        System.out.println("🔗 Driver JDBC    : " + metaData.getDriverName());
+        System.out.println("📌 Versión Driver : " + metaData.getDriverVersion());
+        System.out.println("🏛️  Database       : " + conn.getCatalog());
+        System.out.println("👤 Usuario        : " + metaData.getUserName());
+        System.out.println("─────────────────────────────────────────\n");
 
-        } catch (SQLException e){
-            // Captura errores de SQL (credenciales incorrectas, BD no disponible, etc.)
-            System.out.println("ERROR DE CONEXION: " + e.getMessage());
-        }
+        // ✅ IMPORTANTE: Cerrar la conexión cuando terminamos de usarla
+        conn.close();
     }
 
 

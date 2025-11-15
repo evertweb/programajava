@@ -1,0 +1,30 @@
+# Archivos de configuración con credenciales
+.vscode/mcp.json
+.env
+config.properties
+
+# MySQL MCP Configuration (contiene contraseñas)
+*.mcp.json
+
+# IDE
+.idea/
+*.iml
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# Sistema
+.DS_Store
+Thumbs.db

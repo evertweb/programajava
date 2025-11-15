@@ -41,8 +41,9 @@ public class MovementManagers {
      * @param price        precio por galon
      * @return retorna el objecto movimiento
      */
-    public Movement addMovements(String movementType, String productType , double quantity, double price) {
-        Movement newMovement = new Movement(movementType, productType, quantity, price);
+    public Movement addMovements(String movementType, String productId , String unidadDeMedida,  double quantity, double price) {
+        // Usar el nuevo constructor con productId, vehicleId=null, numeroFactura=null
+        Movement newMovement = new Movement(movementType, productId, null, null, unidadDeMedida, quantity, price);
         movements.add(newMovement);
         return newMovement;
 
