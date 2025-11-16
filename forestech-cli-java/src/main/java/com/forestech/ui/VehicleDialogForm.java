@@ -110,7 +110,7 @@ public class VehicleDialogForm extends JDialog {
 
     private void cargarDatosExistentes() {
         txtNombre.setText(vehiculoExistente.getName());
-        txtCategoria.setText(vehiculoExistente.getCategory());
+        txtCategoria.setText(vehiculoExistente.getCategory() != null ? vehiculoExistente.getCategory().getCode() : "");
         txtCapacidad.setText(String.valueOf(vehiculoExistente.getCapacity()));
         chkTieneHorometro.setSelected(vehiculoExistente.isHaveHorometer());
 

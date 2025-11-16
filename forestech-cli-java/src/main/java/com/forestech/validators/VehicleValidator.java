@@ -92,25 +92,11 @@ public class VehicleValidator {
      *   <li>OTRO</li>
      * </ul>
      */
-    private static void validateCategory(String category) throws ValidationException {
-        if (category == null || category.trim().isEmpty()) {
+    private static void validateCategory(com.forestech.enums.VehicleCategory category) throws ValidationException {
+        if (category == null) {
             throw new ValidationException("❌ Vehicle category is required");
         }
-        
-        boolean isValid = false;
-        for (String validCategory : VALID_CATEGORIES) {
-            if (validCategory.equalsIgnoreCase(category)) {
-                isValid = true;
-                break;
-            }
-        }
-        
-        if (!isValid) {
-            throw new ValidationException(
-                "❌ Invalid vehicle category: '" + category + "'\n" +
-                "   Valid categories: CAMION, CAMIONETA, MOTO, AUTOMOVIL, MAQUINARIA, OTRO"
-            );
-        }
+        // VehicleCategory es un enum, por lo que siempre es válido si no es null
     }
     
     /**

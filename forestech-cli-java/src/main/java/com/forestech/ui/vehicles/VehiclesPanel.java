@@ -239,7 +239,7 @@ public class VehiclesPanel extends JPanel {
         if (categoriaSeleccionada != null && !"Todas".equalsIgnoreCase(categoriaSeleccionada)) {
             String categoria = categoriaSeleccionada.toLowerCase();
             resultado = resultado.stream()
-                .filter(v -> v.getCategory() != null && v.getCategory().toLowerCase().equals(categoria))
+                .filter(v -> v.getCategory() != null && v.getCategory().getCode().toLowerCase().equals(categoria))
                 .collect(Collectors.toList());
         }
 
@@ -278,7 +278,8 @@ public class VehiclesPanel extends JPanel {
         String seleccionActual = (String) cmbFiltroCategoria.getSelectedItem();
         Set<String> categorias = vehiculos.stream()
             .map(Vehicle::getCategory)
-            .filter(cat -> cat != null && !cat.isBlank())
+            .filter(cat -> cat != null)
+            .map(cat -> cat.getCode())
             .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
 
         suppressFilterEvents = true;

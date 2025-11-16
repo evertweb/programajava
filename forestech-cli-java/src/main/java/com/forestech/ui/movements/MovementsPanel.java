@@ -1,12 +1,10 @@
 package com.forestech.ui.movements;
 
-import com.forestech.enums.MovementType;
 import com.forestech.exceptions.DatabaseException;
 import com.forestech.models.Movement;
 import com.forestech.services.MovementServices;
 import com.forestech.ui.MovementDialogForm;
 import com.forestech.ui.utils.AsyncLoadManager;
-import com.forestech.ui.utils.CatalogCache;
 import com.forestech.ui.utils.UIUtils;
 
 import javax.swing.BorderFactory;
@@ -18,9 +16,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
-import javax.swing.table.DefaultTableModel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -29,36 +27,41 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
- * Panel de gestión de movimientos.
+ * Panel de gestión de movimientos (Vista MVC).
+ * Responsabilidad: Solo UI - Botones, layouts, eventos.
  */
 public class MovementsPanel extends JPanel {
 
+    // Dependencias
     private final JFrame owner;
     private final Consumer<String> logger;
     private final Runnable dashboardRefresh;
     private final Consumer<String> productReloadRequest;
     private final AsyncLoadManager loadManager;
 
-    private JTable tablaMovimientos;
-    private DefaultTableModel modeloMovimientos;
-    private JTextField txtBuscarMovimiento;
-    private JComboBox<String> cmbFiltroTipoMovimiento;
-    private JTextField txtFechaDesdeMovimiento;
-    private JTextField txtFechaHastaMovimiento;
-    private JLabel lblResumenMovimientos;
+    // Componentes de UI
+    private JTable movementsTable;
+    private MovementsTableModel tableModel;
+    private JTextField txtSearch;
+    private JComboBox<String> cmbFilterType;
+    private JTextField txtDateFrom;
+    private JTextField txtDateTo;
+    private JLabel lblSummary;
 
-    private List<Movement> movimientosVisibles = List.of();
-    private Map<String, String> cacheNombresProductos = new HashMap<>();
-    private Map<String, String> cacheNombresVehiculos = new HashMap<>();
+    // Datos
+    private List<Movement> visibleMovements = List.of();
+    private Map<String, String> productNamesCache = new HashMap<>();
+    private Map<String, String> vehicleNamesCache = new HashMap<>();
+
+    // Lógica de negocio
+    private final MovementsDataLoader dataLoader;
 
     public MovementsPanel(JFrame owner,
                           Consumer<String> logger,
@@ -68,184 +71,150 @@ public class MovementsPanel extends JPanel {
         this.logger = logger;
         this.dashboardRefresh = dashboardRefresh;
         this.productReloadRequest = productReloadRequest;
-        this.loadManager = new AsyncLoadManager("Movimientos", logger, this::cargarMovimientos);
+        this.loadManager = new AsyncLoadManager("Movimientos", logger, this::loadMovements);
+        this.dataLoader = new MovementsDataLoader();
+
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         buildUI();
     }
 
     private void buildUI() {
-        JLabel titulo = new JLabel("📊 GESTIÓN DE MOVIMIENTOS", JLabel.CENTER);
-        titulo.setFont(new Font("Arial", Font.BOLD, 20));
+        // Encabezado
+        JLabel title = new JLabel("📊 GESTIÓN DE MOVIMIENTOS", JLabel.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 20));
 
-        JPanel encabezado = new JPanel(new BorderLayout(0, 5));
-        encabezado.add(titulo, BorderLayout.NORTH);
-        encabezado.add(crearPanelFiltros(), BorderLayout.CENTER);
-        add(encabezado, BorderLayout.NORTH);
+        JPanel header = new JPanel(new BorderLayout(0, 5));
+        header.add(title, BorderLayout.NORTH);
+        header.add(createFiltersPanel(), BorderLayout.CENTER);
+        add(header, BorderLayout.NORTH);
 
-        String[] columnas = {
-            "ID", "Tipo", "Producto", "Vehículo", "Cantidad (L)",
-            "Unidad", "Factura", "Precio Unitario", "Subtotal", "Fecha"
-        };
-        modeloMovimientos = new DefaultTableModel(columnas, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-
-        tablaMovimientos = new JTable(modeloMovimientos);
-        tablaMovimientos.setRowHeight(25);
-        tablaMovimientos.setAutoCreateRowSorter(true);
-        UIUtils.styleTable(tablaMovimientos);
-        tablaMovimientos.addMouseListener(new java.awt.event.MouseAdapter() {
+        // Tabla
+        tableModel = new MovementsTableModel(productNamesCache, vehicleNamesCache);
+        movementsTable = new JTable(tableModel);
+        movementsTable.setRowHeight(25);
+        movementsTable.setAutoCreateRowSorter(true);
+        UIUtils.styleTable(movementsTable);
+        movementsTable.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                if (e.getClickCount() == 2 && tablaMovimientos.getSelectedRow() != -1) {
-                    verDetallesMovimiento();
+                if (e.getClickCount() == 2 && movementsTable.getSelectedRow() != -1) {
+                    viewMovementDetails();
                 }
             }
         });
 
-        add(new JScrollPane(tablaMovimientos), BorderLayout.CENTER);
-        add(crearPanelBotones(), BorderLayout.SOUTH);
+        add(new JScrollPane(movementsTable), BorderLayout.CENTER);
+        add(createButtonsPanel(), BorderLayout.SOUTH);
     }
 
-    private JPanel crearPanelFiltros() {
-        JPanel panelFiltros = new JPanel(new BorderLayout(0, 5));
-
-        JPanel panelControles = new JPanel(new GridBagLayout());
-        panelControles.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+    private JPanel createFiltersPanel() {
+        JPanel filtersPanel = new JPanel(new BorderLayout(0, 5));
+        JPanel controlsPanel = new JPanel(new GridBagLayout());
+        controlsPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new java.awt.Insets(4, 6, 4, 6);
         gbc.anchor = GridBagConstraints.WEST;
 
-        txtBuscarMovimiento = new JTextField(18);
-        txtBuscarMovimiento.setToolTipText("ID, producto o vehículo");
-        txtBuscarMovimiento.addActionListener(e -> requestRefresh("Enter búsqueda movimientos"));
+        // Componentes de filtro
+        txtSearch = new JTextField(18);
+        txtSearch.setToolTipText("ID, producto o vehículo");
+        txtSearch.addActionListener(e -> requestRefresh("Enter búsqueda movimientos"));
 
-        cmbFiltroTipoMovimiento = new JComboBox<>(new String[]{"Todos", "ENTRADA", "SALIDA"});
-        cmbFiltroTipoMovimiento.setPreferredSize(new java.awt.Dimension(140, 28));
-        cmbFiltroTipoMovimiento.addActionListener(e -> requestRefresh("Filtro tipo movimientos"));
+        cmbFilterType = new JComboBox<>(new String[]{"Todos", "ENTRADA", "SALIDA"});
+        cmbFilterType.setPreferredSize(new java.awt.Dimension(140, 28));
+        cmbFilterType.addActionListener(e -> requestRefresh("Filtro tipo movimientos"));
 
-        txtFechaDesdeMovimiento = new JTextField(10);
-        txtFechaDesdeMovimiento.setToolTipText("Desde (YYYY-MM-DD)");
-        txtFechaDesdeMovimiento.addActionListener(e -> requestRefresh("Enter fecha desde"));
+        txtDateFrom = new JTextField(10);
+        txtDateFrom.setToolTipText("Desde (YYYY-MM-DD)");
+        txtDateFrom.addActionListener(e -> requestRefresh("Enter fecha desde"));
 
-        txtFechaHastaMovimiento = new JTextField(10);
-        txtFechaHastaMovimiento.setToolTipText("Hasta (YYYY-MM-DD)");
-        txtFechaHastaMovimiento.addActionListener(e -> requestRefresh("Enter fecha hasta"));
+        txtDateTo = new JTextField(10);
+        txtDateTo.setToolTipText("Hasta (YYYY-MM-DD)");
+        txtDateTo.addActionListener(e -> requestRefresh("Enter fecha hasta"));
 
-        JButton btnAplicar = new JButton("Aplicar filtros");
-        btnAplicar.addActionListener(e -> requestRefresh("Botón Aplicar filtros Movimientos"));
+        JButton btnApply = new JButton("Aplicar filtros");
+        btnApply.addActionListener(e -> requestRefresh("Botón Aplicar filtros Movimientos"));
 
-        JButton btnHoy = new JButton("Solo hoy");
-        btnHoy.addActionListener(e -> {
-            String hoy = LocalDate.now().toString();
-            txtFechaDesdeMovimiento.setText(hoy);
-            txtFechaHastaMovimiento.setText(hoy);
+        JButton btnToday = new JButton("Solo hoy");
+        btnToday.addActionListener(e -> {
+            String today = LocalDate.now().toString();
+            txtDateFrom.setText(today);
+            txtDateTo.setText(today);
             requestRefresh("Filtro Solo Hoy");
         });
 
-        JButton btnLimpiar = new JButton("Limpiar");
-        btnLimpiar.addActionListener(e -> {
-            txtBuscarMovimiento.setText("");
-            cmbFiltroTipoMovimiento.setSelectedIndex(0);
-            txtFechaDesdeMovimiento.setText("");
-            txtFechaHastaMovimiento.setText("");
+        JButton btnClear = new JButton("Limpiar");
+        btnClear.addActionListener(e -> {
+            txtSearch.setText("");
+            cmbFilterType.setSelectedIndex(0);
+            txtDateFrom.setText("");
+            txtDateTo.setText("");
             requestRefresh("Limpiar filtros Movimientos");
         });
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        panelControles.add(new JLabel("🔍 ID/Producto/Vehículo:"), gbc);
-
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.gridwidth = 3;
-        gbc.weightx = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        panelControles.add(txtBuscarMovimiento, gbc);
-
-        gbc.gridx = 4;
-        gbc.gridy = 0;
-        gbc.gridwidth = 1;
-        gbc.weightx = 0;
-        gbc.fill = GridBagConstraints.NONE;
-        panelControles.add(new JLabel("⚙️ Tipo:"), gbc);
-
+        // Layout de componentes
+        gbc.gridx = 0; gbc.gridy = 0;
+        controlsPanel.add(new JLabel("🔍 ID/Producto/Vehículo:"), gbc);
+        gbc.gridx = 1; gbc.gridwidth = 3; gbc.weightx = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
+        controlsPanel.add(txtSearch, gbc);
+        gbc.gridx = 4; gbc.gridwidth = 1; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
+        controlsPanel.add(new JLabel("⚙️ Tipo:"), gbc);
         gbc.gridx = 5;
-        gbc.gridy = 0;
-        panelControles.add(cmbFiltroTipoMovimiento, gbc);
+        controlsPanel.add(cmbFilterType, gbc);
 
-        gbc.gridy = 1;
-        gbc.gridx = 0;
-        panelControles.add(new JLabel("📅 Desde:"), gbc);
-
-        gbc.gridx = 1;
-        gbc.weightx = 0.4;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        panelControles.add(txtFechaDesdeMovimiento, gbc);
-
-        gbc.gridx = 2;
-        gbc.weightx = 0;
-        gbc.fill = GridBagConstraints.NONE;
-        panelControles.add(new JLabel("Hasta:"), gbc);
-
-        gbc.gridx = 3;
-        gbc.weightx = 0.4;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        panelControles.add(txtFechaHastaMovimiento, gbc);
-
-        gbc.weightx = 0;
-        gbc.fill = GridBagConstraints.NONE;
-
-        gbc.gridx = 4;
-        panelControles.add(btnAplicar, gbc);
-
+        gbc.gridy = 1; gbc.gridx = 0;
+        controlsPanel.add(new JLabel("📅 Desde:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 0.4; gbc.fill = GridBagConstraints.HORIZONTAL;
+        controlsPanel.add(txtDateFrom, gbc);
+        gbc.gridx = 2; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
+        controlsPanel.add(new JLabel("Hasta:"), gbc);
+        gbc.gridx = 3; gbc.weightx = 0.4; gbc.fill = GridBagConstraints.HORIZONTAL;
+        controlsPanel.add(txtDateTo, gbc);
+        gbc.gridx = 4; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
+        controlsPanel.add(btnApply, gbc);
         gbc.gridx = 5;
-        panelControles.add(btnHoy, gbc);
-
+        controlsPanel.add(btnToday, gbc);
         gbc.gridx = 6;
-        panelControles.add(btnLimpiar, gbc);
+        controlsPanel.add(btnClear, gbc);
 
-        lblResumenMovimientos = new JLabel("Mostrando todos los movimientos");
-        lblResumenMovimientos.setFont(new Font("Arial", Font.ITALIC, 12));
-        lblResumenMovimientos.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
+        lblSummary = new JLabel("Mostrando todos los movimientos");
+        lblSummary.setFont(new Font("Arial", Font.ITALIC, 12));
+        lblSummary.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
 
-        panelFiltros.add(panelControles, BorderLayout.CENTER);
-        panelFiltros.add(lblResumenMovimientos, BorderLayout.SOUTH);
-        return panelFiltros;
+        filtersPanel.add(controlsPanel, BorderLayout.CENTER);
+        filtersPanel.add(lblSummary, BorderLayout.SOUTH);
+        return filtersPanel;
     }
 
-    private JPanel crearPanelBotones() {
-        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+    private JPanel createButtonsPanel() {
+        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
-        JButton btnRegistrar = new JButton("Registrar");
-        btnRegistrar.setBackground(new Color(155, 89, 182));
-        btnRegistrar.setForeground(Color.WHITE);
-        btnRegistrar.addActionListener(e -> registrarMovimiento());
-        panelBotones.add(btnRegistrar);
+        JButton btnRegister = new JButton("Registrar");
+        btnRegister.setBackground(new Color(155, 89, 182));
+        btnRegister.setForeground(Color.WHITE);
+        btnRegister.addActionListener(e -> registerMovement());
+        buttonsPanel.add(btnRegister);
 
-        JButton btnEditar = new JButton("Editar");
-        btnEditar.setBackground(new Color(255, 211, 105));
-        btnEditar.addActionListener(e -> editarMovimiento());
-        panelBotones.add(btnEditar);
+        JButton btnEdit = new JButton("Editar");
+        btnEdit.setBackground(new Color(255, 211, 105));
+        btnEdit.addActionListener(e -> editMovement());
+        buttonsPanel.add(btnEdit);
 
-        JButton btnDetalles = new JButton("Ver Detalles");
-        btnDetalles.addActionListener(e -> verDetallesMovimiento());
-        panelBotones.add(btnDetalles);
+        JButton btnDetails = new JButton("Ver Detalles");
+        btnDetails.addActionListener(e -> viewMovementDetails());
+        buttonsPanel.add(btnDetails);
 
-        JButton btnEliminar = new JButton("Eliminar");
-        btnEliminar.setBackground(new Color(255, 150, 150));
-        btnEliminar.addActionListener(e -> eliminarMovimiento());
-        panelBotones.add(btnEliminar);
+        JButton btnDelete = new JButton("Eliminar");
+        btnDelete.setBackground(new Color(255, 150, 150));
+        btnDelete.addActionListener(e -> deleteMovement());
+        buttonsPanel.add(btnDelete);
 
-        JButton btnRefrescar = new JButton("Refrescar");
-        btnRefrescar.addActionListener(e -> requestRefresh("Botón Refrescar Movimientos"));
-        panelBotones.add(btnRefrescar);
+        JButton btnRefresh = new JButton("Refrescar");
+        btnRefresh.addActionListener(e -> requestRefresh("Botón Refrescar Movimientos"));
+        buttonsPanel.add(btnRefresh);
 
-        return panelBotones;
+        return buttonsPanel;
     }
 
     public void requestRefresh(String origin) {
@@ -256,411 +225,201 @@ public class MovementsPanel extends JPanel {
         loadManager.cancelCurrentLoad();
     }
 
-    private void cargarMovimientos(String origin) {
-        final String criterio = txtBuscarMovimiento != null
-            ? txtBuscarMovimiento.getText().trim()
-            : "";
-        final String tipoSeleccionado = (cmbFiltroTipoMovimiento != null &&
-            cmbFiltroTipoMovimiento.getSelectedItem() != null)
-            ? cmbFiltroTipoMovimiento.getSelectedItem().toString()
+    /**
+     * Método público para registrar un movimiento (llamado desde Dashboard).
+     */
+    public void registrarMovimiento() {
+        registerMovement();
+    }
+
+    private void loadMovements(String origin) {
+        // Obtener valores de filtros
+        final String searchTerm = txtSearch != null ? txtSearch.getText().trim() : "";
+        final String selectedType = (cmbFilterType != null && cmbFilterType.getSelectedItem() != null)
+            ? cmbFilterType.getSelectedItem().toString()
             : "Todos";
 
-        final LocalDate fechaDesde;
-        final LocalDate fechaHasta;
+        // Parsear fechas
+        final LocalDate startDate;
+        final LocalDate endDate;
         try {
-            fechaDesde = parsearFechaFiltro(txtFechaDesdeMovimiento);
-            fechaHasta = parsearFechaFiltro(txtFechaHastaMovimiento);
-            if (fechaDesde != null && fechaHasta != null && fechaHasta.isBefore(fechaDesde)) {
+            startDate = MovementsFormatter.parseDateFilter(txtDateFrom != null ? txtDateFrom.getText() : "");
+            endDate = MovementsFormatter.parseDateFilter(txtDateTo != null ? txtDateTo.getText() : "");
+            if (startDate != null && endDate != null && endDate.isBefore(startDate)) {
                 throw new IllegalArgumentException("La fecha \"Hasta\" no puede ser anterior a \"Desde\"");
             }
         } catch (IllegalArgumentException ex) {
-            JOptionPane.showMessageDialog(owner,
-                ex.getMessage(),
-                "Filtro de fecha inválido",
-                JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(owner, ex.getMessage(), "Filtro de fecha inválido", JOptionPane.WARNING_MESSAGE);
             logger.accept("Movimientos: filtros inválidos → " + ex.getMessage());
             loadManager.finish(0);
             return;
         }
 
         setBusyCursor(true);
-        final long inicio = System.currentTimeMillis();
+        final long startTime = System.currentTimeMillis();
         logger.accept("Movimientos: iniciando carga (origen: " + origin + ")");
 
-        final String terminoBusqueda = criterio.toLowerCase();
-
-        SwingWorker<MovimientosCargaResult, Void> worker = new SwingWorker<>() {
+        SwingWorker<MovementsDataLoader.MovementsLoadResult, Void> worker = new SwingWorker<>() {
             @Override
-            protected MovimientosCargaResult doInBackground() throws Exception {
-                List<Movement> movimientos = MovementServices.getAllMovements();
-
-                // Usar CatalogCache en lugar de consultas duplicadas
-                Map<String, String> productosNombres = CatalogCache.getInstance().getProductNames();
-                Map<String, String> vehiculosNombres = CatalogCache.getInstance().getVehicleNames();
-
-                List<Movement> filtrados = movimientos.stream()
-                    .filter(m -> coincideConTipo(m, tipoSeleccionado))
-                    .filter(m -> coincideConFecha(m, fechaDesde, fechaHasta))
-                    .filter(m -> coincideConTexto(m, terminoBusqueda, productosNombres, vehiculosNombres))
-                    .collect(Collectors.toList());
-
-                long totalEntradas = 0;
-                long totalSalidas = 0;
-                double litrosEntradas = 0;
-                double litrosSalidas = 0;
-
-                for (Movement movimiento : filtrados) {
-                    MovementType type = movimiento.getMovementType();
-                    if (MovementType.ENTRADA.equals(type)) {
-                        totalEntradas++;
-                        litrosEntradas += movimiento.getQuantity();
-                    } else if (MovementType.SALIDA.equals(type)) {
-                        totalSalidas++;
-                        litrosSalidas += movimiento.getQuantity();
-                    }
-                }
-
-                return new MovimientosCargaResult(
-                    filtrados,
-                    productosNombres,
-                    vehiculosNombres,
-                    totalEntradas,
-                    litrosEntradas,
-                    totalSalidas,
-                    litrosSalidas
-                );
+            protected MovementsDataLoader.MovementsLoadResult doInBackground() throws Exception {
+                return dataLoader.loadMovements(searchTerm, selectedType, startDate, endDate);
             }
 
             @Override
             protected void done() {
                 try {
-                    MovimientosCargaResult resultado = get();
-                    movimientosVisibles = resultado.movimientos;
-                    cacheNombresProductos = resultado.productos;
-                    cacheNombresVehiculos = resultado.vehiculos;
+                    MovementsDataLoader.MovementsLoadResult result = get();
+                    visibleMovements = result.movements;
+                    productNamesCache = result.productNames;
+                    vehicleNamesCache = result.vehicleNames;
 
-                    modeloMovimientos.setRowCount(0);
-                    for (Movement movimiento : movimientosVisibles) {
-                        String typeLabel = movimiento.getMovementType() != null
-                            ? movimiento.getMovementType().getCode()
-                            : "—";
-                        String measurementUnit = movimiento.getMeasurementUnitCode() != null
-                            ? movimiento.getMeasurementUnitCode()
-                            : "—";
-                        String invoiceLabel = movimiento.getInvoiceNumber() != null
-                            ? movimiento.getInvoiceNumber()
-                            : "—";
-                        String createdAtRaw = movimiento.getCreatedAt() != null
-                            ? movimiento.getCreatedAt().toString()
-                            : null;
+                    // Actualizar caches en el tableModel
+                    tableModel = new MovementsTableModel(productNamesCache, vehicleNamesCache);
+                    movementsTable.setModel(tableModel);
 
-                        modeloMovimientos.addRow(new Object[]{
-                            movimiento.getId(),
-                            typeLabel,
-                            construirEtiquetaProducto(movimiento.getProductId()),
-                            construirEtiquetaVehiculo(movimiento.getVehicleId()),
-                            String.format("%,.2f", movimiento.getQuantity()),
-                            measurementUnit,
-                            invoiceLabel,
-                            UIUtils.formatCurrency(movimiento.getUnitPrice()),
-                            UIUtils.formatCurrency(movimiento.getQuantity() * movimiento.getUnitPrice()),
-                            UIUtils.formatMovementDate(createdAtRaw)
-                        });
-                    }
+                    // Cargar datos en la tabla
+                    tableModel.loadMovements(visibleMovements);
 
-                    actualizarResumenMovimientos(resultado);
+                    // Actualizar resumen
+                    updateSummary(result);
+
                     logger.accept(String.format(
                         "Movimientos: carga completada en %d ms (%d registros)",
-                        System.currentTimeMillis() - inicio,
-                        movimientosVisibles.size()
+                        System.currentTimeMillis() - startTime,
+                        visibleMovements.size()
                     ));
                 } catch (ExecutionException ex) {
-                    String mensaje = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
-                    JOptionPane.showMessageDialog(owner,
-                        "Error al cargar movimientos: " + mensaje,
-                        "Error", JOptionPane.ERROR_MESSAGE);
-                    logger.accept("Movimientos: error al cargar → " + mensaje);
+                    String message = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
+                    JOptionPane.showMessageDialog(owner, "Error al cargar movimientos: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+                    logger.accept("Movimientos: error al cargar → " + message);
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
                     logger.accept("Movimientos: carga interrumpida");
                 } finally {
-                    finalizarCarga(inicio);
+                    finishLoad(startTime);
                 }
             }
         };
 
-        // Registrar worker para cancelación antes de ejecutar
         loadManager.registerWorker(worker);
         worker.execute();
     }
 
-    private void finalizarCarga(long inicio) {
+    private void finishLoad(long startTime) {
         setBusyCursor(false);
-        loadManager.finish(inicio);
+        loadManager.finish(startTime);
     }
 
-    public void registrarMovimiento() {
+    private void updateSummary(MovementsDataLoader.MovementsLoadResult result) {
+        if (lblSummary == null) return;
+        lblSummary.setText(MovementsFormatter.formatSummary(visibleMovements.size(), result.statistics));
+    }
+
+    private void registerMovement() {
         MovementDialogForm dialog = new MovementDialogForm(owner, true);
         if (dialog.isGuardadoExitoso()) {
             logger.accept("Movimientos: registro exitoso desde formulario");
             requestRefresh("Nuevo movimiento");
-            requestProductosRecalc("Recalcular stock tras movimiento");
+            requestProductsRecalc("Recalcular stock tras movimiento");
             refreshDashboard();
         }
     }
 
-    private void editarMovimiento() {
-        String movimientoId = obtenerMovimientoSeleccionado();
-        if (movimientoId == null) {
-            return;
-        }
+    private void editMovement() {
+        String movementId = getSelectedMovementId();
+        if (movementId == null) return;
 
         try {
-            Movement movimiento;
-            try {
-                movimiento = MovementServices.getMovementById(movimientoId);
-            } catch (DatabaseException e) {
-                JOptionPane.showMessageDialog(owner,
-                    "Error al buscar movimiento: " + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            if (movimiento == null) {
-                JOptionPane.showMessageDialog(owner,
-                    "El movimiento ya no existe. Actualizando lista...",
-                    "Información", JOptionPane.INFORMATION_MESSAGE);
+            Movement movement = MovementServices.getMovementById(movementId);
+            if (movement == null) {
+                JOptionPane.showMessageDialog(owner, "El movimiento ya no existe. Actualizando lista...", "Información", JOptionPane.INFORMATION_MESSAGE);
                 requestRefresh("Movimiento desaparecido");
                 return;
             }
 
-            String cantidadStr = JOptionPane.showInputDialog(owner,
-                "Nueva cantidad (L)", movimiento.getQuantity());
-            if (cantidadStr == null) {
-                return;
-            }
+            String quantityStr = JOptionPane.showInputDialog(owner, "Nueva cantidad (L)", movement.getQuantity());
+            if (quantityStr == null) return;
 
-            String precioStr = JOptionPane.showInputDialog(owner,
-                "Nuevo precio unitario", movimiento.getUnitPrice());
-            if (precioStr == null) {
-                return;
-            }
+            String priceStr = JOptionPane.showInputDialog(owner, "Nuevo precio unitario", movement.getUnitPrice());
+            if (priceStr == null) return;
 
-            double nuevaCantidad = Double.parseDouble(cantidadStr);
-            double nuevoPrecio = Double.parseDouble(precioStr);
+            double newQuantity = Double.parseDouble(quantityStr);
+            double newPrice = Double.parseDouble(priceStr);
 
-            try {
-                MovementServices.updateMovement(movimientoId, nuevaCantidad, nuevoPrecio);
-                JOptionPane.showMessageDialog(owner,
-                    "Movimiento actualizado correctamente",
-                    "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            MovementServices.updateMovement(movementId, newQuantity, newPrice);
+            JOptionPane.showMessageDialog(owner, "Movimiento actualizado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
-                logger.accept("Movimientos: edición aplicada sobre " + movimientoId);
-                requestRefresh("Edición movimiento");
-                requestProductosRecalc("Recalcular stock tras edición movimiento");
-                refreshDashboard();
-            } catch (DatabaseException ex) {
-                JOptionPane.showMessageDialog(owner,
-                    "Error al actualizar movimiento: " + ex.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-            }
+            logger.accept("Movimientos: edición aplicada sobre " + movementId);
+            requestRefresh("Edición movimiento");
+            requestProductsRecalc("Recalcular stock tras edición movimiento");
+            refreshDashboard();
+        } catch (DatabaseException ex) {
+            JOptionPane.showMessageDialog(owner, "Error al actualizar movimiento: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(owner,
-                "Valores numéricos inválidos",
-                "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(owner, "Valores numéricos inválidos", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void eliminarMovimiento() {
-        String movimientoId = obtenerMovimientoSeleccionado();
-        if (movimientoId == null) {
-            return;
-        }
+    private void deleteMovement() {
+        String movementId = getSelectedMovementId();
+        if (movementId == null) return;
 
-        int confirmacion = JOptionPane.showConfirmDialog(owner,
-            "¿Eliminar movimiento " + movimientoId + "?", "Confirmar",
-            JOptionPane.YES_NO_OPTION);
-
-        if (confirmacion != JOptionPane.YES_OPTION) {
-            return;
-        }
+        int confirmation = JOptionPane.showConfirmDialog(owner, "¿Eliminar movimiento " + movementId + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
+        if (confirmation != JOptionPane.YES_OPTION) return;
 
         try {
-            if (MovementServices.deleteMovement(movimientoId)) {
-                JOptionPane.showMessageDialog(owner,
-                    "Movimiento eliminado",
-                    "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                logger.accept("Movimientos: eliminado " + movimientoId);
+            if (MovementServices.deleteMovement(movementId)) {
+                JOptionPane.showMessageDialog(owner, "Movimiento eliminado", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                logger.accept("Movimientos: eliminado " + movementId);
                 requestRefresh("Eliminación movimiento");
-                requestProductosRecalc("Recalcular stock tras eliminación");
+                requestProductsRecalc("Recalcular stock tras eliminación");
                 refreshDashboard();
             } else {
-                JOptionPane.showMessageDialog(owner,
-                    "No se encontró el movimiento",
-                    "Advertencia", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(owner, "No se encontró el movimiento", "Advertencia", JOptionPane.WARNING_MESSAGE);
             }
         } catch (DatabaseException ex) {
-            JOptionPane.showMessageDialog(owner,
-                "Error al eliminar movimiento: " + ex.getMessage(),
-                "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(owner, "Error al eliminar movimiento: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void verDetallesMovimiento() {
-        String movimientoId = obtenerMovimientoSeleccionado();
-        if (movimientoId == null) {
-            return;
-        }
+    private void viewMovementDetails() {
+        String movementId = getSelectedMovementId();
+        if (movementId == null) return;
 
         try {
-            Movement movimiento = MovementServices.getMovementById(movimientoId);
-            if (movimiento == null) {
-                JOptionPane.showMessageDialog(owner,
-                    "El movimiento ya no existe",
-                    "Advertencia", JOptionPane.WARNING_MESSAGE);
+            Movement movement = MovementServices.getMovementById(movementId);
+            if (movement == null) {
+                JOptionPane.showMessageDialog(owner, "El movimiento ya no existe", "Advertencia", JOptionPane.WARNING_MESSAGE);
                 requestRefresh("Movimiento faltante");
                 return;
             }
 
-            String detalle = """
-                ID: %s
-                Tipo: %s
-                Producto: %s
-                Vehículo: %s
-                Cantidad: %,.2f %s
-                Precio unitario: %s
-                Subtotal: %s
-                Factura: %s
-                Fecha: %s
-                """.formatted(
-                movimiento.getId(),
-                movimiento.getMovementType() != null ? movimiento.getMovementType().getCode() : "—",
-                construirEtiquetaProducto(movimiento.getProductId()),
-                construirEtiquetaVehiculo(movimiento.getVehicleId()),
-                movimiento.getQuantity(),
-                movimiento.getMeasurementUnitCode() != null ? movimiento.getMeasurementUnitCode() : "—",
-                UIUtils.formatCurrency(movimiento.getUnitPrice()),
-                UIUtils.formatCurrency(movimiento.getQuantity() * movimiento.getUnitPrice()),
-                movimiento.getInvoiceNumber() != null ? movimiento.getInvoiceNumber() : "—",
-                UIUtils.formatMovementDate(movimiento.getCreatedAt() != null ? movimiento.getCreatedAt().toString() : null)
-            );
+            String details = MovementsFormatter.formatMovementDetails(movement, productNamesCache, vehicleNamesCache);
 
-            javax.swing.JTextArea area = new javax.swing.JTextArea(detalle);
+            JTextArea area = new JTextArea(details);
             area.setEditable(false);
-            area.setFont(new java.awt.Font("Consolas", java.awt.Font.PLAIN, 13));
+            area.setFont(new Font("Consolas", Font.PLAIN, 13));
             area.setLineWrap(true);
             area.setWrapStyleWord(true);
 
-            JOptionPane.showMessageDialog(owner, new javax.swing.JScrollPane(area),
-                "Detalle de movimiento", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(owner, new JScrollPane(area), "Detalle de movimiento", JOptionPane.INFORMATION_MESSAGE);
         } catch (DatabaseException ex) {
-            JOptionPane.showMessageDialog(owner,
-                "Error al consultar movimiento: " + ex.getMessage(),
-                "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(owner, "Error al consultar movimiento: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private String obtenerMovimientoSeleccionado() {
-        if (tablaMovimientos == null || tablaMovimientos.getSelectedRow() == -1) {
-            JOptionPane.showMessageDialog(owner,
-                "Selecciona un movimiento primero",
-                "Advertencia", JOptionPane.WARNING_MESSAGE);
+    private String getSelectedMovementId() {
+        if (movementsTable == null || movementsTable.getSelectedRow() == -1) {
+            JOptionPane.showMessageDialog(owner, "Selecciona un movimiento primero", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return null;
         }
 
-        int filaVista = tablaMovimientos.getSelectedRow();
-        int filaModelo = tablaMovimientos.convertRowIndexToModel(filaVista);
-        return (String) modeloMovimientos.getValueAt(filaModelo, 0);
+        int viewRow = movementsTable.getSelectedRow();
+        int modelRow = movementsTable.convertRowIndexToModel(viewRow);
+        return tableModel.getMovementIdAt(modelRow);
     }
 
-    private void actualizarResumenMovimientos(MovimientosCargaResult resultado) {
-        if (lblResumenMovimientos == null) {
-            return;
-        }
-
-        lblResumenMovimientos.setText(String.format(
-            "Mostrando %d movimientos | Entradas: %d (%,.2f L) | Salidas: %d (%,.2f L)",
-            movimientosVisibles.size(),
-            resultado.totalEntradas,
-            resultado.litrosEntradas,
-            resultado.totalSalidas,
-            resultado.litrosSalidas
-        ));
-    }
-
-    private LocalDate parsearFechaFiltro(JTextField campo) {
-        if (campo == null) {
-            return null;
-        }
-        String valor = campo.getText().trim();
-        if (valor.isEmpty()) {
-            return null;
-        }
-        try {
-            return LocalDate.parse(valor);
-        } catch (DateTimeParseException ex) {
-            throw new IllegalArgumentException("Formato de fecha inválido: " + valor);
-        }
-    }
-
-    private boolean coincideConTipo(Movement movimiento, String filtroTipo) {
-        if ("Todos".equalsIgnoreCase(filtroTipo)) {
-            return true;
-        }
-        MovementType type = movimiento.getMovementType();
-        return type != null && type.getCode().equalsIgnoreCase(filtroTipo);
-    }
-
-    private boolean coincideConFecha(Movement movimiento, LocalDate desde, LocalDate hasta) {
-        if (movimiento.getCreatedAt() == null) {
-            return false;
-        }
-        LocalDate fechaMovimiento = movimiento.getCreatedAt().toLocalDate();
-        if (fechaMovimiento == null) {
-            return false;
-        }
-
-        boolean despuesDeDesde = (desde == null) || !fechaMovimiento.isBefore(desde);
-        boolean antesDeHasta = (hasta == null) || !fechaMovimiento.isAfter(hasta);
-        return despuesDeDesde && antesDeHasta;
-    }
-
-    private boolean coincideConTexto(Movement movimiento, String termino,
-                                     Map<String, String> nombresProductos,
-                                     Map<String, String> nombresVehiculos) {
-        if (termino == null || termino.isBlank()) {
-            return true;
-        }
-
-        String lower = termino.toLowerCase();
-        return contains(movimiento.getId(), lower)
-            || contains(movimiento.getProductId(), lower)
-            || contains(nombresProductos.get(movimiento.getProductId()), lower)
-            || contains(movimiento.getVehicleId(), lower)
-            || contains(nombresVehiculos.get(movimiento.getVehicleId()), lower)
-            || contains(movimiento.getInvoiceNumber(), lower);
-    }
-
-    private boolean contains(String valor, String termino) {
-        return valor != null && valor.toLowerCase().contains(termino);
-    }
-
-    private String construirEtiquetaProducto(String productId) {
-        if (productId == null) {
-            return "—";
-        }
-        String nombre = cacheNombresProductos.getOrDefault(productId, productId);
-        return productId + " - " + nombre;
-    }
-
-    private String construirEtiquetaVehiculo(String vehicleId) {
-        if (vehicleId == null || vehicleId.isBlank()) {
-            return "—";
-        }
-        String nombre = cacheNombresVehiculos.getOrDefault(vehicleId, vehicleId);
-        return vehicleId + " - " + nombre;
-    }
-
-    private void requestProductosRecalc(String origin) {
+    private void requestProductsRecalc(String origin) {
         if (productReloadRequest != null) {
             productReloadRequest.accept(origin);
         }
@@ -678,31 +437,5 @@ public class MovementsPanel extends JPanel {
             owner.setCursor(cursor);
         }
         setCursor(cursor);
-    }
-
-    private static class MovimientosCargaResult {
-        final List<Movement> movimientos;
-        final Map<String, String> productos;
-        final Map<String, String> vehiculos;
-        final long totalEntradas;
-        final double litrosEntradas;
-        final long totalSalidas;
-        final double litrosSalidas;
-
-        MovimientosCargaResult(List<Movement> movimientos,
-                               Map<String, String> productos,
-                               Map<String, String> vehiculos,
-                               long totalEntradas,
-                               double litrosEntradas,
-                               long totalSalidas,
-                               double litrosSalidas) {
-            this.movimientos = movimientos;
-            this.productos = productos;
-            this.vehiculos = vehiculos;
-            this.totalEntradas = totalEntradas;
-            this.litrosEntradas = litrosEntradas;
-            this.totalSalidas = totalSalidas;
-            this.litrosSalidas = litrosSalidas;
-        }
     }
 }
