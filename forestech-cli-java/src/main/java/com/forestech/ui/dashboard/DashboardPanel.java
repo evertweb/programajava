@@ -145,10 +145,10 @@ public class DashboardPanel extends JPanel {
         SwingWorker<DashboardMetrics, Void> worker = new SwingWorker<>() {
             @Override
             protected DashboardMetrics doInBackground() throws Exception {
-                List<Product> productos = ProductServices.getAllProducts();
-                List<Vehicle> vehiculos = VehicleServices.getAllVehicles();
-                List<Movement> movimientos = MovementServices.getAllMovements();
-                List<Factura> facturas = FacturaServices.getAllFacturas();
+                List<Product> productos = new ProductServices().getAllProducts();
+                List<Vehicle> vehiculos = new VehicleServices().getAllVehicles();
+                List<Movement> movimientos = new MovementServices().getAllMovements();
+                List<Factura> facturas = new FacturaServices().getAllFacturas();
                 return new DashboardMetrics(
                     productos.size(),
                     vehiculos.size(),

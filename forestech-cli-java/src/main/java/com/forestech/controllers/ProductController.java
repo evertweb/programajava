@@ -17,9 +17,11 @@ public class ProductController {
 
     private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
     private Scanner scanner;
-    
+    private final ProductServices productServices;
+
     public ProductController(Scanner scanner) {
         this.scanner = scanner;
+        this.productServices = new ProductServices();
     }
     
     public void gestionarProductos() {
@@ -85,7 +87,7 @@ public class ProductController {
             double precio = InputHelper.readDouble("💰 Precio por unidad: ");
 
             Product producto = new Product(nombre, unidadDeMedida, precio);
-            ProductServices.insertProduct(producto);
+            productServices.insertProduct(producto);
 
             logger.info("Producto creado exitosamente - ID: {}, Nombre: {}", producto.getId(), producto.getName());
 
@@ -110,7 +112,7 @@ public class ProductController {
         System.out.println("═══════════════════════════════════════\n");
 
         try {
-            List<Product> productos = ProductServices.getAllProducts();
+            List<Product> productos = productServices.getAllProducts();
 
             if (productos.isEmpty()) {
                 System.out.println("⚠️  No hay productos registrados.");
@@ -135,7 +137,7 @@ public class ProductController {
         String nombreBusqueda = InputHelper.readString("📝 Ingrese el nombre o parte del nombre: ");
 
         try {
-            List<Product> productos = ProductServices.searchProductsByName(nombreBusqueda);
+            List<Product> productos = productServices.searchProductsByName(nombreBusqueda);
 
             if (productos.isEmpty()) {
                 System.out.println("⚠️  No se encontraron productos con el nombre: " + nombreBusqueda);
@@ -161,7 +163,7 @@ public class ProductController {
         String unidad = InputHelper.readString("📏 Ingrese la unidad de medida: ");
 
         try {
-            List<Product> productos = ProductServices.getProductsByUnidadDeMedida(unidad);
+            List<Product> productos = productServices.getProductsByUnidadDeMedida(unidad);
 
             if (productos.isEmpty()) {
                 System.out.println("⚠️  No se encontraron productos con la unidad: " + unidad);
@@ -190,7 +192,7 @@ public class ProductController {
 
         try {
             Product producto = new Product(id, nuevoNombre, nuevaUnidad, nuevoPrecio);
-            boolean actualizado = ProductServices.updateProduct(producto);
+            boolean actualizado = productServices.updateProduct(producto);
 
             if (actualizado) {
                 logger.info("Producto actualizado exitosamente - ID: {}", id);
@@ -219,7 +221,7 @@ public class ProductController {
         }
 
         try {
-            boolean eliminado = ProductServices.deleteProduct(id);
+            boolean eliminado = productServices.deleteProduct(id);
 
             if (eliminado) {
                 logger.info("Producto eliminado exitosamente - ID: {}", id);

@@ -178,7 +178,7 @@ public class SuppliersPanel extends JPanel {
         SwingWorker<List<Supplier>, Void> worker = new SwingWorker<>() {
             @Override
             protected List<Supplier> doInBackground() throws Exception {
-                List<Supplier> proveedores = SupplierServices.getAllSuppliers();
+                List<Supplier> proveedores = new SupplierServices().getAllSuppliers();
 
                 if (!criterio.isBlank()) {
                     proveedores = proveedores.stream()
@@ -299,7 +299,7 @@ public class SuppliersPanel extends JPanel {
         }
 
         try {
-            SupplierServices.insertSupplier(nuevo);
+            new SupplierServices().insertSupplier(nuevo);
             JOptionPane.showMessageDialog(owner,
                 "Proveedor creado correctamente",
                 "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -320,7 +320,7 @@ public class SuppliersPanel extends JPanel {
         }
 
         try {
-            Supplier existente = SupplierServices.getSupplierById(proveedorId);
+            Supplier existente = new SupplierServices().getSupplierById(proveedorId);
             if (existente == null) {
                 JOptionPane.showMessageDialog(owner,
                     "El proveedor ya no existe",
@@ -335,7 +335,7 @@ public class SuppliersPanel extends JPanel {
                 return;
             }
 
-            if (SupplierServices.updateSupplier(actualizado)) {
+            if (new SupplierServices().updateSupplier(actualizado)) {
                 JOptionPane.showMessageDialog(owner,
                     "Proveedor actualizado",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -365,7 +365,7 @@ public class SuppliersPanel extends JPanel {
         }
 
         try {
-            if (SupplierServices.deleteSupplier(proveedorId)) {
+            if (new SupplierServices().deleteSupplier(proveedorId)) {
                 JOptionPane.showMessageDialog(owner,
                     "Proveedor eliminado",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -387,7 +387,7 @@ public class SuppliersPanel extends JPanel {
         }
 
         try {
-            Supplier proveedor = SupplierServices.getSupplierById(proveedorId);
+            Supplier proveedor = new SupplierServices().getSupplierById(proveedorId);
             if (proveedor == null) {
                 JOptionPane.showMessageDialog(owner,
                     "El proveedor ya no existe",

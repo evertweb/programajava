@@ -81,7 +81,7 @@ public class VehicleManagerGUI extends JFrame {
 
     private void cargarVehiculos() {
         try {
-            List<Vehicle> vehiculos = VehicleServices.getAllVehicles();
+            List<Vehicle> vehiculos = new VehicleServices().getAllVehicles();
             modeloTabla.setRowCount(0);
 
             for (Vehicle v : vehiculos) {
@@ -122,7 +122,7 @@ public class VehicleManagerGUI extends JFrame {
         String id = (String) modeloTabla.getValueAt(fila, 0);
 
         try {
-            Vehicle vehiculo = VehicleServices.getVehicleById(id);
+            Vehicle vehiculo = new VehicleServices().getVehicleById(id);
             if (vehiculo != null) {
                 VehicleDialogForm dialogo = new VehicleDialogForm(this, true, vehiculo);
                 if (dialogo.isGuardadoExitoso()) {
@@ -152,7 +152,7 @@ public class VehicleManagerGUI extends JFrame {
 
         if (confirmacion == JOptionPane.YES_OPTION) {
             try {
-                VehicleServices.deleteVehicle(id);
+                new VehicleServices().deleteVehicle(id);
                 JOptionPane.showMessageDialog(this, "Vehículo eliminado correctamente",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 cargarVehiculos();

@@ -184,7 +184,7 @@ public class FormularioProductoSimple extends JFrame {
             JOptionPane.INFORMATION_MESSAGE
         );
 
-        // En una aplicación real, aquí llamarías a ProductServices.insertProduct()
+        // En una aplicación real, aquí llamarías a new ProductServices().insertProduct()
         System.out.println("=".repeat(50));
         System.out.println("PRODUCTO GUARDADO:");
         System.out.println("Nombre: " + nombre);

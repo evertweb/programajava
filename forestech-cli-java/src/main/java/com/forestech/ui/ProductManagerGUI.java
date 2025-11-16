@@ -158,14 +158,14 @@ public class ProductManagerGUI extends JFrame {
      * Carga todos los productos desde la base de datos y los muestra en la tabla.
      *
      * INTEGRACIÓN CON SERVICES:
-     * - Llama a ProductServices.getAllProducts()
+     * - Llama a new ProductServices().getAllProducts()
      * - Maneja DatabaseException con JOptionPane
      * - Actualiza la tabla con los datos recuperados
      */
     private void cargarProductosDesdeDB() {
         try {
             // LLAMADA A LA CAPA DE SERVICES
-            List<Product> productos = ProductServices.getAllProducts();
+            List<Product> productos = new ProductServices().getAllProducts();
 
             // Limpiar tabla antes de cargar
             modeloTabla.setRowCount(0);
@@ -200,7 +200,7 @@ public class ProductManagerGUI extends JFrame {
      * PASOS:
      * 1. Validar campos del formulario
      * 2. Crear objeto Product
-     * 3. Llamar a ProductServices.insertProduct()
+     * 3. Llamar a new ProductServices().insertProduct()
      * 4. Manejar errores (DatabaseException)
      * 5. Refrescar tabla si fue exitoso
      */
@@ -258,7 +258,7 @@ public class ProductManagerGUI extends JFrame {
 
         // PASO 3: INSERTAR EN BD MEDIANTE SERVICES
         try {
-            ProductServices.insertProduct(nuevoProducto);
+            new ProductServices().insertProduct(nuevoProducto);
 
             // ÉXITO: Mostrar mensaje y refrescar
             JOptionPane.showMessageDialog(this,
@@ -324,7 +324,7 @@ public class ProductManagerGUI extends JFrame {
         if (confirmacion == JOptionPane.YES_OPTION) {
             try {
                 // Llamar a Services para eliminar
-                ProductServices.deleteProduct(productId);
+                new ProductServices().deleteProduct(productId);
 
                 JOptionPane.showMessageDialog(this,
                     "Producto eliminado correctamente",

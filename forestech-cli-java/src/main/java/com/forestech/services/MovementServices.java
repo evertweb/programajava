@@ -4,7 +4,9 @@ import com.forestech.dao.MovementDAO;
 import com.forestech.enums.MovementType;
 import com.forestech.exceptions.DatabaseException;
 import com.forestech.exceptions.InsufficientStockException;
+import com.forestech.exceptions.ValidationException;
 import com.forestech.models.Movement;
+import com.forestech.services.interfaces.IMovementService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,13 +29,38 @@ import java.util.Optional;
  * </ul>
  *
  * @author Forestech Development Team
- * @version 2.0 (con llaves foráneas)
+ * @version 3.0 (implementa IMovementService, instance methods)
  * @since Fase 4
  */
-public class MovementServices {
+public class MovementServices implements IMovementService {
 
     private static final Logger logger = LoggerFactory.getLogger(MovementServices.class);
-    private static final MovementDAO dao = new MovementDAO();
+    private final MovementDAO dao;
+    private final ProductServices productServices;
+    private final VehicleServices vehicleServices;
+    private final FacturaServices facturaServices;
+
+    /**
+     * Constructor con inyección de dependencias.
+     */
+    public MovementServices(ProductServices productServices,
+                            VehicleServices vehicleServices,
+                            FacturaServices facturaServices) {
+        this.dao = new MovementDAO();
+        this.productServices = productServices;
+        this.vehicleServices = vehicleServices;
+        this.facturaServices = facturaServices;
+    }
+
+    /**
+     * Constructor por defecto (crea dependencias internamente).
+     */
+    public MovementServices() {
+        this.dao = new MovementDAO();
+        this.productServices = new ProductServices();
+        this.vehicleServices = new VehicleServices();
+        this.facturaServices = new FacturaServices();
+    }
 
     // ============================================================================
     // CREATE - OPERACIONES DE INSERCIÓN
@@ -86,9 +113,11 @@ public class MovementServices {
      * @param movement Objeto Movement a insertar (con ID ya generado)
      * @throws DatabaseException Si hay error de conexión o alguna FK no existe
      * @throws InsufficientStockException Si es SALIDA y no hay stock suficiente
+     * @throws ValidationException Si los datos no son válidos
      * @see Movement
      */
-    public static void insertMovement(Movement movement) throws DatabaseException, InsufficientStockException {
+    @Override
+    public void insertMovement(Movement movement) throws DatabaseException, InsufficientStockException, ValidationException {
         try {
             // ========================================================================
             // VALIDACIÓN 1: product_id OBLIGATORIO (DEBE existir en oil_products)
@@ -100,7 +129,7 @@ public class MovementServices {
                 );
             }
 
-            if (!ProductServices.existsProduct(movement.getProductId())) {
+            if (!productServices.existsProduct(movement.getProductId())) {
                 throw new DatabaseException(
                     "ERROR: El producto '" + movement.getProductId() + "' NO existe en oil_products. " +
                     "Debes crear el producto primero antes de usarlo en un movimiento.",
@@ -112,7 +141,7 @@ public class MovementServices {
             // VALIDACIÓN 2: vehicle_id (solo si NO es NULL, debe existir en vehicles)
             // ========================================================================
             if (movement.getVehicleId() != null && !movement.getVehicleId().trim().isEmpty()) {
-                if (!VehicleServices.existsVehicle(movement.getVehicleId())) {
+                if (!vehicleServices.existsVehicle(movement.getVehicleId())) {
                     throw new DatabaseException(
                         "ERROR: El vehículo '" + movement.getVehicleId() + "' NO existe en vehicles. " +
                         "Debes crear el vehículo primero antes de usarlo en un movimiento.",
@@ -125,7 +154,7 @@ public class MovementServices {
             // VALIDACIÓN 3: numero_factura (solo si NO es NULL, debe existir en facturas)
             // ========================================================================
             if (movement.getInvoiceNumber() != null && !movement.getInvoiceNumber().trim().isEmpty()) {
-                if (!FacturaServices.existsFactura(movement.getInvoiceNumber())) {
+                if (!facturaServices.existsFactura(movement.getInvoiceNumber())) {
                     throw new DatabaseException(
                         "ERROR: La factura '" + movement.getInvoiceNumber() + "' NO existe en facturas. " +
                         "Debes crear la factura primero antes de usarla en un movimiento.",
@@ -188,7 +217,8 @@ public class MovementServices {
      * @return Lista de movimientos (vacía si no hay registros)
      * @throws DatabaseException Si hay error de conexión
      */
-    public static List<Movement> getAllMovements() throws DatabaseException {
+    @Override
+    public List<Movement> getAllMovements() throws DatabaseException {
         try {
             List<Movement> movements = dao.findAll();
             logger.debug("Se cargaron {} movimientos", movements.size());
@@ -207,7 +237,8 @@ public class MovementServices {
      * @return Movement encontrado, o null si no existe
      * @throws DatabaseException Si hay error de conexión
      */
-    public static Movement getMovementById(String movementId) throws DatabaseException {
+    @Override
+    public Movement getMovementById(String movementId) throws DatabaseException {
         try {
             return dao.findById(movementId).orElse(null);
         } catch (SQLException e) {
@@ -223,7 +254,8 @@ public class MovementServices {
      * @return Lista de movimientos del tipo especificado
      * @throws DatabaseException Si hay error de conexión
      */
-    public static List<Movement> getMovementsByType(MovementType movementType) throws DatabaseException {
+    @Override
+    public List<Movement> getMovementsByType(MovementType movementType) throws DatabaseException {
         if (movementType == null) {
             throw new DatabaseException(
                 "movementType no puede ser nulo",
@@ -245,7 +277,7 @@ public class MovementServices {
      * @deprecated Usa {@link #getMovementsByType(MovementType)}
      */
     @Deprecated
-    public static List<Movement> getMovementsByType(String movementType) throws DatabaseException {
+    public List<Movement> getMovementsByType(String movementType) throws DatabaseException {
         MovementType type = movementType != null ? MovementType.fromCode(movementType) : null;
         return getMovementsByType(type);
     }
@@ -263,11 +295,12 @@ public class MovementServices {
      * @param movementId ID del movimiento a actualizar
      * @param newQuantity Nueva cantidad
      * @param newUnitPrice Nuevo precio unitario
-     * @return true si se actualizó correctamente, false si no existe el movimiento
      * @throws DatabaseException Si hay error de conexión
+     * @throws InsufficientStockException Si la actualización causa stock negativo
      */
-    public static boolean updateMovement(String movementId, double newQuantity, double newUnitPrice)
-            throws DatabaseException {
+    @Override
+    public void updateMovement(String movementId, double newQuantity, double newUnitPrice)
+            throws DatabaseException, InsufficientStockException {
 
         try {
             Optional<Movement> optMovement = dao.findById(movementId);
@@ -275,7 +308,7 @@ public class MovementServices {
             if (optMovement.isEmpty()) {
                 logger.warn("No se encontró movimiento para actualizar - ID: {}", movementId);
                 System.out.println("⚠️  No se encontró el movimiento: " + movementId);
-                return false;
+                throw new DatabaseException("Movimiento no encontrado: " + movementId);
             }
 
             Movement movement = optMovement.get();
@@ -287,7 +320,6 @@ public class MovementServices {
             logger.info("Movimiento actualizado - ID: {}, Cantidad: {}, Precio: {}",
                 movementId, newQuantity, newUnitPrice);
             System.out.println("✅ Movimiento actualizado: " + movementId);
-            return true;
 
         } catch (SQLException e) {
             logger.error("Error al actualizar movimiento - ID: {}", movementId, e);
@@ -310,7 +342,8 @@ public class MovementServices {
      * @return true si se eliminó correctamente, false si no existe
      * @throws DatabaseException Si hay error de conexión
      */
-    public static boolean deleteMovement(String movementId) throws DatabaseException {
+    @Override
+    public boolean deleteMovement(String movementId) throws DatabaseException {
         try {
             boolean deleted = dao.delete(movementId);
 
@@ -341,7 +374,8 @@ public class MovementServices {
      * @return Stock actual (puede ser negativo si hubo más salidas que entradas)
      * @throws DatabaseException Si hay error de conexión
      */
-    public static double getProductStock(String productId) throws DatabaseException {
+    @Override
+    public double getProductStock(String productId) throws DatabaseException {
         try {
             return dao.getStockByProductId(productId);
         } catch (SQLException e) {
@@ -360,7 +394,8 @@ public class MovementServices {
      * @return Mapa producto → stock (0.0 si no tiene movimientos)
      * @throws DatabaseException Error al consultar la base de datos
      */
-    public static Map<String, Double> getStockByProductIds(List<String> productIds) throws DatabaseException {
+    @Override
+    public Map<String, Double> getStockByProductIds(List<String> productIds) throws DatabaseException {
         Map<String, Double> stockMap = new HashMap<>();
         if (productIds == null || productIds.isEmpty()) {
             return stockMap;
@@ -384,7 +419,8 @@ public class MovementServices {
      * @return Cantidad total de movimientos
      * @throws DatabaseException Si hay error de conexión
      */
-    public static int getTotalMovements() throws DatabaseException {
+    @Override
+    public int getTotalMovements() throws DatabaseException {
         try {
             List<Movement> allMovements = dao.findAll();
             return allMovements.size();
@@ -401,7 +437,8 @@ public class MovementServices {
      * @return Lista de movimientos del vehículo
      * @throws DatabaseException Si hay error de conexión
      */
-    public static List<Movement> getMovementsByVehicle(String vehicleId) throws DatabaseException {
+    @Override
+    public List<Movement> getMovementsByVehicle(String vehicleId) throws DatabaseException {
         try {
             return dao.findByVehicleId(vehicleId);
         } catch (SQLException e) {
@@ -423,11 +460,51 @@ public class MovementServices {
      * @deprecated Método pendiente de implementación en el DAO
      */
     @Deprecated
-    public static List<Movement> getMovementsByDateRange(String fechaInicio, String fechaFin)
+    @Override
+    public List<Movement> getMovementsByDateRange(String fechaInicio, String fechaFin)
             throws DatabaseException {
         throw new UnsupportedOperationException(
             "Este método requiere implementar findByDateRange() en MovementDAO. " +
             "Usa getAllMovements() y filtra en memoria por ahora."
         );
     }
+
+    /**
+     * Obtiene movimientos de un producto específico.
+     *
+     * @param productId ID del producto
+     * @return Lista de movimientos del producto
+     * @throws DatabaseException Si hay error de conexión
+     */
+    @Override
+    public List<Movement> getMovementsByProduct(String productId) throws DatabaseException {
+        try {
+            return dao.findByProductId(productId);
+        } catch (SQLException e) {
+            logger.error("Error al obtener movimientos por producto: {}", productId, e);
+            throw new DatabaseException("Error al obtener movimientos por producto", e);
+        }
+    }
+
+    /**
+     * Obtiene el stock de todos los productos.
+     *
+     * @return Mapa con productId → stock
+     * @throws DatabaseException Si hay error de conexión
+     */
+    @Override
+    public Map<String, Double> getAllProductsStock() throws DatabaseException {
+        try {
+            // Obtener todos los productos y calcular su stock
+            List<String> allProductIds = productServices.getAllProducts()
+                .stream()
+                .map(p -> p.getId())
+                .toList();
+            return getStockByProductIds(allProductIds);
+        } catch (Exception e) {
+            logger.error("Error al calcular stock de todos los productos", e);
+            throw new DatabaseException("Error al calcular stock de todos los productos", e);
+        }
+    }
+
 }

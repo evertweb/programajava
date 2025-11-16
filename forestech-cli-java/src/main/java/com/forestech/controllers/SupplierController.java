@@ -70,7 +70,7 @@ public class SupplierController {
             String direccion = InputHelper.readString("📍 Dirección: ");
 
             Supplier proveedor = new Supplier(nombre, nit, telefono, email, direccion);
-            SupplierServices.insertSupplier(proveedor);
+            new SupplierServices().insertSupplier(proveedor);
 
             logger.info("Proveedor creado exitosamente - ID: {}, Nombre: {}", proveedor.getId(), proveedor.getName());
 
@@ -89,7 +89,7 @@ public class SupplierController {
         System.out.println("═══════════════════════════════════════\n");
 
         try {
-            List<Supplier> proveedores = SupplierServices.getAllSuppliers();
+            List<Supplier> proveedores = new SupplierServices().getAllSuppliers();
 
             if (proveedores.isEmpty()) {
                 System.out.println("⚠️  No hay proveedores registrados.");
@@ -114,7 +114,7 @@ public class SupplierController {
         String id = InputHelper.readString("🆔 Ingrese el ID del proveedor: ");
 
         try {
-            Supplier s = SupplierServices.getSupplierById(id);
+            Supplier s = new SupplierServices().getSupplierById(id);
 
             if (s == null) {
                 System.out.println("⚠️  No se encontró el proveedor.");
@@ -143,7 +143,7 @@ public class SupplierController {
             String direccion = InputHelper.readString("📍 Nueva dirección: ");
 
             Supplier proveedor = new Supplier(id, nombre, nit, telefono, email, direccion);
-            boolean actualizado = SupplierServices.updateSupplier(proveedor);
+            boolean actualizado = new SupplierServices().updateSupplier(proveedor);
 
             if (actualizado) {
                 logger.info("Proveedor actualizado exitosamente - ID: {}", id);
@@ -172,7 +172,7 @@ public class SupplierController {
         }
 
         try {
-            boolean eliminado = SupplierServices.deleteSupplier(id);
+            boolean eliminado = new SupplierServices().deleteSupplier(id);
 
             if (eliminado) {
                 logger.info("Proveedor eliminado exitosamente - ID: {}", id);

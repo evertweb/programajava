@@ -119,7 +119,7 @@ public class InvoicesPanel extends JPanel {
         SwingWorker<List<Factura>, Void> worker = new SwingWorker<>() {
             @Override
             protected List<Factura> doInBackground() throws Exception {
-                return FacturaServices.getAllFacturas();
+                return new FacturaServices().getAllFacturas();
             }
 
             @Override
@@ -188,7 +188,7 @@ public class InvoicesPanel extends JPanel {
 
         JComboBox<String> cmbProveedor = new JComboBox<>();
         try {
-            List<Supplier> proveedores = SupplierServices.getAllSuppliers();
+            List<Supplier> proveedores = new SupplierServices().getAllSuppliers();
             cmbProveedor.addItem("--- Sin proveedor ---");
             for (Supplier s : proveedores) {
                 cmbProveedor.addItem(s.getId() + " - " + s.getName());
@@ -257,7 +257,7 @@ public class InvoicesPanel extends JPanel {
                     null
                 );
 
-                FacturaServices.createFacturaWithDetails(factura, new ArrayList<>());
+                new FacturaServices().createFacturaWithDetails(factura, new ArrayList<>());
 
                 JOptionPane.showMessageDialog(dialog,
                     "Factura creada correctamente\nTotal: " + UIUtils.formatCurrency(total),
@@ -298,7 +298,7 @@ public class InvoicesPanel extends JPanel {
         String numeroFactura = (String) modeloFacturas.getValueAt(fila, 0);
 
         try {
-            List<DetalleFactura> detalles = FacturaServices.getDetallesByFactura(numeroFactura);
+            List<DetalleFactura> detalles = new FacturaServices().getDetallesByFactura(numeroFactura);
 
             if (detalles.isEmpty()) {
                 JOptionPane.showMessageDialog(owner,

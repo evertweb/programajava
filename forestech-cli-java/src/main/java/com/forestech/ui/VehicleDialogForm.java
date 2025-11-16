@@ -80,7 +80,7 @@ public class VehicleDialogForm extends JDialog {
 
     private void cargarProductosCombustible() {
         try {
-            List<Product> productos = ProductServices.getAllProducts();
+            List<Product> productos = new ProductServices().getAllProducts();
             cmbCombustible.addItem(new ComboItem(null, "(Sin asignar)"));
             for (Product p : productos) {
                 cmbCombustible.addItem(new ComboItem(p.getId(), p.getName()));
@@ -158,7 +158,7 @@ public class VehicleDialogForm extends JDialog {
         try {
             if (vehiculoExistente == null) {
                 Vehicle nuevoVehiculo = new Vehicle(nombre, categoria, capacidad, fuelProductId, tieneHorometro);
-                VehicleServices.insertVehicle(nuevoVehiculo);
+                new VehicleServices().insertVehicle(nuevoVehiculo);
                 JOptionPane.showMessageDialog(this, "Vehículo agregado exitosamente",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
             } else {
@@ -167,7 +167,7 @@ public class VehicleDialogForm extends JDialog {
                 vehiculoExistente.setCapacity(capacidad);
                 vehiculoExistente.setFuelProductId(fuelProductId);
                 vehiculoExistente.setHaveHorometer(tieneHorometro);
-                VehicleServices.updateVehicle(vehiculoExistente);
+                new VehicleServices().updateVehicle(vehiculoExistente);
                 JOptionPane.showMessageDialog(this, "Vehículo actualizado exitosamente",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
             }

@@ -203,8 +203,8 @@ public class ProductsPanel extends JPanel {
             @Override
             protected List<Product> doInBackground() throws Exception {
                 List<Product> productos = criterio.isEmpty()
-                    ? ProductServices.getAllProducts()
-                    : ProductServices.searchProductsByName(criterio);
+                    ? new ProductServices().getAllProducts()
+                    : new ProductServices().searchProductsByName(criterio);
 
                 if (unidadSeleccionada != null && !"Todas".equalsIgnoreCase(unidadSeleccionada)) {
                     productos = productos.stream()
@@ -214,7 +214,7 @@ public class ProductsPanel extends JPanel {
 
                 if (!productos.isEmpty()) {
                     List<String> ids = productos.stream().map(Product::getId).toList();
-                    stockPorProducto = MovementServices.getStockByProductIds(ids);
+                    stockPorProducto = new MovementServices().getStockByProductIds(ids);
                 }
 
                 return productos;
@@ -392,7 +392,7 @@ public class ProductsPanel extends JPanel {
 
         if (confirmacion == JOptionPane.YES_OPTION) {
             try {
-                ProductServices.deleteProduct(id);
+                new ProductServices().deleteProduct(id);
                 JOptionPane.showMessageDialog(owner, "Producto eliminado",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 requestRefresh("Post Eliminación Producto");
@@ -417,7 +417,7 @@ public class ProductsPanel extends JPanel {
 
         String id = (String) modeloProductos.getValueAt(fila, 0);
         try {
-            Product producto = ProductServices.getProductById(id);
+            Product producto = new ProductServices().getProductById(id);
             if (producto == null) {
                 JOptionPane.showMessageDialog(owner, "El producto ya no existe",
                     "Error", JOptionPane.ERROR_MESSAGE);
@@ -450,7 +450,7 @@ public class ProductsPanel extends JPanel {
 
         String id = (String) modeloProductos.getValueAt(fila, 0);
         try {
-            Product producto = ProductServices.getProductById(id);
+            Product producto = new ProductServices().getProductById(id);
             if (producto == null) {
                 JOptionPane.showMessageDialog(owner, "No se encontró el producto",
                     "Error", JOptionPane.ERROR_MESSAGE);
@@ -458,7 +458,7 @@ public class ProductsPanel extends JPanel {
                 return;
             }
 
-            double stock = MovementServices.getProductStock(id);
+            double stock = new MovementServices().getProductStock(id);
             String mensaje = "ID: " + producto.getId() +
                 "\nNombre: " + producto.getName() +
                 "\nUnidad: " + producto.getUnidadDeMedida() +

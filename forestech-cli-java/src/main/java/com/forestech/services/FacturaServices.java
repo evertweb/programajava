@@ -5,6 +5,7 @@ import com.forestech.exceptions.DatabaseException;
 import com.forestech.exceptions.TransactionFailedException;
 import com.forestech.models.Factura;
 import com.forestech.models.DetalleFactura;
+import com.forestech.services.interfaces.IFacturaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,10 +15,27 @@ import java.util.List;
 
 /**
  * Servicio para gestionar facturas con transacciones.
+ *
+ * @version 3.0 (implementa IFacturaService, instance methods)
  */
-public class FacturaServices {
+public class FacturaServices implements IFacturaService {
 
     private static final Logger logger = LoggerFactory.getLogger(FacturaServices.class);
+    private final SupplierServices supplierServices;
+
+    /**
+     * Constructor con inyección de dependencias.
+     */
+    public FacturaServices(SupplierServices supplierServices) {
+        this.supplierServices = supplierServices;
+    }
+
+    /**
+     * Constructor por defecto (crea dependencias internamente).
+     */
+    public FacturaServices() {
+        this.supplierServices = new SupplierServices();
+    }
 
     /**
      * Crea una factura con sus detalles en UNA SOLA TRANSACCIÓN CON VALIDACIONES.
@@ -28,14 +46,15 @@ public class FacturaServices {
      *   <li><strong>supplier_id:</strong> Si NO es NULL, DEBE existir en suppliers</li>
      * </ol>
      */
-    public static void createFacturaWithDetails(Factura factura, List<DetalleFactura> detalles)
+    @Override
+    public void createFacturaWithDetails(Factura factura, List<DetalleFactura> detalles)
             throws TransactionFailedException, DatabaseException {
 
         // ========================================================================
         // VALIDACIÓN: supplier_id (solo si NO es NULL, debe existir)
         // ========================================================================
         if (factura.getSupplierId() != null && !factura.getSupplierId().trim().isEmpty()) {
-            if (!SupplierServices.existsSupplier(factura.getSupplierId())) {
+            if (!supplierServices.existsSupplier(factura.getSupplierId())) {
                 throw new DatabaseException(
                     "ERROR: El proveedor '" + factura.getSupplierId() + "' NO existe en suppliers. " +
                     "Debes crear el proveedor primero antes de usarlo en una factura.",
@@ -114,7 +133,8 @@ public class FacturaServices {
     }
 
     // READ: Obtener todas las facturas
-    public static List<Factura> getAllFacturas() throws DatabaseException {
+    @Override
+    public List<Factura> getAllFacturas() throws DatabaseException {
         List<Factura> facturas = new ArrayList<>();
         String sql = "SELECT numero_factura, fecha_emision, fecha_vencimiento, supplier_id, " +
                 "subtotal, iva, total, observaciones, forma_pago, cuenta_bancaria FROM facturas " +
@@ -156,7 +176,8 @@ public class FacturaServices {
      * @return Factura encontrada, o null si no existe
      * @throws DatabaseException Si hay error de conexión
      */
-    public static Factura getFacturaByNumero(String numeroFactura) throws DatabaseException {
+    @Override
+    public Factura getFacturaByNumero(String numeroFactura) throws DatabaseException {
         String sql = "SELECT numero_factura, fecha_emision, fecha_vencimiento, supplier_id, " +
                 "subtotal, iva, total, observaciones, forma_pago, cuenta_bancaria " +
                 "FROM facturas WHERE numero_factura = ?";
@@ -197,12 +218,14 @@ public class FacturaServices {
      * @return true si existe, false si no existe
      * @throws DatabaseException Si hay error de conexión
      */
-    public static boolean existsFactura(String numeroFactura) throws DatabaseException {
+    @Override
+    public boolean existsFactura(String numeroFactura) throws DatabaseException {
         return getFacturaByNumero(numeroFactura) != null;
     }
 
     // READ: Obtener detalles de una factura
-    public static List<DetalleFactura> getDetallesByFactura(String numeroFactura)
+    @Override
+    public List<DetalleFactura> getDetallesByFactura(String numeroFactura)
             throws DatabaseException {
         List<DetalleFactura> detalles = new ArrayList<>();
         String sql = "SELECT id_detalle, numero_factura, producto, cantidad, precio_unitario " +

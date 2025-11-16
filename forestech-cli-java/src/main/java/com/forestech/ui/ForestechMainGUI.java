@@ -303,7 +303,7 @@ public class ForestechMainGUI extends JFrame {
      */
     private void cargarProductos() {
         try {
-            List<Product> productos = ProductServices.getAllProducts();
+            List<Product> productos = new ProductServices().getAllProducts();
             modeloProductos.setRowCount(0);
 
             for (Product p : productos) {
@@ -329,7 +329,7 @@ public class ForestechMainGUI extends JFrame {
      */
     private void cargarVehiculos() {
         try {
-            List<Vehicle> vehiculos = VehicleServices.getAllVehicles();
+            List<Vehicle> vehiculos = new VehicleServices().getAllVehicles();
             modeloVehiculos.setRowCount(0);
 
             for (Vehicle v : vehiculos) {
@@ -356,7 +356,7 @@ public class ForestechMainGUI extends JFrame {
      */
     private void cargarMovimientos() {
         try {
-            List<Movement> movimientos = MovementServices.getAllMovements();
+            List<Movement> movimientos = new MovementServices().getAllMovements();
             modeloMovimientos.setRowCount(0);
 
             for (Movement m : movimientos) {
@@ -392,7 +392,7 @@ public class ForestechMainGUI extends JFrame {
         try {
             double precio = Double.parseDouble(precioStr);
             Product producto = new Product(nombre, "Litros", precio);
-            ProductServices.insertProduct(producto);
+            new ProductServices().insertProduct(producto);
 
             JOptionPane.showMessageDialog(this, "Producto agregado correctamente",
                 "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -426,7 +426,7 @@ public class ForestechMainGUI extends JFrame {
 
         if (confirmacion == JOptionPane.YES_OPTION) {
             try {
-                ProductServices.deleteProduct(id);
+                new ProductServices().deleteProduct(id);
                 JOptionPane.showMessageDialog(this, "Producto eliminado",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 cargarProductos();

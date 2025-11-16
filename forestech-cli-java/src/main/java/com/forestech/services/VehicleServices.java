@@ -3,6 +3,7 @@ package com.forestech.services;
 import com.forestech.dao.VehicleDAO;
 import com.forestech.exceptions.DatabaseException;
 import com.forestech.models.Vehicle;
+import com.forestech.services.interfaces.IVehicleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,20 +11,37 @@ import java.util.List;
 
 /**
  * Servicio para gestionar operaciones CRUD de vehículos.
- * 
+ *
  * <p><strong>REFACTORIZADO - Usa DAO Pattern:</strong></p>
  * <ul>
  *   <li>Antes: 347 líneas con JDBC directo</li>
  *   <li>Después: 115 líneas delegando a VehicleDAO</li>
  *   <li>Reducción: 67% menos código</li>
  * </ul>
- * 
- * @version 2.0 (Refactorizado con DAO Pattern)
+ *
+ * @version 3.0 (implementa IVehicleService, instance methods)
  */
-public class VehicleServices {
+public class VehicleServices implements IVehicleService {
 
     private static final Logger logger = LoggerFactory.getLogger(VehicleServices.class);
-    private static final VehicleDAO vehicleDAO = new VehicleDAO();
+    private final VehicleDAO vehicleDAO;
+    private final ProductServices productServices;
+
+    /**
+     * Constructor con inyección de dependencias.
+     */
+    public VehicleServices(ProductServices productServices) {
+        this.vehicleDAO = new VehicleDAO();
+        this.productServices = productServices;
+    }
+
+    /**
+     * Constructor por defecto (crea dependencias internamente).
+     */
+    public VehicleServices() {
+        this.vehicleDAO = new VehicleDAO();
+        this.productServices = new ProductServices();
+    }
 
     // ============================================================================
     // CREATE - OPERACIONES DE INSERCIÓN
@@ -37,10 +55,11 @@ public class VehicleServices {
      *   <li><strong>fuel_product_id:</strong> Si NO es NULL, DEBE existir en oil_products</li>
      * </ol>
      */
-    public static void insertVehicle(Vehicle vehicle) throws DatabaseException {
+    @Override
+    public void insertVehicle(Vehicle vehicle) throws DatabaseException {
         // VALIDACIÓN: fuel_product_id (solo si NO es NULL, debe existir)
         if (vehicle.getFuelProductId() != null && !vehicle.getFuelProductId().trim().isEmpty()) {
-            if (!ProductServices.existsProduct(vehicle.getFuelProductId())) {
+            if (!productServices.existsProduct(vehicle.getFuelProductId())) {
                 throw new DatabaseException(
                     "ERROR: El producto de combustible '" + vehicle.getFuelProductId() +
                     "' NO existe en oil_products. " +
@@ -67,7 +86,8 @@ public class VehicleServices {
     /**
      * Recupera todos los vehículos de la base de datos.
      */
-    public static List<Vehicle> getAllVehicles() throws DatabaseException {
+    @Override
+    public List<Vehicle> getAllVehicles() throws DatabaseException {
         try {
             List<Vehicle> vehicles = vehicleDAO.findAll();
             logger.debug("Se cargaron {} vehículos", vehicles.size());
@@ -82,7 +102,8 @@ public class VehicleServices {
     /**
      * Busca un vehículo por su ID.
      */
-    public static Vehicle getVehicleById(String vehicleId) throws DatabaseException {
+    @Override
+    public Vehicle getVehicleById(String vehicleId) throws DatabaseException {
         try {
             return vehicleDAO.findById(vehicleId).orElse(null);
         } catch (Exception e) {
@@ -95,7 +116,8 @@ public class VehicleServices {
      * Verifica si un vehículo existe en la BD.
      * Útil para validar FKs antes de insertar Movimientos.
      */
-    public static boolean existsVehicle(String vehicleId) throws DatabaseException {
+    @Override
+    public boolean existsVehicle(String vehicleId) throws DatabaseException {
         try {
             return vehicleDAO.exists(vehicleId);
         } catch (Exception e) {
@@ -107,7 +129,8 @@ public class VehicleServices {
     /**
      * Filtra vehículos por categoría.
      */
-    public static List<Vehicle> getVehiclesByCategory(String category) throws DatabaseException {
+    @Override
+    public List<Vehicle> getVehiclesByCategory(String category) throws DatabaseException {
         try {
             List<Vehicle> vehicles = vehicleDAO.findByCategory(category);
             System.out.println("✅ Encontrados " + vehicles.size() + " vehículos en categoría: " + category);
@@ -121,7 +144,8 @@ public class VehicleServices {
     // UPDATE - OPERACIONES DE ACTUALIZACIÓN
     // ============================================================================
 
-    public static boolean updateVehicle(Vehicle vehicle) throws DatabaseException {
+    @Override
+    public boolean updateVehicle(Vehicle vehicle) throws DatabaseException {
         try {
             vehicleDAO.update(vehicle);
             logger.info("Vehículo actualizado - ID: {}", vehicle.getId());
@@ -138,7 +162,8 @@ public class VehicleServices {
     // DELETE - OPERACIONES DE ELIMINACIÓN
     // ============================================================================
 
-    public static boolean deleteVehicle(String vehicleId) throws DatabaseException {
+    @Override
+    public boolean deleteVehicle(String vehicleId) throws DatabaseException {
         try {
             boolean deleted = vehicleDAO.delete(vehicleId);
             if (deleted) {

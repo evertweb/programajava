@@ -31,7 +31,7 @@ public class MovementsDataLoader {
                                              LocalDate startDate,
                                              LocalDate endDate) throws DatabaseException {
         // Cargar todos los movimientos
-        List<Movement> allMovements = MovementServices.getAllMovements();
+        List<Movement> allMovements = new MovementServices().getAllMovements();
 
         // Obtener nombres desde el cache
         Map<String, String> productNames = CatalogCache.getInstance().getProductNames();

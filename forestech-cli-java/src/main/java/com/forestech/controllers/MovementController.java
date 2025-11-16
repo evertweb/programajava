@@ -127,7 +127,7 @@ public class MovementController {
                 .unitPrice(precio)
                 .build();
 
-            MovementServices.insertMovement(entrada);
+            new MovementServices().insertMovement(entrada);
 
             logger.info("ENTRADA registrada exitosamente - ID: {}, Producto: {}, Cantidad: {}",
                 entrada.getId(), productId, cantidad);
@@ -158,7 +158,7 @@ public class MovementController {
             String productId = seleccionarProducto();
             if (productId == null) return;
 
-            double stockActual = MovementServices.getProductStock(productId);
+            double stockActual = new MovementServices().getProductStock(productId);
             System.out.println("\n📦 Stock disponible: " + stockActual + " unidades");
 
             double cantidad = InputHelper.readDouble("\n💧 Ingrese la cantidad a retirar: ");
@@ -178,7 +178,7 @@ public class MovementController {
                 .unitPrice(precio)
                 .build();
 
-            MovementServices.insertMovement(salida);
+            new MovementServices().insertMovement(salida);
 
             logger.info("SALIDA registrada exitosamente - ID: {}, Producto: {}, Vehículo: {}, Cantidad: {}",
                 salida.getId(), productId, vehicleId, cantidad);
@@ -208,7 +208,7 @@ public class MovementController {
         System.out.println("═══════════════════════════════════════\n");
 
         try {
-            List<Movement> movimientos = MovementServices.getAllMovements();
+            List<Movement> movimientos = new MovementServices().getAllMovements();
             
             if (movimientos.isEmpty()) {
                 System.out.println("ℹ️  No hay movimientos registrados.");
@@ -248,7 +248,7 @@ public class MovementController {
         String id = InputHelper.readString("🔑 Ingrese el ID del movimiento: ");
 
         try {
-            Movement m = MovementServices.getMovementById(id);
+            Movement m = new MovementServices().getMovementById(id);
             
             if (m == null) {
                 System.out.println("❌ No se encontró movimiento con ID: " + id);
@@ -280,7 +280,7 @@ public class MovementController {
         if (productId == null) return;
 
         try {
-            double stock = MovementServices.getProductStock(productId);
+            double stock = new MovementServices().getProductStock(productId);
             
             System.out.println("\n📦 Stock actual del producto " + productId + ":");
             System.out.println("   " + stock + " unidades");
@@ -299,7 +299,8 @@ public class MovementController {
         String id = InputHelper.readString("🔑 ID del movimiento a actualizar: ");
 
         try {
-            Movement m = MovementServices.getMovementById(id);
+            MovementServices movementServices = new MovementServices();
+            Movement m = movementServices.getMovementById(id);
             if (m == null) {
                 System.out.println("❌ No existe movimiento con ID: " + id);
                 return;
@@ -312,13 +313,16 @@ public class MovementController {
             double nuevaCantidad = InputHelper.readDouble("\n💧 Nueva cantidad: ");
             double nuevoPrecio = InputHelper.readDouble("💰 Nuevo precio: ");
 
-            MovementServices.updateMovement(m.getId(), nuevaCantidad, nuevoPrecio);
+            movementServices.updateMovement(m.getId(), nuevaCantidad, nuevoPrecio);
 
             logger.info("Movimiento actualizado exitosamente - ID: {}, Nueva cantidad: {}, Nuevo precio: {}",
                 m.getId(), nuevaCantidad, nuevoPrecio);
 
             System.out.println("\n✅ Movimiento actualizado exitosamente!");
 
+        } catch (InsufficientStockException e) {
+            logger.error("Error: Stock insuficiente al actualizar movimiento {}: {}", id, e.getMessage(), e);
+            System.out.println("❌ Error: " + e.getMessage());
         } catch (DatabaseException e) {
             logger.error("Error al actualizar movimiento {}: {}", id, e.getMessage(), e);
             System.out.println("❌ Error: " + e.getMessage());
@@ -333,7 +337,7 @@ public class MovementController {
         String id = InputHelper.readString("🔑 ID del movimiento a eliminar: ");
 
         try {
-            Movement m = MovementServices.getMovementById(id);
+            Movement m = new MovementServices().getMovementById(id);
             if (m == null) {
                 System.out.println("❌ No existe movimiento con ID: " + id);
                 return;
@@ -348,7 +352,7 @@ public class MovementController {
             String confirmacion = InputHelper.readString("\nEscriba 'SI' para confirmar: ");
 
             if (confirmacion.equalsIgnoreCase("SI")) {
-                MovementServices.deleteMovement(id);
+                new MovementServices().deleteMovement(id);
                 logger.info("Movimiento eliminado exitosamente - ID: {}", id);
                 System.out.println("\n✅ Movimiento eliminado exitosamente!");
             } else {
@@ -384,7 +388,7 @@ public class MovementController {
     
     private String seleccionarProducto() {
         try {
-            List<Product> productos = ProductServices.getAllProducts();
+            List<Product> productos = new ProductServices().getAllProducts();
             
             if (productos.isEmpty()) {
                 System.out.println("❌ No hay productos registrados. Cree uno primero.");
@@ -418,7 +422,7 @@ public class MovementController {
     
     private String seleccionarVehiculo() {
         try {
-            List<Vehicle> vehiculos = VehicleServices.getAllVehicles();
+            List<Vehicle> vehiculos = new VehicleServices().getAllVehicles();
             
             if (vehiculos.isEmpty()) {
                 System.out.println("❌ No hay vehículos registrados. Cree uno primero.");

@@ -3,6 +3,7 @@ package com.forestech.services;
 import com.forestech.dao.ProductDAO;
 import com.forestech.exceptions.DatabaseException;
 import com.forestech.models.Product;
+import com.forestech.services.interfaces.IProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,20 +11,27 @@ import java.util.List;
 
 /**
  * Servicio para gestionar operaciones CRUD de productos.
- * 
+ *
  * <p><strong>REFACTORIZADO - Usa DAO Pattern:</strong></p>
  * <ul>
  *   <li>Antes: 373 líneas con JDBC directo</li>
  *   <li>Después: 110 líneas delegando a ProductDAO</li>
  *   <li>Reducción: 70% menos código</li>
  * </ul>
- * 
- * @version 2.0 (Refactorizado con DAO Pattern)
+ *
+ * @version 3.0 (implementa IProductService, instance methods)
  */
-public class ProductServices {
+public class ProductServices implements IProductService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProductServices.class);
-    private static final ProductDAO productDAO = new ProductDAO();
+    private final ProductDAO productDAO;
+
+    /**
+     * Constructor sin parámetros.
+     */
+    public ProductServices() {
+        this.productDAO = new ProductDAO();
+    }
 
     // ============================================================================
     // CREATE - OPERACIONES DE INSERCIÓN
@@ -39,7 +47,8 @@ public class ProductServices {
      *   <li>El precio debe ser mayor a 0</li>
      * </ul>
      */
-    public static void insertProduct(Product product) throws DatabaseException {
+    @Override
+    public void insertProduct(Product product) throws DatabaseException {
         try {
             productDAO.insert(product);
             logger.info("Producto insertado - ID: {}, Nombre: {}", product.getId(), product.getName());
@@ -57,7 +66,8 @@ public class ProductServices {
     /**
      * Recupera todos los productos de la base de datos.
      */
-    public static List<Product> getAllProducts() throws DatabaseException {
+    @Override
+    public List<Product> getAllProducts() throws DatabaseException {
         try {
             List<Product> products = productDAO.findAll();
             logger.debug("Se cargaron {} productos", products.size());
@@ -72,7 +82,8 @@ public class ProductServices {
     /**
      * Busca un producto por su ID.
      */
-    public static Product getProductById(String productId) throws DatabaseException {
+    @Override
+    public Product getProductById(String productId) throws DatabaseException {
         try {
             return productDAO.findById(productId).orElse(null);
         } catch (Exception e) {
@@ -85,7 +96,8 @@ public class ProductServices {
      * Verifica si un producto existe en la BD.
      * Útil para validar FKs antes de insertar Movimientos o Vehículos.
      */
-    public static boolean existsProduct(String productId) throws DatabaseException {
+    @Override
+    public boolean existsProduct(String productId) throws DatabaseException {
         try {
             return productDAO.exists(productId);
         } catch (Exception e) {
@@ -97,7 +109,8 @@ public class ProductServices {
     /**
      * Busca productos por nombre (coincidencia parcial).
      */
-    public static List<Product> searchProductsByName(String searchTerm) throws DatabaseException {
+    @Override
+    public List<Product> searchProductsByName(String searchTerm) throws DatabaseException {
         try {
             List<Product> products = productDAO.findByName(searchTerm);
             logger.debug("Búsqueda por nombre '{}' - {} productos encontrados", searchTerm, products.size());
@@ -112,7 +125,7 @@ public class ProductServices {
     /**
      * Filtra productos por categoría.
      */
-    public static List<Product> getProductsByCategory(String category) throws DatabaseException {
+    public List<Product> getProductsByCategory(String category) throws DatabaseException {
         try {
             List<Product> products = productDAO.findByCategory(category);
             System.out.println("✅ Encontrados " + products.size() + " productos en categoría: " + category);
@@ -125,7 +138,8 @@ public class ProductServices {
     /**
      * Filtra productos por unidad de medida.
      */
-    public static List<Product> getProductsByUnidadDeMedida(String unidadDeMedida) throws DatabaseException {
+    @Override
+    public List<Product> getProductsByUnidadDeMedida(String unidadDeMedida) throws DatabaseException {
         try {
             List<Product> products = productDAO.findByCategory(unidadDeMedida);
             System.out.println("✅ Encontrados " + products.size() + " productos con unidad: " + unidadDeMedida);
@@ -139,7 +153,8 @@ public class ProductServices {
     // UPDATE - OPERACIONES DE ACTUALIZACIÓN
     // ============================================================================
 
-    public static boolean updateProduct(Product product) throws DatabaseException {
+    @Override
+    public boolean updateProduct(Product product) throws DatabaseException {
         try {
             productDAO.update(product);
             logger.info("Producto actualizado - ID: {}", product.getId());
@@ -156,7 +171,8 @@ public class ProductServices {
     // DELETE - OPERACIONES DE ELIMINACIÓN
     // ============================================================================
 
-    public static boolean deleteProduct(String productId) throws DatabaseException {
+    @Override
+    public boolean deleteProduct(String productId) throws DatabaseException {
         try {
             boolean deleted = productDAO.delete(productId);
             if (deleted) {

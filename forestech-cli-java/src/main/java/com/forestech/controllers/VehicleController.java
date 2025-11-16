@@ -73,7 +73,7 @@ public class VehicleController {
             boolean tieneHorometro = tieneHorometroStr.equalsIgnoreCase("S");
 
             Vehicle vehiculo = new Vehicle(nombre, categoria, capacidad, fuelProductId, tieneHorometro);
-            VehicleServices.insertVehicle(vehiculo);
+            new VehicleServices().insertVehicle(vehiculo);
 
             logger.info("Vehículo creado exitosamente - ID: {}, Nombre: {}", vehiculo.getId(), vehiculo.getName());
 
@@ -92,7 +92,7 @@ public class VehicleController {
         System.out.println("═══════════════════════════════════════\n");
 
         try {
-            List<Vehicle> vehiculos = VehicleServices.getAllVehicles();
+            List<Vehicle> vehiculos = new VehicleServices().getAllVehicles();
 
             if (vehiculos.isEmpty()) {
                 System.out.println("⚠️  No hay vehículos registrados.");
@@ -117,7 +117,7 @@ public class VehicleController {
         String id = InputHelper.readString("🆔 Ingrese el ID del vehículo: ");
 
         try {
-            Vehicle v = VehicleServices.getVehicleById(id);
+            Vehicle v = new VehicleServices().getVehicleById(id);
 
             if (v == null) {
                 System.out.println("⚠️  No se encontró el vehículo.");
@@ -139,7 +139,7 @@ public class VehicleController {
         String categoria = InputHelper.readString("📋 Ingrese la categoría (Camión, Excavadora, Motosierra, etc.): ");
 
         try {
-            List<Vehicle> vehiculos = VehicleServices.getVehiclesByCategory(categoria);
+            List<Vehicle> vehiculos = new VehicleServices().getVehiclesByCategory(categoria);
 
             if (vehiculos.isEmpty()) {
                 System.out.println("⚠️  No se encontraron vehículos en la categoría: " + categoria);
@@ -173,7 +173,7 @@ public class VehicleController {
             boolean tieneHorometro = tieneHorometroStr.equalsIgnoreCase("S");
 
             Vehicle vehiculo = new Vehicle(id, nombre, categoria, capacidad, fuelProductId, tieneHorometro);
-            boolean actualizado = VehicleServices.updateVehicle(vehiculo);
+            boolean actualizado = new VehicleServices().updateVehicle(vehiculo);
 
             if (actualizado) {
                 logger.info("Vehículo actualizado exitosamente - ID: {}", id);
@@ -202,7 +202,7 @@ public class VehicleController {
         }
 
         try {
-            boolean eliminado = VehicleServices.deleteVehicle(id);
+            boolean eliminado = new VehicleServices().deleteVehicle(id);
 
             if (eliminado) {
                 logger.info("Vehículo eliminado exitosamente - ID: {}", id);

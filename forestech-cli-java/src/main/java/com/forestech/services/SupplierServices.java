@@ -3,6 +3,7 @@ package com.forestech.services;
 import com.forestech.dao.SupplierDAO;
 import com.forestech.exceptions.DatabaseException;
 import com.forestech.models.Supplier;
+import com.forestech.services.interfaces.ISupplierService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,33 +11,41 @@ import java.util.List;
 
 /**
  * Servicio para gestionar operaciones CRUD de proveedores.
- * 
+ *
  * <p><strong>REFACTORIZADO - Usa DAO Pattern:</strong></p>
  * <ul>
  *   <li>Antes: 168 líneas con JDBC directo</li>
  *   <li>Después: 80 líneas delegando a SupplierDAO</li>
  *   <li>Reducción: 52% menos código</li>
  * </ul>
- * 
+ *
  * <p>Ahora esta clase SOLO maneja:</p>
  * <ul>
  *   <li>Validaciones de negocio (si las hay)</li>
  *   <li>Mensajes de éxito/error</li>
  *   <li>Delegación al DAO</li>
  * </ul>
- * 
- * @version 2.0 (Refactorizado con DAO Pattern)
+ *
+ * @version 3.0 (implementa ISupplierService, instance methods)
  */
-public class SupplierServices {
+public class SupplierServices implements ISupplierService {
 
     private static final Logger logger = LoggerFactory.getLogger(SupplierServices.class);
-    private static final SupplierDAO supplierDAO = new SupplierDAO();
+    private final SupplierDAO supplierDAO;
+
+    /**
+     * Constructor sin parámetros.
+     */
+    public SupplierServices() {
+        this.supplierDAO = new SupplierDAO();
+    }
 
     // ============================================================================
     // CREATE - OPERACIONES DE INSERCIÓN
     // ============================================================================
 
-    public static void insertSupplier(Supplier supplier) throws DatabaseException {
+    @Override
+    public void insertSupplier(Supplier supplier) throws DatabaseException {
         try {
             supplierDAO.insert(supplier);
             logger.info("Proveedor insertado - ID: {}, Nombre: {}", supplier.getId(), supplier.getName());
@@ -54,7 +63,8 @@ public class SupplierServices {
     /**
      * Recupera todos los proveedores de la base de datos.
      */
-    public static List<Supplier> getAllSuppliers() throws DatabaseException {
+    @Override
+    public List<Supplier> getAllSuppliers() throws DatabaseException {
         try {
             List<Supplier> suppliers = supplierDAO.findAll();
             logger.debug("Se cargaron {} proveedores", suppliers.size());
@@ -74,7 +84,8 @@ public class SupplierServices {
      * @return Supplier encontrado, o null si no existe
      * @throws DatabaseException Si hay error de conexión
      */
-    public static Supplier getSupplierById(String supplierId) throws DatabaseException {
+    @Override
+    public Supplier getSupplierById(String supplierId) throws DatabaseException {
         try {
             return supplierDAO.findById(supplierId).orElse(null);
         } catch (Exception e) {
@@ -87,7 +98,8 @@ public class SupplierServices {
      * Verifica si un proveedor existe en la BD.
      * Útil para validar FKs antes de insertar Facturas.
      */
-    public static boolean existsSupplier(String supplierId) throws DatabaseException {
+    @Override
+    public boolean existsSupplier(String supplierId) throws DatabaseException {
         try {
             return supplierDAO.exists(supplierId);
         } catch (Exception e) {
@@ -100,7 +112,8 @@ public class SupplierServices {
     // UPDATE - OPERACIONES DE ACTUALIZACIÓN
     // ============================================================================
 
-    public static boolean updateSupplier(Supplier supplier) throws DatabaseException {
+    @Override
+    public boolean updateSupplier(Supplier supplier) throws DatabaseException {
         try {
             supplierDAO.update(supplier);
             logger.info("Proveedor actualizado - ID: {}", supplier.getId());
@@ -117,7 +130,8 @@ public class SupplierServices {
     // DELETE - OPERACIONES DE ELIMINACIÓN
     // ============================================================================
 
-    public static boolean deleteSupplier(String supplierId) throws DatabaseException {
+    @Override
+    public boolean deleteSupplier(String supplierId) throws DatabaseException {
         try {
             boolean deleted = supplierDAO.delete(supplierId);
             if (deleted) {

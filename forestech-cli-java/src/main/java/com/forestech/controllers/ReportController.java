@@ -66,7 +66,7 @@ public class ReportController {
         System.out.println("═══════════════════════════════════════════════════════════════════════\n");
 
         try {
-            List<Product> productos = ProductServices.getAllProducts();
+            List<Product> productos = new ProductServices().getAllProducts();
 
             if (productos.isEmpty()) {
                 System.out.println("⚠️  No hay productos registrados en el sistema.");
@@ -84,7 +84,7 @@ public class ReportController {
             int productosSinStock = 0;
 
             for (Product p : productos) {
-                double stock = MovementServices.getProductStock(p.getId());
+                double stock = new MovementServices().getProductStock(p.getId());
                 stockTotal += stock;
 
                 if (stock == 0) {
@@ -161,7 +161,7 @@ public class ReportController {
             String fechaInicio = InputHelper.readString("📅 Fecha inicio (YYYY-MM-DD HH:MM:SS): ");
             String fechaFin = InputHelper.readString("📅 Fecha fin (YYYY-MM-DD HH:MM:SS): ");
 
-            List<Movement> movimientos = MovementServices.getMovementsByDateRange(fechaInicio, fechaFin);
+            List<Movement> movimientos = new MovementServices().getMovementsByDateRange(fechaInicio, fechaFin);
 
             if (movimientos.isEmpty()) {
                 System.out.println("\n⚠️  No hay movimientos en ese rango de fechas.");
@@ -186,7 +186,7 @@ public class ReportController {
         String vehicleId = InputHelper.readString("🚜 Ingrese ID del vehículo: ");
 
         try {
-            List<Movement> movimientos = MovementServices.getMovementsByVehicle(vehicleId);
+            List<Movement> movimientos = new MovementServices().getMovementsByVehicle(vehicleId);
 
             if (movimientos.isEmpty()) {
                 System.out.println("\n⚠️  No hay movimientos para ese vehículo.");
@@ -209,7 +209,7 @@ public class ReportController {
         System.out.println("═══════════════════════════════════════\n");
 
         try {
-            int total = MovementServices.getTotalMovements();
+            int total = new MovementServices().getTotalMovements();
             System.out.println("📊 Total de movimientos en el sistema: " + total);
 
         } catch (DatabaseException e) {
@@ -231,7 +231,7 @@ public class ReportController {
         MovementType tipo = (opcion == 1) ? MovementType.ENTRADA : MovementType.SALIDA;
 
         try {
-            List<Movement> movimientos = MovementServices.getMovementsByType(tipo);
+            List<Movement> movimientos = new MovementServices().getMovementsByType(tipo);
 
             if (movimientos.isEmpty()) {
                 System.out.println("\n⚠️  No hay movimientos de tipo " + tipo.getCode());

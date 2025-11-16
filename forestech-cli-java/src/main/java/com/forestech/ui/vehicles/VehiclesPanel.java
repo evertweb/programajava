@@ -193,7 +193,7 @@ public class VehiclesPanel extends JPanel {
         SwingWorker<VehiclesPayload, Void> worker = new SwingWorker<>() {
             @Override
             protected VehiclesPayload doInBackground() throws Exception {
-                List<Vehicle> vehiculos = VehicleServices.getAllVehicles();
+                List<Vehicle> vehiculos = new VehicleServices().getAllVehicles();
                 List<Vehicle> filtrados = aplicarFiltros(vehiculos, criterio, categoriaSeleccionada);
                 return new VehiclesPayload(vehiculos, filtrados, criterio, categoriaSeleccionada);
             }
@@ -347,7 +347,7 @@ public class VehiclesPanel extends JPanel {
 
         String id = (String) modeloVehiculos.getValueAt(fila, 0);
         try {
-            Vehicle vehiculo = VehicleServices.getVehicleById(id);
+            Vehicle vehiculo = new VehicleServices().getVehicleById(id);
             if (vehiculo == null) {
                 JOptionPane.showMessageDialog(owner, "El vehículo ya no existe",
                     "Error", JOptionPane.ERROR_MESSAGE);
@@ -384,7 +384,7 @@ public class VehiclesPanel extends JPanel {
 
         if (confirmacion == JOptionPane.YES_OPTION) {
             try {
-                VehicleServices.deleteVehicle(id);
+                new VehicleServices().deleteVehicle(id);
                 JOptionPane.showMessageDialog(owner, "Vehículo eliminado",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 refresh();
@@ -409,7 +409,7 @@ public class VehiclesPanel extends JPanel {
 
         String id = (String) modeloVehiculos.getValueAt(fila, 0);
         try {
-            Vehicle vehiculo = VehicleServices.getVehicleById(id);
+            Vehicle vehiculo = new VehicleServices().getVehicleById(id);
             if (vehiculo == null) {
                 JOptionPane.showMessageDialog(owner, "No se encontró el vehículo",
                     "Error", JOptionPane.ERROR_MESSAGE);

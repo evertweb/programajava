@@ -1,6 +1,7 @@
 package com.forestech.ui.movements;
 
 import com.forestech.exceptions.DatabaseException;
+import com.forestech.exceptions.InsufficientStockException;
 import com.forestech.models.Movement;
 import com.forestech.services.MovementServices;
 import com.forestech.ui.MovementDialogForm;
@@ -330,7 +331,7 @@ public class MovementsPanel extends JPanel {
         if (movementId == null) return;
 
         try {
-            Movement movement = MovementServices.getMovementById(movementId);
+            Movement movement = new MovementServices().getMovementById(movementId);
             if (movement == null) {
                 JOptionPane.showMessageDialog(owner, "El movimiento ya no existe. Actualizando lista...", "Información", JOptionPane.INFORMATION_MESSAGE);
                 requestRefresh("Movimiento desaparecido");
@@ -346,13 +347,15 @@ public class MovementsPanel extends JPanel {
             double newQuantity = Double.parseDouble(quantityStr);
             double newPrice = Double.parseDouble(priceStr);
 
-            MovementServices.updateMovement(movementId, newQuantity, newPrice);
+            new MovementServices().updateMovement(movementId, newQuantity, newPrice);
             JOptionPane.showMessageDialog(owner, "Movimiento actualizado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
             logger.accept("Movimientos: edición aplicada sobre " + movementId);
             requestRefresh("Edición movimiento");
             requestProductsRecalc("Recalcular stock tras edición movimiento");
             refreshDashboard();
+        } catch (InsufficientStockException ex) {
+            JOptionPane.showMessageDialog(owner, "Error: Stock insuficiente - " + ex.getMessage(), "Error de Stock", JOptionPane.ERROR_MESSAGE);
         } catch (DatabaseException ex) {
             JOptionPane.showMessageDialog(owner, "Error al actualizar movimiento: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         } catch (NumberFormatException ex) {
@@ -368,7 +371,7 @@ public class MovementsPanel extends JPanel {
         if (confirmation != JOptionPane.YES_OPTION) return;
 
         try {
-            if (MovementServices.deleteMovement(movementId)) {
+            if (new MovementServices().deleteMovement(movementId)) {
                 JOptionPane.showMessageDialog(owner, "Movimiento eliminado", "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 logger.accept("Movimientos: eliminado " + movementId);
                 requestRefresh("Eliminación movimiento");
@@ -387,7 +390,7 @@ public class MovementsPanel extends JPanel {
         if (movementId == null) return;
 
         try {
-            Movement movement = MovementServices.getMovementById(movementId);
+            Movement movement = new MovementServices().getMovementById(movementId);
             if (movement == null) {
                 JOptionPane.showMessageDialog(owner, "El movimiento ya no existe", "Advertencia", JOptionPane.WARNING_MESSAGE);
                 requestRefresh("Movimiento faltante");

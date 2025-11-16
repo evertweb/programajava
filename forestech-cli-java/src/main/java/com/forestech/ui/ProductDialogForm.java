@@ -200,7 +200,7 @@ public class ProductDialogForm extends JDialog {
             if (productoExistente == null) {
                 // MODO AGREGAR: Crear nuevo producto
                 Product nuevoProducto = new Product(nombre, unidad, precio);
-                ProductServices.insertProduct(nuevoProducto);
+                new ProductServices().insertProduct(nuevoProducto);
 
                 JOptionPane.showMessageDialog(this,
                     "Producto agregado exitosamente:\n\n" +
@@ -218,7 +218,7 @@ public class ProductDialogForm extends JDialog {
                 productoExistente.setPriceXUnd(precio);
                 productoExistente.setUnidadDeMedida(unidad);
 
-                ProductServices.updateProduct(productoExistente);
+                new ProductServices().updateProduct(productoExistente);
 
                 JOptionPane.showMessageDialog(this,
                     "Producto actualizado exitosamente:\n\n" +

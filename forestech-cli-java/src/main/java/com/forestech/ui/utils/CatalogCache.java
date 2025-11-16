@@ -88,7 +88,7 @@ public class CatalogCache {
      */
     private void refreshProducts() {
         try {
-            productNames = ProductServices.getAllProducts().stream()
+            productNames = new ProductServices().getAllProducts().stream()
                 .collect(Collectors.toMap(Product::getId, Product::getName));
             lastProductsUpdate = System.currentTimeMillis();
         } catch (Exception e) {
@@ -103,7 +103,7 @@ public class CatalogCache {
      */
     private void refreshVehicles() {
         try {
-            vehicleNames = VehicleServices.getAllVehicles().stream()
+            vehicleNames = new VehicleServices().getAllVehicles().stream()
                 .collect(Collectors.toMap(Vehicle::getId, Vehicle::getName));
             lastVehiclesUpdate = System.currentTimeMillis();
         } catch (Exception e) {

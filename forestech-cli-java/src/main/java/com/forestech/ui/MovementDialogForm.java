@@ -93,7 +93,7 @@ public class MovementDialogForm extends JDialog {
 
     private void cargarProductos() {
         try {
-            List<Product> productos = ProductServices.getAllProducts();
+            List<Product> productos = new ProductServices().getAllProducts();
             for (Product p : productos) {
                 cmbProducto.addItem(new ComboItem(p.getId(), p.getName()));
             }
@@ -107,7 +107,7 @@ public class MovementDialogForm extends JDialog {
     private void cargarVehiculos() {
         try {
             cmbVehiculo.addItem(new ComboItem(null, "(Opcional)"));
-            List<Vehicle> vehiculos = VehicleServices.getAllVehicles();
+            List<Vehicle> vehiculos = new VehicleServices().getAllVehicles();
             for (Vehicle v : vehiculos) {
                 cmbVehiculo.addItem(new ComboItem(v.getId(), v.getName()));
             }
@@ -121,7 +121,7 @@ public class MovementDialogForm extends JDialog {
     private void cargarFacturas() {
         try {
             cmbFactura.addItem(new ComboItem(null, "(Opcional)"));
-            List<Factura> facturas = FacturaServices.getAllFacturas();
+            List<Factura> facturas = new FacturaServices().getAllFacturas();
             for (Factura f : facturas) {
                 cmbFactura.addItem(new ComboItem(f.getNumeroFactura(),
                     "Factura #" + f.getNumeroFactura() + " - " + f.getFechaEmision()));
@@ -227,7 +227,7 @@ public class MovementDialogForm extends JDialog {
         try {
             // Constructor requiere: tipo, productId, vehicleId, numeroFactura, unidadDeMedida, quantity, unitPrice
             Movement nuevoMovimiento = new Movement(tipo, productId, vehicleId, numeroFactura, "Litros", cantidad, 0.0);
-            MovementServices.insertMovement(nuevoMovimiento);
+            new MovementServices().insertMovement(nuevoMovimiento);
 
             JOptionPane.showMessageDialog(this,
                 String.format("Movimiento registrado exitosamente:\n\n" +
@@ -243,6 +243,14 @@ public class MovementDialogForm extends JDialog {
 
             guardadoExitoso = true;
             dispose();
+
+        } catch (com.forestech.exceptions.ValidationException e) {
+            // MANEJO ESPECÍFICO PARA ERRORES DE VALIDACIÓN
+            JOptionPane.showMessageDialog(this,
+                "Error de validación: " + e.getMessage(),
+                "Datos inválidos",
+                JOptionPane.ERROR_MESSAGE);
+            System.out.println("❌ Error de validación: " + e.getMessage());
 
         } catch (InsufficientStockException e) {
             // MANEJO ESPECÍFICO PARA STOCK INSUFICIENTE
