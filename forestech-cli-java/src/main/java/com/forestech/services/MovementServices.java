@@ -1,15 +1,18 @@
 package com.forestech.services;
 
-import com.forestech.config.DatabaseConnection;
+import com.forestech.dao.MovementDAO;
+import com.forestech.enums.MovementType;
 import com.forestech.exceptions.DatabaseException;
 import com.forestech.exceptions.InsufficientStockException;
 import com.forestech.models.Movement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.sql.*;
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Servicio para gestionar operaciones CRUD de movimientos de combustible.
@@ -28,6 +31,9 @@ import java.util.Map;
  * @since Fase 4
  */
 public class MovementServices {
+
+    private static final Logger logger = LoggerFactory.getLogger(MovementServices.class);
+    private static final MovementDAO dao = new MovementDAO();
 
     // ============================================================================
     // CREATE - OPERACIONES DE INSERCIÓN
@@ -83,103 +89,76 @@ public class MovementServices {
      * @see Movement
      */
     public static void insertMovement(Movement movement) throws DatabaseException, InsufficientStockException {
-        // ========================================================================
-        // VALIDACIÓN 1: product_id OBLIGATORIO (DEBE existir en oil_products)
-        // ========================================================================
-        if (movement.getProductId() == null || movement.getProductId().trim().isEmpty()) {
-            throw new DatabaseException(
-                "ERROR: product_id es OBLIGATORIO. No puede ser NULL.",
-                new IllegalArgumentException("product_id NULL")
-            );
-        }
-
-        if (!ProductServices.existsProduct(movement.getProductId())) {
-            throw new DatabaseException(
-                "ERROR: El producto '" + movement.getProductId() + "' NO existe en oil_products. " +
-                "Debes crear el producto primero antes de usarlo en un movimiento.",
-                new IllegalArgumentException("product_id inválido")
-            );
-        }
-
-        // ========================================================================
-        // VALIDACIÓN 2: vehicle_id (solo si NO es NULL, debe existir en vehicles)
-        // ========================================================================
-        if (movement.getVehicleId() != null && !movement.getVehicleId().trim().isEmpty()) {
-            if (!VehicleServices.existsVehicle(movement.getVehicleId())) {
+        try {
+            // ========================================================================
+            // VALIDACIÓN 1: product_id OBLIGATORIO (DEBE existir en oil_products)
+            // ========================================================================
+            if (movement.getProductId() == null || movement.getProductId().trim().isEmpty()) {
                 throw new DatabaseException(
-                    "ERROR: El vehículo '" + movement.getVehicleId() + "' NO existe en vehicles. " +
-                    "Debes crear el vehículo primero antes de usarlo en un movimiento.",
-                    new IllegalArgumentException("vehicle_id inválido")
+                    "ERROR: product_id es OBLIGATORIO. No puede ser NULL.",
+                    new IllegalArgumentException("product_id NULL")
                 );
             }
-        }
 
-        // ========================================================================
-        // VALIDACIÓN 3: numero_factura (solo si NO es NULL, debe existir en facturas)
-        // ========================================================================
-        if (movement.getNumeroFactura() != null && !movement.getNumeroFactura().trim().isEmpty()) {
-            if (!FacturaServices.existsFactura(movement.getNumeroFactura())) {
+            if (!ProductServices.existsProduct(movement.getProductId())) {
                 throw new DatabaseException(
-                    "ERROR: La factura '" + movement.getNumeroFactura() + "' NO existe en facturas. " +
-                    "Debes crear la factura primero antes de usarla en un movimiento.",
-                    new IllegalArgumentException("numero_factura inválido")
+                    "ERROR: El producto '" + movement.getProductId() + "' NO existe en oil_products. " +
+                    "Debes crear el producto primero antes de usarlo en un movimiento.",
+                    new IllegalArgumentException("product_id inválido")
                 );
             }
-        }
 
-        // ========================================================================
-        // VALIDACIÓN 4: STOCK para SALIDAS (debe haber suficiente inventario)
-        // ========================================================================
-        if (movement.getMovementType().equals("SALIDA")) {
-            double stockActual = getProductStock(movement.getProductId());
-            if (stockActual < movement.getQuantity()) {
-                throw new InsufficientStockException(
-                    "Stock insuficiente. Disponible: " + stockActual +
-                    ", Solicitado: " + movement.getQuantity(),
-                    movement.getProductId(),
-                    stockActual,
-                    movement.getQuantity()
-                );
+            // ========================================================================
+            // VALIDACIÓN 2: vehicle_id (solo si NO es NULL, debe existir en vehicles)
+            // ========================================================================
+            if (movement.getVehicleId() != null && !movement.getVehicleId().trim().isEmpty()) {
+                if (!VehicleServices.existsVehicle(movement.getVehicleId())) {
+                    throw new DatabaseException(
+                        "ERROR: El vehículo '" + movement.getVehicleId() + "' NO existe en vehicles. " +
+                        "Debes crear el vehículo primero antes de usarlo en un movimiento.",
+                        new IllegalArgumentException("vehicle_id inválido")
+                    );
+                }
             }
-        }
 
-        // ========================================================================
-        // SI TODAS LAS VALIDACIONES PASARON → Proceder con INSERT
-        // ========================================================================
-
-        String sql = "INSERT INTO Movement " +
-                "(id, movementType, product_id, vehicle_id, numero_factura, " +
-                "unidadDeMedida, quantity, unitPrice, movementDate) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            // Configurar parámetros del PreparedStatement
-            pstmt.setString(1, movement.getId());
-            pstmt.setString(2, movement.getMovementType());
-            pstmt.setString(3, movement.getProductId());        // FK → oil_products
-            pstmt.setString(4, movement.getVehicleId());        // FK → vehicles (puede ser NULL)
-            pstmt.setString(5, movement.getNumeroFactura());    // FK → facturas (puede ser NULL)
-            pstmt.setString(6, movement.getUnidadDeMedida());
-            pstmt.setDouble(7, movement.getQuantity());
-            pstmt.setDouble(8, movement.getUnitPrice());
-            pstmt.setString(9, movement.getMovementDate());
-
-            // Ejecutar inserción
-            int rowsAffected = pstmt.executeUpdate();
-
-            if (rowsAffected > 0) {
-                System.out.println("✅ Movimiento insertado exitosamente: " + movement.getId());
+            // ========================================================================
+            // VALIDACIÓN 3: numero_factura (solo si NO es NULL, debe existir en facturas)
+            // ========================================================================
+            if (movement.getInvoiceNumber() != null && !movement.getInvoiceNumber().trim().isEmpty()) {
+                if (!FacturaServices.existsFactura(movement.getInvoiceNumber())) {
+                    throw new DatabaseException(
+                        "ERROR: La factura '" + movement.getInvoiceNumber() + "' NO existe en facturas. " +
+                        "Debes crear la factura primero antes de usarla en un movimiento.",
+                        new IllegalArgumentException("numero_factura inválido")
+                    );
+                }
             }
+
+            // ========================================================================
+            // VALIDACIÓN 4: STOCK para SALIDAS (debe haber suficiente inventario)
+            // ========================================================================
+            if (MovementType.SALIDA.equals(movement.getMovementType())) {
+                dao.validateStockForSalida(movement.getProductId(), movement.getQuantity());
+            }
+
+            // ========================================================================
+            // SI TODAS LAS VALIDACIONES PASARON → Delegar inserción al DAO
+            // ========================================================================
+            dao.insert(movement);
+
+            logger.info("Movimiento insertado exitosamente - ID: {}, Tipo: {}",
+                movement.getId(), movement.getMovementTypeCode());
+            System.out.println("✅ Movimiento insertado exitosamente: " + movement.getId());
 
         } catch (SQLException e) {
             // Verificar si el error es por violación de Foreign Key
             if (e.getMessage().contains("foreign key constraint")) {
+                logger.error("Violación de FK al insertar movimiento - ID: {}", movement.getId(), e);
                 throw new DatabaseException(
                     "Error: El productId, vehicleId o numeroFactura no existe en la BD. " +
                     "Verifica que las llaves foráneas sean válidas.", e);
             } else {
+                logger.error("Error SQL al insertar movimiento - ID: {}", movement.getId(), e);
                 throw new DatabaseException("Error al insertar movimiento", e);
             }
         }
@@ -210,29 +189,15 @@ public class MovementServices {
      * @throws DatabaseException Si hay error de conexión
      */
     public static List<Movement> getAllMovements() throws DatabaseException {
-        List<Movement> movements = new ArrayList<>();
-
-        String sql = "SELECT m.id, m.movementType, m.product_id, m.vehicle_id, " +
-                "m.numero_factura, m.unidadDeMedida, m.quantity, m.unitPrice, " +
-                "m.movementDate " +
-                "FROM Movement m " +
-                "ORDER BY m.movementDate DESC";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-
-            while (rs.next()) {
-                movements.add(mapResultSetToMovement(rs));
-            }
-
+        try {
+            List<Movement> movements = dao.findAll();
+            logger.debug("Se cargaron {} movimientos", movements.size());
             System.out.println("✅ Se cargaron " + movements.size() + " movimientos");
-
+            return movements;
         } catch (SQLException e) {
+            logger.error("Error al obtener todos los movimientos", e);
             throw new DatabaseException("Error al obtener movimientos", e);
         }
-
-        return movements;
     }
 
     /**
@@ -243,25 +208,10 @@ public class MovementServices {
      * @throws DatabaseException Si hay error de conexión
      */
     public static Movement getMovementById(String movementId) throws DatabaseException {
-        String sql = "SELECT m.id, m.movementType, m.product_id, m.vehicle_id, " +
-                "m.numero_factura, m.unidadDeMedida, m.quantity, m.unitPrice, " +
-                "m.movementDate " +
-                "FROM Movement m " +
-                "WHERE m.id = ?";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, movementId);
-            ResultSet rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                return mapResultSetToMovement(rs);
-            } else {
-                return null;  // No se encontró el movimiento
-            }
-
+        try {
+            return dao.findById(movementId).orElse(null);
         } catch (SQLException e) {
+            logger.error("Error al buscar movimiento por ID: {}", movementId, e);
             throw new DatabaseException("Error al buscar movimiento por ID", e);
         }
     }
@@ -273,33 +223,31 @@ public class MovementServices {
      * @return Lista de movimientos del tipo especificado
      * @throws DatabaseException Si hay error de conexión
      */
-    public static List<Movement> getMovementsByType(String movementType) throws DatabaseException {
-        List<Movement> movements = new ArrayList<>();
-
-        String sql = "SELECT m.id, m.movementType, m.product_id, m.vehicle_id, " +
-                "m.numero_factura, m.unidadDeMedida, m.quantity, m.unitPrice, " +
-                "m.movementDate " +
-                "FROM Movement m " +
-                "WHERE m.movementType = ? " +
-                "ORDER BY m.movementDate DESC";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, movementType);
-            ResultSet rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                movements.add(mapResultSetToMovement(rs));
-            }
-
-            System.out.println("✅ Se encontraron " + movements.size() + " movimientos de tipo: " + movementType);
-
-        } catch (SQLException e) {
-            throw new DatabaseException("Error al buscar movimientos por tipo", e);
+    public static List<Movement> getMovementsByType(MovementType movementType) throws DatabaseException {
+        if (movementType == null) {
+            throw new DatabaseException(
+                "movementType no puede ser nulo",
+                new IllegalArgumentException("movementType null"));
         }
 
-        return movements;
+        try {
+            List<Movement> movements = dao.findByType(movementType);
+            logger.debug("Se encontraron {} movimientos de tipo: {}", movements.size(), movementType.getCode());
+            System.out.println("✅ Se encontraron " + movements.size() + " movimientos de tipo: " + movementType.getCode());
+            return movements;
+        } catch (SQLException e) {
+            logger.error("Error al buscar movimientos por tipo: {}", movementType.getCode(), e);
+            throw new DatabaseException("Error al buscar movimientos por tipo", e);
+        }
+    }
+
+    /**
+     * @deprecated Usa {@link #getMovementsByType(MovementType)}
+     */
+    @Deprecated
+    public static List<Movement> getMovementsByType(String movementType) throws DatabaseException {
+        MovementType type = movementType != null ? MovementType.fromCode(movementType) : null;
+        return getMovementsByType(type);
     }
 
     // ============================================================================
@@ -321,26 +269,28 @@ public class MovementServices {
     public static boolean updateMovement(String movementId, double newQuantity, double newUnitPrice)
             throws DatabaseException {
 
-        String sql = "UPDATE Movement SET quantity = ?, unitPrice = ? WHERE id = ?";
+        try {
+            Optional<Movement> optMovement = dao.findById(movementId);
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setDouble(1, newQuantity);
-            pstmt.setDouble(2, newUnitPrice);
-            pstmt.setString(3, movementId);
-
-            int rowsAffected = pstmt.executeUpdate();
-
-            if (rowsAffected > 0) {
-                System.out.println("✅ Movimiento actualizado: " + movementId);
-                return true;
-            } else {
+            if (optMovement.isEmpty()) {
+                logger.warn("No se encontró movimiento para actualizar - ID: {}", movementId);
                 System.out.println("⚠️  No se encontró el movimiento: " + movementId);
                 return false;
             }
 
+            Movement movement = optMovement.get();
+            movement.setQuantity(newQuantity);
+            movement.setUnitPrice(newUnitPrice);
+
+            dao.update(movement);
+
+            logger.info("Movimiento actualizado - ID: {}, Cantidad: {}, Precio: {}",
+                movementId, newQuantity, newUnitPrice);
+            System.out.println("✅ Movimiento actualizado: " + movementId);
+            return true;
+
         } catch (SQLException e) {
+            logger.error("Error al actualizar movimiento - ID: {}", movementId, e);
             throw new DatabaseException("Error al actualizar movimiento", e);
         }
     }
@@ -361,150 +311,27 @@ public class MovementServices {
      * @throws DatabaseException Si hay error de conexión
      */
     public static boolean deleteMovement(String movementId) throws DatabaseException {
-        String sql = "DELETE FROM Movement WHERE id = ?";
+        try {
+            boolean deleted = dao.delete(movementId);
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, movementId);
-            int rowsAffected = pstmt.executeUpdate();
-
-            if (rowsAffected > 0) {
+            if (deleted) {
+                logger.info("Movimiento eliminado - ID: {}", movementId);
                 System.out.println("✅ Movimiento eliminado: " + movementId);
                 return true;
             } else {
+                logger.warn("No se encontró movimiento para eliminar - ID: {}", movementId);
                 System.out.println("⚠️  No se encontró el movimiento: " + movementId);
                 return false;
             }
 
         } catch (SQLException e) {
+            logger.error("Error al eliminar movimiento - ID: {}", movementId, e);
             throw new DatabaseException("Error al eliminar movimiento", e);
         }
     }
 
     // ============================================================================
-    // MÉTODOS AUXILIARES PRIVADOS
-    // ============================================================================
-
-    /**
-     * Convierte una fila de ResultSet en un objeto Movement.
-     *
-     * @param rs ResultSet posicionado en una fila válida
-     * @return Objeto Movement con los datos de la fila
-     * @throws SQLException Si hay error al leer columnas
-     */
-    private static Movement mapResultSetToMovement(ResultSet rs) throws SQLException {
-        return new Movement(
-                rs.getString("id"),
-                rs.getString("movementType"),
-                rs.getString("product_id"),
-                rs.getString("vehicle_id"),       // puede ser NULL
-                rs.getString("numero_factura"),   // puede ser NULL
-                rs.getString("unidadDeMedida"),
-                rs.getDouble("quantity"),
-                rs.getDouble("unitPrice"),
-                rs.getString("movementDate")
-        );
-    }
-
-    // ============================================================================
-    // 🎯 EJERCICIOS PARA TI (TODOs)
-    // ============================================================================
-
-    /**
-     * TODO: EJERCICIO 1 - Obtener el total de movimientos
-     *
-     * <p><strong>Instrucciones:</strong></p>
-     * <ol>
-     *   <li>Crear un método llamado `getTotalMovements()` que devuelva int</li>
-     *   <li>Usar la query: `SELECT COUNT(*) as total FROM Movement`</li>
-     *   <li>Ejecutar con `executeQuery()` y leer el resultado con `rs.getInt("total")`</li>
-     *   <li>Retornar el número total de movimientos</li>
-     * </ol>
-     *
-     * <p><strong>Firma del método:</strong></p>
-     * <pre>
-     * public static int getTotalMovements() throws DatabaseException {
-     *     // Tu código aquí
-     * }
-     * </pre>
-     *
-     * <p><strong>Pistas:</strong></p>
-     * <ul>
-     *   <li>Usa `SELECT COUNT(*) as total FROM Movement`</li>
-     *   <li>No necesitas PreparedStatement (no hay parámetros)</li>
-     *   <li>El resultado es un solo número, no una lista</li>
-     * </ul>
-     */
-
-    /**
-     * TODO: EJERCICIO 2 - Calcular stock actual de un producto
-     *
-     * <p><strong>Instrucciones:</strong></p>
-     * <ol>
-     *   <li>Crear método `getProductStock(String productId)` que devuelva double</li>
-     *   <li>Calcular: ENTRADAS - SALIDAS de ese producto específico</li>
-     *   <li>Usar query con SUM y CASE:</li>
-     *   <pre>
-     *   SELECT
-     *     SUM(CASE WHEN movementType = 'ENTRADA' THEN quantity ELSE 0 END) as entradas,
-     *     SUM(CASE WHEN movementType = 'SALIDA' THEN quantity ELSE 0 END) as salidas
-     *   FROM Movement
-     *   WHERE product_id = ?
-     *   </pre>
-     *   <li>Retornar: entradas - salidas</li>
-     * </ol>
-     *
-     * <p><strong>Firma del método:</strong></p>
-     * <pre>
-     * public static double getProductStock(String productId) throws DatabaseException {
-     *     // Tu código aquí
-     * }
-     * </pre>
-     */
-
-    /**
-     * TODO: EJERCICIO 3 - Obtener movimientos de un vehículo específico
-     *
-     * <p><strong>Instrucciones:</strong></p>
-     * <ol>
-     *   <li>Crear método `getMovementsByVehicle(String vehicleId)` que devuelva `List&lt;Movement&gt;`</li>
-     *   <li>Usar query: `SELECT * FROM Movement WHERE vehicle_id = ? ORDER BY movementDate DESC`</li>
-     *   <li>Usar PreparedStatement con parámetro vehicleId</li>
-     *   <li>Mapear cada fila con `mapResultSetToMovement(rs)`</li>
-     *   <li>Retornar la lista</li>
-     * </ol>
-     *
-     * <p><strong>Firma del método:</strong></p>
-     * <pre>
-     * public static List&lt;Movement&gt; getMovementsByVehicle(String vehicleId) throws DatabaseException {
-     *     // Tu código aquí
-     * }
-     * </pre>
-     */
-
-    /**
-     * TODO: EJERCICIO 4 - Obtener movimientos por rango de fechas
-     *
-     * <p><strong>Instrucciones:</strong></p>
-     * <ol>
-     *   <li>Crear método `getMovementsByDateRange(String fechaInicio, String fechaFin)`</li>
-     *   <li>Usar query: `SELECT * FROM Movement WHERE movementDate BETWEEN ? AND ?`</li>
-     *   <li>Los parámetros deben ser fechas en formato: "2025-01-01 00:00:00"</li>
-     *   <li>Retornar lista de movimientos</li>
-     * </ol>
-     *
-     * <p><strong>Firma del método:</strong></p>
-     * <pre>
-     * public static List&lt;Movement&gt; getMovementsByDateRange(String fechaInicio, String fechaFin)
-     *         throws DatabaseException {
-     *     // Tu código aquí
-     * }
-     * </pre>
-     */
-
-    // ============================================================================
-    // MÉTODOS DE CÁLCULO DE STOCK (solución a ejercicios)
+    // MÉTODOS DE CÁLCULO DE STOCK
     // ============================================================================
 
     /**
@@ -515,31 +342,19 @@ public class MovementServices {
      * @throws DatabaseException Si hay error de conexión
      */
     public static double getProductStock(String productId) throws DatabaseException {
-        String sql = "SELECT " +
-                "SUM(CASE WHEN movementType = 'ENTRADA' THEN quantity ELSE 0 END) as entradas, " +
-                "SUM(CASE WHEN movementType = 'SALIDA' THEN quantity ELSE 0 END) as salidas " +
-                "FROM Movement WHERE product_id = ?";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, productId);
-            ResultSet rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                double entradas = rs.getDouble("entradas");
-                double salidas = rs.getDouble("salidas");
-                return entradas - salidas;
-            }
-            return 0.0;
-
+        try {
+            return dao.getStockByProductId(productId);
         } catch (SQLException e) {
+            logger.error("Error al calcular stock del producto: {}", productId, e);
             throw new DatabaseException("Error al calcular stock", e);
         }
     }
 
     /**
-     * Obtiene el stock actual para una lista de productos en una sola consulta.
+     * Obtiene el stock actual para una lista de productos.
+     *
+     * <p><strong>NOTA:</strong> Esta implementación llama al DAO múltiples veces.
+     * Para consultas masivas, considera implementar un método bulk en el DAO.</p>
      *
      * @param productIds IDs de producto a consultar
      * @return Mapa producto → stock (0.0 si no tiene movimientos)
@@ -551,112 +366,68 @@ public class MovementServices {
             return stockMap;
         }
 
-        // Construir placeholders ?,?,?
-        StringBuilder placeholders = new StringBuilder();
-        for (int i = 0; i < productIds.size(); i++) {
-            placeholders.append("?");
-            if (i < productIds.size() - 1) {
-                placeholders.append(",");
+        try {
+            for (String productId : productIds) {
+                double stock = dao.getStockByProductId(productId);
+                stockMap.put(productId, stock);
             }
-        }
-
-        String sql = "SELECT product_id, " +
-                "SUM(CASE WHEN movementType = 'ENTRADA' THEN quantity ELSE 0 END) as entradas, " +
-                "SUM(CASE WHEN movementType = 'SALIDA' THEN quantity ELSE 0 END) as salidas " +
-                "FROM Movement WHERE product_id IN (" + placeholders + ") GROUP BY product_id";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            for (int i = 0; i < productIds.size(); i++) {
-                pstmt.setString(i + 1, productIds.get(i));
-            }
-
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                double entradas = rs.getDouble("entradas");
-                double salidas = rs.getDouble("salidas");
-                stockMap.put(rs.getString("product_id"), entradas - salidas);
-            }
-
             return stockMap;
-
         } catch (SQLException e) {
+            logger.error("Error al calcular stock por lote - {} productos", productIds.size(), e);
             throw new DatabaseException("Error al calcular stock por lote", e);
         }
     }
 
     /**
      * Obtiene el total de movimientos en la base de datos.
+     *
+     * @return Cantidad total de movimientos
+     * @throws DatabaseException Si hay error de conexión
      */
     public static int getTotalMovements() throws DatabaseException {
-        String sql = "SELECT COUNT(*) as total FROM Movement";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            if (rs.next()) {
-                return rs.getInt("total");
-            }
-            return 0;
-
+        try {
+            List<Movement> allMovements = dao.findAll();
+            return allMovements.size();
         } catch (SQLException e) {
+            logger.error("Error al contar movimientos", e);
             throw new DatabaseException("Error al contar movimientos", e);
         }
     }
 
     /**
      * Obtiene movimientos de un vehículo específico.
+     *
+     * @param vehicleId ID del vehículo
+     * @return Lista de movimientos del vehículo
+     * @throws DatabaseException Si hay error de conexión
      */
     public static List<Movement> getMovementsByVehicle(String vehicleId) throws DatabaseException {
-        List<Movement> movements = new ArrayList<>();
-        String sql = "SELECT id, movementType, product_id, vehicle_id, numero_factura, " +
-                "unidadDeMedida, quantity, unitPrice, movementDate " +
-                "FROM Movement WHERE vehicle_id = ? ORDER BY movementDate DESC";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, vehicleId);
-            ResultSet rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                movements.add(mapResultSetToMovement(rs));
-            }
-
-            return movements;
-
+        try {
+            return dao.findByVehicleId(vehicleId);
         } catch (SQLException e) {
+            logger.error("Error al obtener movimientos por vehículo: {}", vehicleId, e);
             throw new DatabaseException("Error al obtener movimientos por vehículo", e);
         }
     }
 
     /**
      * Obtiene movimientos por rango de fechas.
+     *
+     * <p><strong>TODO:</strong> Implementar método findByDateRange() en MovementDAO.</p>
+     * <p>Por ahora, usa getAllMovements() y filtra en memoria si es necesario.</p>
+     *
+     * @param fechaInicio Fecha de inicio (formato: "2025-01-01 00:00:00")
+     * @param fechaFin Fecha de fin (formato: "2025-12-31 23:59:59")
+     * @return Lista de movimientos en el rango de fechas
+     * @throws DatabaseException Si hay error de conexión
+     * @deprecated Método pendiente de implementación en el DAO
      */
+    @Deprecated
     public static List<Movement> getMovementsByDateRange(String fechaInicio, String fechaFin)
             throws DatabaseException {
-        List<Movement> movements = new ArrayList<>();
-        String sql = "SELECT id, movementType, product_id, vehicle_id, numero_factura, " +
-                "unidadDeMedida, quantity, unitPrice, movementDate " +
-                "FROM Movement WHERE movementDate BETWEEN ? AND ? ORDER BY movementDate DESC";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, fechaInicio);
-            pstmt.setString(2, fechaFin);
-            ResultSet rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                movements.add(mapResultSetToMovement(rs));
-            }
-
-            return movements;
-
-        } catch (SQLException e) {
-            throw new DatabaseException("Error al obtener movimientos por fecha", e);
-        }
+        throw new UnsupportedOperationException(
+            "Este método requiere implementar findByDateRange() en MovementDAO. " +
+            "Usa getAllMovements() y filtra en memoria por ahora."
+        );
     }
 }

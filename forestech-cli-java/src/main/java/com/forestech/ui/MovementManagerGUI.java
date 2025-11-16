@@ -1,5 +1,6 @@
 package com.forestech.ui;
 
+import com.forestech.enums.MovementType;
 import com.forestech.exceptions.DatabaseException;
 import com.forestech.models.Movement;
 import com.forestech.services.MovementServices;
@@ -131,14 +132,20 @@ public class MovementManagerGUI extends JFrame {
             modeloTabla.setRowCount(0);
 
             for (Movement m : movimientos) {
+                String movementTypeLabel = m.getMovementType() != null
+                        ? m.getMovementType().getCode()
+                        : "N/A";
+                String invoiceLabel = m.getInvoiceNumber() != null ? m.getInvoiceNumber() : "N/A";
+                String createdAt = m.getCreatedAt() != null ? m.getCreatedAt().toString() : "N/A";
+
                 modeloTabla.addRow(new Object[]{
                     m.getId(),
-                    m.getMovementType(),
+                    movementTypeLabel,
                     m.getProductId(),
                     m.getVehicleId() != null ? m.getVehicleId() : "N/A",
-                    m.getNumeroFactura() != null ? m.getNumeroFactura() : "N/A",
+                    invoiceLabel,
                     String.format("%.2f", m.getQuantity()),
-                    m.getMovementDate()
+                    createdAt
                 });
             }
 
@@ -160,20 +167,27 @@ public class MovementManagerGUI extends JFrame {
             if ("Todos".equals(filtro)) {
                 movimientos = MovementServices.getAllMovements();
             } else {
-                movimientos = MovementServices.getMovementsByType(filtro);
+                MovementType movementType = MovementType.fromCode(filtro);
+                movimientos = MovementServices.getMovementsByType(movementType);
             }
 
             modeloTabla.setRowCount(0);
 
             for (Movement m : movimientos) {
+                String movementTypeLabel = m.getMovementType() != null
+                        ? m.getMovementType().getCode()
+                        : "N/A";
+                String invoiceLabel = m.getInvoiceNumber() != null ? m.getInvoiceNumber() : "N/A";
+                String createdAt = m.getCreatedAt() != null ? m.getCreatedAt().toString() : "N/A";
+
                 modeloTabla.addRow(new Object[]{
                     m.getId(),
-                    m.getMovementType(),
+                    movementTypeLabel,
                     m.getProductId(),
                     m.getVehicleId() != null ? m.getVehicleId() : "N/A",
-                    m.getNumeroFactura() != null ? m.getNumeroFactura() : "N/A",
+                    invoiceLabel,
                     String.format("%.2f", m.getQuantity()),
-                    m.getMovementDate()
+                    createdAt
                 });
             }
 
@@ -194,9 +208,10 @@ public class MovementManagerGUI extends JFrame {
             double totalSalidas = 0;
 
             for (Movement m : movimientos) {
-                if ("ENTRADA".equals(m.getMovementType())) {
+                MovementType type = m.getMovementType();
+                if (MovementType.ENTRADA.equals(type)) {
                     totalEntradas += m.getQuantity();
-                } else {
+                } else if (MovementType.SALIDA.equals(type)) {
                     totalSalidas += m.getQuantity();
                 }
             }
@@ -239,10 +254,11 @@ public class MovementManagerGUI extends JFrame {
             int contSalidas = 0;
 
             for (Movement m : movimientos) {
-                if ("ENTRADA".equals(m.getMovementType())) {
+                MovementType type = m.getMovementType();
+                if (MovementType.ENTRADA.equals(type)) {
                     totalEntradas += m.getQuantity();
                     contEntradas++;
-                } else {
+                } else if (MovementType.SALIDA.equals(type)) {
                     totalSalidas += m.getQuantity();
                     contSalidas++;
                 }
@@ -278,8 +294,8 @@ public class MovementManagerGUI extends JFrame {
                 totalEntradas,
                 totalSalidas,
                 stockActual,
-                totalEntradas > 0 ? totalEntradas / contarPorTipo("ENTRADA") : 0,
-                totalSalidas > 0 ? totalSalidas / contarPorTipo("SALIDA") : 0,
+                contEntradas > 0 ? totalEntradas / contEntradas : 0,
+                contSalidas > 0 ? totalSalidas / contSalidas : 0,
                 totalEntradas > 0 ? (totalSalidas / totalEntradas * 100) : 0,
                 java.time.LocalDateTime.now()
             );
@@ -299,10 +315,6 @@ public class MovementManagerGUI extends JFrame {
                 "Error al generar reporte: " + e.getMessage(),
                 "Error", JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-    private int contarPorTipo(String tipo) throws DatabaseException {
-        return MovementServices.getMovementsByType(tipo).size();
     }
 
     public static void main(String[] args) {

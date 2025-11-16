@@ -5,6 +5,8 @@ import com.forestech.exceptions.DatabaseException;
 import com.forestech.exceptions.TransactionFailedException;
 import com.forestech.models.Factura;
 import com.forestech.models.DetalleFactura;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -14,6 +16,8 @@ import java.util.List;
  * Servicio para gestionar facturas con transacciones.
  */
 public class FacturaServices {
+
+    private static final Logger logger = LoggerFactory.getLogger(FacturaServices.class);
 
     /**
      * Crea una factura con sus detalles en UNA SOLA TRANSACCIÓN CON VALIDACIONES.
@@ -80,17 +84,22 @@ public class FacturaServices {
             }
 
             conn.commit();  // ✅ TODO OK, confirmar transacción
+            logger.info("Factura creada con transacción exitosa - Número: {}, Detalles: {}",
+                factura.getNumeroFactura(), detalles.size());
             System.out.println("✅ Factura creada con " + detalles.size() + " detalles");
 
         } catch (SQLException e) {
             if (conn != null) {
                 try {
                     conn.rollback();  // ❌ ERROR, revertir TODO
+                    logger.warn("Transacción revertida para factura: {}", factura.getNumeroFactura());
                     System.out.println("⚠️  Transacción revertida");
                 } catch (SQLException ex) {
+                    logger.error("Error al hacer rollback de factura: {}", factura.getNumeroFactura(), ex);
                     throw new TransactionFailedException("Error al hacer rollback", ex);
                 }
             }
+            logger.error("Error al crear factura con transacción - Número: {}", factura.getNumeroFactura(), e);
             throw new TransactionFailedException("Error al crear factura", e);
         } finally {
             if (conn != null) {
@@ -131,6 +140,7 @@ public class FacturaServices {
             }
 
         } catch (SQLException e) {
+            logger.error("Error al obtener todas las facturas", e);
             throw new DatabaseException("Error al obtener facturas", e);
         }
 
@@ -174,6 +184,7 @@ public class FacturaServices {
             return null;
 
         } catch (SQLException e) {
+            logger.error("Error al buscar factura por número: {}", numeroFactura, e);
             throw new DatabaseException("Error al buscar factura", e);
         }
     }
@@ -214,6 +225,7 @@ public class FacturaServices {
             }
 
         } catch (SQLException e) {
+            logger.error("Error al obtener detalles de factura: {}", numeroFactura, e);
             throw new DatabaseException("Error al obtener detalles", e);
         }
 

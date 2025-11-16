@@ -1,193 +1,188 @@
 package com.forestech.models;
+
 import com.forestech.AppConfig;
+import com.forestech.enums.MeasurementUnit;
+import com.forestech.enums.MovementType;
 import com.forestech.utils.IdGenerator;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
 
-
 public class Movement {
 
-    // ============================================================================
-    // ATRIBUTOS
-    // ============================================================================
-
-    private final String id;
-    private String movementType;
-    private String productId;        // FK → oil_products.id
-    private String vehicleId;        // FK → vehicles.id (NULL para ENTRADA)
-    private String numeroFactura;    // FK → facturas.numero_factura (NULL para SALIDA)
-    private String unidadDeMedida;
+    private String id;
+    private MovementType movementType;
+    private String productId;
+    private String vehicleId;
+    private String invoiceNumber;
+    private MeasurementUnit measurementUnit;
     private double quantity;
     private double unitPrice;
-    private final String movementDate;
+    private LocalDateTime createdAt;
 
-    // ============================================================================
-    // CONSTRUCTORES
-    // ============================================================================
+    private String productoNombre;
+    private String productoCategoria;
+    private String vehiculoPlaca;
+    private String vehiculoTipo;
 
-    /**
-     * Constructor para CREAR nuevos movimientos (genera ID automático).
-     * Usa productId (FK) que apunta a oil_products.id
-     *
-     * @param movementType   Tipo: "ENTRADA" o "SALIDA"
-     * @param productId      FK → oil_products.id (obligatorio)
-     * @param vehicleId      FK → vehicles.id (opcional, NULL para ENTRADA)
-     * @param numeroFactura  FK → facturas.numero_factura (opcional, NULL para SALIDA)
-     * @param unidadDeMedida Unidad: GALON, GARRAFA, CUARTO, CANECA
-     * @param quantity       Cantidad movida (debe ser > 0)
-     * @param unitPrice      Precio unitario
-     */
-    public Movement(String movementType, String productId, String vehicleId, String numeroFactura,
-                    String unidadDeMedida, double quantity, double unitPrice) {
+    public Movement(MovementType movementType, String productId, String vehicleId, String invoiceNumber,
+                    MeasurementUnit measurementUnit, double quantity, double unitPrice) {
         this.id = IdGenerator.generateMovementId();
         this.movementType = movementType;
         this.productId = productId;
         this.vehicleId = vehicleId;
-        this.numeroFactura = numeroFactura;
-        this.unidadDeMedida = unidadDeMedida;
+        this.invoiceNumber = invoiceNumber;
+        this.measurementUnit = measurementUnit;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
-        this.movementDate = LocalDateTime.now().toString();
+        this.createdAt = LocalDateTime.now();
     }
 
-    /**
-     * Constructor para CARGAR desde la base de datos (usa ID existente).
-     * Este constructor es usado por MovementServices al hacer SELECT.
-     *
-     * @param id             ID existente del movimiento
-     * @param movementType   Tipo: "ENTRADA" o "SALIDA"
-     * @param productId      FK → oil_products.id
-     * @param vehicleId      FK → vehicles.id (puede ser NULL)
-     * @param numeroFactura  FK → facturas.numero_factura (puede ser NULL)
-     * @param unidadDeMedida Unidad de medida
-     * @param quantity       Cantidad
-     * @param unitPrice      Precio unitario
-     * @param movementDate   Fecha del movimiento (String)
-     */
-    public Movement(String id, String movementType, String productId,
-                    String vehicleId, String numeroFactura, String unidadDeMedida,
-                    double quantity, double unitPrice, String movementDate) {
+    @Deprecated
+    public Movement(String movementType, String productId, String vehicleId, String numeroFactura,
+                    String unidadDeMedida, double quantity, double unitPrice) {
+        this(
+            movementType != null ? MovementType.fromCode(movementType) : null,
+            productId,
+            vehicleId,
+            numeroFactura,
+            unidadDeMedida != null ? MeasurementUnit.fromCode(unidadDeMedida) : null,
+            quantity,
+            unitPrice
+        );
+    }
+
+    public Movement(String id, MovementType movementType, String productId,
+                    String vehicleId, String invoiceNumber, MeasurementUnit measurementUnit,
+                    double quantity, double unitPrice, LocalDateTime createdAt) {
         this.id = id;
         this.movementType = movementType;
         this.productId = productId;
         this.vehicleId = vehicleId;
-        this.numeroFactura = numeroFactura;
-        this.unidadDeMedida = unidadDeMedida;
+        this.invoiceNumber = invoiceNumber;
+        this.measurementUnit = measurementUnit;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
-        this.movementDate = movementDate;
+        this.createdAt = createdAt;
     }
 
-    /**
-     * Constructor vacío para herramientas/testing.
-     */
+    @Deprecated
+    public Movement(String id, String movementType, String productId,
+                    String vehicleId, String numeroFactura, String unidadDeMedida,
+                    double quantity, double unitPrice, LocalDateTime createdAt) {
+        this(
+            id,
+            movementType != null ? MovementType.fromCode(movementType) : null,
+            productId,
+            vehicleId,
+            numeroFactura,
+            unidadDeMedida != null ? MeasurementUnit.fromCode(unidadDeMedida) : null,
+            quantity,
+            unitPrice,
+            createdAt
+        );
+    }
+
     public Movement() {
         this.id = IdGenerator.generateMovementId();
-        this.movementDate = LocalDateTime.now().toString();
-        this.movementType = null;
-        this.productId = null;
-        this.vehicleId = null;
-        this.numeroFactura = null;
-        this.unidadDeMedida = null;
-        this.quantity = 0.0;
-        this.unitPrice = 0.0;
+        this.createdAt = LocalDateTime.now();
     }
-
-
-    //getters y setters
-
 
     public String getId() {
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public String getMovementType() {
+    public MovementType getMovementType() {
         return movementType;
     }
 
+    public String getMovementTypeCode() {
+        return movementType != null ? movementType.getCode() : null;
+    }
+
+    public void setMovementType(@NotNull MovementType movementType) {
+        this.movementType = movementType;
+    }
+
+    @Deprecated
     public void setMovementType(@NotNull String movementType) {
-        if (movementType.equals("ENTRADA") || movementType.equals("SALIDA")) {
-            this.movementType = movementType;
+        setMovementType(MovementType.fromCode(movementType));
+    }
+
+    public void setMovementTypeFromCode(String movementTypeCode) {
+        if (movementTypeCode == null) {
+            this.movementType = null;
         } else {
-            System.out.println("TIPO DE MOVIMIENTO NO VALIDO");
+            this.movementType = MovementType.fromCode(movementTypeCode);
         }
     }
 
-    // ============================================================================
-    // GETTERS Y SETTERS PARA LLAVES FORÁNEAS (FASE 4)
-    // ============================================================================
-
-    /**
-     * Obtiene el ID del producto asociado a este movimiento.
-     *
-     * @return ID del producto (FK → oil_products.id)
-     */
     public String getProductId() {
         return productId;
     }
 
-    /**
-     * Establece el ID del producto para este movimiento.
-     *
-     * @param productId ID del producto (debe existir en oil_products)
-     */
     public void setProductId(String productId) {
         this.productId = productId;
     }
 
-    /**
-     * Obtiene el ID del vehículo asociado a este movimiento (solo para SALIDA).
-     *
-     * @return ID del vehículo (FK → vehicles.id), o NULL si es una ENTRADA
-     */
     public String getVehicleId() {
         return vehicleId;
     }
 
-    /**
-     * Establece el ID del vehículo para este movimiento.
-     *
-     * @param vehicleId ID del vehículo (debe existir en vehicles), o NULL
-     */
     public void setVehicleId(String vehicleId) {
         this.vehicleId = vehicleId;
     }
 
-    /**
-     * Obtiene el número de factura asociado a este movimiento (solo para ENTRADA).
-     *
-     * @return Número de factura (FK → facturas.numero_factura), o NULL si es una SALIDA
-     */
+    public String getInvoiceNumber() {
+        return invoiceNumber;
+    }
+
+    public void setInvoiceNumber(String invoiceNumber) {
+        this.invoiceNumber = invoiceNumber;
+    }
+
+    @Deprecated
     public String getNumeroFactura() {
-        return numeroFactura;
+        return invoiceNumber;
     }
 
-    /**
-     * Establece el número de factura para este movimiento.
-     *
-     * @param numeroFactura Número de factura (debe existir en facturas), o NULL
-     */
+    @Deprecated
     public void setNumeroFactura(String numeroFactura) {
-        this.numeroFactura = numeroFactura;
+        setInvoiceNumber(numeroFactura);
     }
 
-
-    public String getUnidadDeMedida() {
-        return unidadDeMedida;
+    public MeasurementUnit getMeasurementUnit() {
+        return measurementUnit;
     }
 
-    public void setUnidadDeMedida(String unidad) {
-        // Validar que sea una unidad válida
-        if (unidad.equals("GALON") || 
-            unidad.equals("GARRAFA") || 
-            unidad.equals("CUARTO") || 
-            unidad.equals("CANECA")) {
-            this.unidadDeMedida = unidad;
+    public String getMeasurementUnitCode() {
+        return measurementUnit != null ? measurementUnit.getCode() : null;
+    }
+
+    public void setMeasurementUnit(MeasurementUnit measurementUnit) {
+        this.measurementUnit = measurementUnit;
+    }
+
+    public void setMeasurementUnitFromCode(String unidad) {
+        if (unidad == null) {
+            this.measurementUnit = null;
         } else {
-            throw new IllegalArgumentException("Unidad de medida no válida: " + unidad);
+            this.measurementUnit = MeasurementUnit.fromCode(unidad);
         }
+    }
+
+    @Deprecated
+    public String getUnidadDeMedida() {
+        return getMeasurementUnitCode();
+    }
+
+    @Deprecated
+    public void setUnidadDeMedida(String unidad) {
+        setMeasurementUnitFromCode(unidad);
     }
 
     public double getQuantity() {
@@ -200,8 +195,6 @@ public class Movement {
         } else {
             System.out.println("CANTIDAD NO VALIDA");
         }
-
-
     }
 
     public double getUnitPrice() {
@@ -216,47 +209,67 @@ public class Movement {
         }
     }
 
+    public double getPricePerUnit() {
+        return unitPrice;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Deprecated
     public String getMovementDate() {
-        return movementDate;
+        return createdAt != null ? createdAt.toString() : "";
     }
 
-
-    public double getSubtotalvalue() {
-        return this.quantity * this.unitPrice;
-
+    public String getProductoNombre() {
+        return productoNombre;
     }
 
-    public double getIva() {
-        return getSubtotalvalue() * AppConfig.IVA_RATE;
-
+    public void setProductoNombre(String productoNombre) {
+        this.productoNombre = productoNombre;
     }
 
-    public double getTotalWithIva() {
-        return getSubtotalvalue() + getIva();
+    public String getProductoCategoria() {
+        return productoCategoria;
     }
 
+    public void setProductoCategoria(String productoCategoria) {
+        this.productoCategoria = productoCategoria;
+    }
 
-    // Método toString() - Define cómo se muestra el objeto al imprimirlo
-    // Indica que sobrescribe un método de la clase padre (Object)
+    public String getVehiculoPlaca() {
+        return vehiculoPlaca;
+    }
+
+    public void setVehiculoPlaca(String vehiculoPlaca) {
+        this.vehiculoPlaca = vehiculoPlaca;
+    }
+
+    public String getVehiculoTipo() {
+        return vehiculoTipo;
+    }
+
+    public void setVehiculoTipo(String vehiculoTipo) {
+        this.vehiculoTipo = vehiculoTipo;
+    }
+
     @Override
     public String toString() {
         return "Movement{" +
                 "id='" + id + '\'' +
-                ", movementType='" + movementType + '\'' +
+                ", movementType='" + getMovementTypeCode() + '\'' +
                 ", productId='" + productId + '\'' +
                 ", vehicleId='" + vehicleId + '\'' +
-                ", numeroFactura='" + numeroFactura + '\'' +
-                ", unidadDeMedida='" + unidadDeMedida + '\'' +
+                ", invoiceNumber='" + invoiceNumber + '\'' +
+                ", measurementUnit='" + getMeasurementUnitCode() + '\'' +
                 ", quantity=" + quantity +
                 ", unitPrice=" + unitPrice +
-                ", movementDate='" + movementDate + '\'' +
+                ", createdAt='" + createdAt + '\'' +
                 '}';
     }
-
-
 }
-
-
-
-
-

@@ -32,6 +32,9 @@
         <!-- Versiones de dependencias -->
         <mysql.connector.version>8.0.33</mysql.connector.version>
         <junit.version>5.10.0</junit.version>
+        <hikari.version>5.1.0</hikari.version>
+        <slf4j.version>2.0.9</slf4j.version>
+        <logback.version>1.4.11</logback.version>
     </properties>
     
     <!-- ========================================= -->
@@ -50,6 +53,16 @@
         </dependency>
         
         <!-- ===================================== -->
+        <!-- HikariCP Connection Pool              -->
+        <!-- ===================================== -->
+        <!-- Pool de conexiones de alto rendimiento -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>${hikari.version}</version>
+        </dependency>
+        
+        <!-- ===================================== -->
         <!-- JUnit 5 (Testing) - FUTURO            -->
         <!-- ===================================== -->
         <!-- Para escribir tests unitarios -->
@@ -64,6 +77,20 @@
             <artifactId>annotations</artifactId>
             <version>RELEASE</version>
             <scope>compile</scope>
+        </dependency>
+        
+        <!-- ===================================== -->
+        <!-- SLF4J + Logback (Logging)             -->
+        <!-- ===================================== -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
         </dependency>
 
     </dependencies>

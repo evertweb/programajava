@@ -1,0 +1,112 @@
+package com.forestech.config;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+/**
+ * Configuración del Connection Pool usando HikariCP.
+ * 
+ * <p><strong>¿Por qué usar Connection Pooling?</strong></p>
+ * <ul>
+ *   <li>Crear conexiones es LENTO (~100-200ms cada una)</li>
+ *   <li>El pool mantiene conexiones listas para usar (~1ms)</li>
+ *   <li>Resultado: 10x-100x más rápido</li>
+ * </ul>
+ * 
+ * <p><strong>Configuración:</strong></p>
+ * <ul>
+ *   <li>Mínimo: 5 conexiones siempre activas</li>
+ *   <li>Máximo: 20 conexiones simultáneas</li>
+ *   <li>Timeout: 30 segundos máximo de espera</li>
+ * </ul>
+ */
+public class HikariCPDataSource {
+    
+    private static HikariDataSource dataSource;
+    
+    // Bloque estático: se ejecuta UNA VEZ cuando la clase se carga
+    static {
+        try {
+            HikariConfig config = new HikariConfig();
+            
+            // ===== CONFIGURACIÓN DE CONEXIÓN (desde application.properties) =====
+            config.setJdbcUrl(ConfigLoader.get("db.url"));
+            config.setUsername(ConfigLoader.get("db.username"));
+            config.setPassword(ConfigLoader.get("db.password"));
+            
+            // ===== CONFIGURACIÓN DEL POOL (desde application.properties) =====
+            config.setMinimumIdle(ConfigLoader.getInt("hikari.minimum-idle", 5));
+            config.setMaximumPoolSize(ConfigLoader.getInt("hikari.maximum-pool-size", 20));
+            config.setConnectionTimeout(ConfigLoader.getLong("hikari.connection-timeout", 30000L));
+            config.setIdleTimeout(ConfigLoader.getLong("hikari.idle-timeout", 600000L));
+            config.setMaxLifetime(ConfigLoader.getLong("hikari.max-lifetime", 1800000L));
+            
+            // ===== OPTIMIZACIONES MYSQL =====
+            config.addDataSourceProperty("cachePrepStmts", "true");
+            config.addDataSourceProperty("prepStmtCacheSize", "250");
+            config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+            config.addDataSourceProperty("useServerPrepStmts", "true");
+            config.addDataSourceProperty("useLocalSessionState", "true");
+            config.addDataSourceProperty("rewriteBatchedStatements", "true");
+            config.addDataSourceProperty("cacheResultSetMetadata", "true");
+            config.addDataSourceProperty("cacheServerConfiguration", "true");
+            config.addDataSourceProperty("elideSetAutoCommits", "true");
+            config.addDataSourceProperty("maintainTimeStats", "false");
+            
+            // Nombre del pool para logs
+            config.setPoolName("ForestechHikariPool");
+            
+            // Crear el DataSource
+            dataSource = new HikariDataSource(config);
+            
+            System.out.println("✅ HikariCP inicializado correctamente");
+            
+        } catch (Exception e) {
+            System.err.println("❌ Error al inicializar HikariCP: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Constructor privado - no se puede instanciar (Singleton Pattern)
+     */
+    private HikariCPDataSource() {}
+    
+    /**
+     * Obtiene el DataSource configurado.
+     * 
+     * @return DataSource con el pool de conexiones
+     */
+    public static DataSource getDataSource() {
+        return dataSource;
+    }
+    
+    /**
+     * Obtiene una conexión del pool.
+     * 
+     * <p>Esta conexión viene del pool (rápida), NO se crea desde cero.</p>
+     * <p><strong>IMPORTANTE:</strong> Siempre cerrar con conn.close() para devolverla al pool</p>
+     * 
+     * @return Connection lista para usar
+     * @throws SQLException Si no hay conexiones disponibles
+     */
+    public static Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
+    }
+    
+    /**
+     * Cierra el pool de conexiones completamente.
+     * 
+     * <p>Llamar solo al cerrar la aplicación.</p>
+     */
+    public static void close() {
+        if (dataSource != null && !dataSource.isClosed()) {
+            dataSource.close();
+            System.out.println("🔒 HikariCP cerrado correctamente");
+        }
+    }
+}

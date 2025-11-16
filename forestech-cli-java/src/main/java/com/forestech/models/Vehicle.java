@@ -1,17 +1,15 @@
 package com.forestech.models;
 
+import com.forestech.enums.VehicleCategory;
 import com.forestech.utils.IdGenerator;
 
 public class Vehicle {
-    // ============================================================================
-    // ATRIBUTOS
-    // ============================================================================
     private final String id;
     private String name;
-    private String category;
+    private VehicleCategory category;
     private double capacity;
-    private String fuelProductId;  // FK → oil_products.id
-    private boolean haveHorometer;
+    private String fuelProductId;
+    private boolean hasHorometer;
 
     // ============================================================================
     // CONSTRUCTORES
@@ -26,13 +24,22 @@ public class Vehicle {
      * @param fuelProductId  FK → oil_products.id (ID del combustible que usa)
      * @param haveHorometer  true si tiene horómetro, false si no
      */
-    public Vehicle(String name, String category, double capacity, String fuelProductId, boolean haveHorometer) {
+    public Vehicle(String name, VehicleCategory category, double capacity, String fuelProductId, boolean hasHorometer) {
         this.id = IdGenerator.generateVehicleId();
         this.name = name;
         this.category = category;
         this.capacity = capacity;
         this.fuelProductId = fuelProductId;
-        this.haveHorometer = haveHorometer;
+        this.hasHorometer = hasHorometer;
+    }
+
+    @Deprecated
+    public Vehicle(String name, String category, double capacity, String fuelProductId, boolean haveHorometer) {
+        this(name,
+             category != null ? VehicleCategory.fromCode(category) : null,
+             capacity,
+             fuelProductId,
+             haveHorometer);
     }
 
     /**
@@ -45,14 +52,25 @@ public class Vehicle {
      * @param fuelProductId  FK → oil_products.id
      * @param haveHorometer  Tiene horómetro
      */
-    public Vehicle(String id, String name, String category, double capacity,
-                   String fuelProductId, boolean haveHorometer) {
+    public Vehicle(String id, String name, VehicleCategory category, double capacity,
+                   String fuelProductId, boolean hasHorometer) {
         this.id = id;
         this.name = name;
         this.category = category;
         this.capacity = capacity;
         this.fuelProductId = fuelProductId;
-        this.haveHorometer = haveHorometer;
+        this.hasHorometer = hasHorometer;
+    }
+
+    @Deprecated
+    public Vehicle(String id, String name, String category, double capacity,
+                   String fuelProductId, boolean haveHorometer) {
+        this(id,
+             name,
+             category != null ? VehicleCategory.fromCode(category) : null,
+             capacity,
+             fuelProductId,
+             haveHorometer);
     }
 
     // ============================================================================
@@ -80,12 +98,29 @@ public class Vehicle {
         this.name = name;
     }
 
-    public String getCategory() {
+    public VehicleCategory getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public String getCategoryCode() {
+        return category != null ? category.getCode() : null;
+    }
+
+    public void setCategory(VehicleCategory category) {
         this.category = category;
+    }
+
+    public void setCategoryFromCode(String categoryCode) {
+        if (categoryCode == null) {
+            this.category = null;
+        } else {
+            this.category = VehicleCategory.fromCode(categoryCode);
+        }
+    }
+
+    @Deprecated
+    public void setCategory(String category) {
+        setCategoryFromCode(category);
     }
 
     public double getCapacity() {
@@ -96,12 +131,22 @@ public class Vehicle {
         this.capacity = capacity;
     }
 
-    public boolean isHaveHorometer() {
-        return haveHorometer;
+    public boolean hasHorometer() {
+        return hasHorometer;
     }
 
+    public void setHasHorometer(boolean hasHorometer) {
+        this.hasHorometer = hasHorometer;
+    }
+
+    @Deprecated
+    public boolean isHaveHorometer() {
+        return hasHorometer();
+    }
+
+    @Deprecated
     public void setHaveHorometer(boolean haveHorometer) {
-        this.haveHorometer = haveHorometer;
+        setHasHorometer(haveHorometer);
     }
 
     @Override
@@ -112,9 +157,9 @@ public class Vehicle {
                 "│ 🆔 ID:                " + id + "\n" +
                 "│ 📌 Nombre:            " + name + "\n" +
                 "│ ⛽ Combustible ID:     " + fuelProductId + "\n" +
-                "│ 📦 Categoría:         " + category + "\n" +
+                "│ 📦 Categoría:         " + getCategoryCode() + "\n" +
                 "│ 💾 Capacidad (lts):   " + capacity + "\n" +
-                "│ ⏱️  Horómetro:         " + (haveHorometer ? "Sí" : "No") + "\n" +
+                "│ ⏱️  Horómetro:         " + (hasHorometer ? "Sí" : "No") + "\n" +
                 "└─────────────────────────────────────────────────────┘";
     }
 

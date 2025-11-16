@@ -1,27 +1,41 @@
 package com.forestech.models;
 
+import com.forestech.enums.MeasurementUnit;
 import com.forestech.utils.IdGenerator;
 
 public class Product {
     private final String id;
     private String name;
-    private String unidadDeMedida;
-    private double priceXUnd;
+    private MeasurementUnit measurementUnit;
+    private double unitPrice;
 
-    // Constructor para CREAR nuevos productos (genera ID automático)
-    public Product(String name, String unidadDeMedida, double priceXUnd) {
+    public Product(String name, MeasurementUnit measurementUnit, double unitPrice) {
         this.id = IdGenerator.generateFuelId();
         this.name = name;
-        this.unidadDeMedida = unidadDeMedida;
-        this.priceXUnd = priceXUnd;
+        this.measurementUnit = measurementUnit;
+        this.unitPrice = unitPrice;
     }
 
-    // Constructor para CARGAR productos desde la BD (usa ID existente)
-    public Product(String id, String name, String unidadDeMedida, double priceXUnd) {
+    @Deprecated
+    public Product(String name, String unidadDeMedida, double priceXUnd) {
+        this(name,
+             unidadDeMedida != null ? MeasurementUnit.fromCode(unidadDeMedida) : null,
+             priceXUnd);
+    }
+
+    public Product(String id, String name, MeasurementUnit measurementUnit, double unitPrice) {
         this.id = id;
         this.name = name;
-        this.unidadDeMedida = unidadDeMedida;
-        this.priceXUnd = priceXUnd;
+        this.measurementUnit = measurementUnit;
+        this.unitPrice = unitPrice;
+    }
+
+    @Deprecated
+    public Product(String id, String name, String unidadDeMedida, double priceXUnd) {
+        this(id,
+             name,
+             unidadDeMedida != null ? MeasurementUnit.fromCode(unidadDeMedida) : null,
+             priceXUnd);
     }
 
     public String getId() {
@@ -36,20 +50,52 @@ public class Product {
         this.name = name;
     }
 
+    public MeasurementUnit getMeasurementUnit() {
+        return measurementUnit;
+    }
+
+    public String getMeasurementUnitCode() {
+        return measurementUnit != null ? measurementUnit.getCode() : null;
+    }
+
+    public void setMeasurementUnit(MeasurementUnit measurementUnit) {
+        this.measurementUnit = measurementUnit;
+    }
+
+    public void setMeasurementUnitFromCode(String unidadDeMedida) {
+        if (unidadDeMedida == null) {
+            this.measurementUnit = null;
+        } else {
+            this.measurementUnit = MeasurementUnit.fromCode(unidadDeMedida);
+        }
+    }
+
+    @Deprecated
     public String getUnidadDeMedida() {
-        return unidadDeMedida;
+        return getMeasurementUnitCode();
     }
 
+    @Deprecated
     public void setUnidadDeMedida(String unidadDeMedida) {
-        this.unidadDeMedida = unidadDeMedida;
+        setMeasurementUnitFromCode(unidadDeMedida);
     }
 
+    public double getUnitPrice() {
+        return unitPrice;
+    }
+
+    public void setUnitPrice(double unitPrice) {
+        this.unitPrice = unitPrice;
+    }
+
+    @Deprecated
     public double getPriceXUnd() {
-        return priceXUnd;
+        return getUnitPrice();
     }
 
+    @Deprecated
     public void setPriceXUnd(double priceXUnd) {
-        this.priceXUnd = priceXUnd;
+        setUnitPrice(priceXUnd);
     }
 
     @Override
@@ -57,8 +103,8 @@ public class Product {
         return "Product{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", unidadDeMedida='" + unidadDeMedida + '\'' +
-                ", priceXUnd=" + priceXUnd +
+                ", measurementUnit='" + getMeasurementUnitCode() + '\'' +
+                ", unitPrice=" + unitPrice +
                 '}';
     }
 
