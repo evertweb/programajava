@@ -196,7 +196,7 @@ public class DashboardPanel extends JPanel {
     private long countTodayMovements(List<Movement> movimientos) {
         LocalDate today = LocalDate.now();
         return movimientos.stream()
-            .map(m -> UIUtils.extractMovementDate(m.getMovementDate()))
+            .map(m -> m.getCreatedAt() != null ? m.getCreatedAt().toLocalDate() : null)
             .filter(today::equals)
             .count();
     }

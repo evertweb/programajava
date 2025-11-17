@@ -16,26 +16,11 @@ public class Product {
         this.unitPrice = unitPrice;
     }
 
-    @Deprecated
-    public Product(String name, String unidadDeMedida, double priceXUnd) {
-        this(name,
-             unidadDeMedida != null ? MeasurementUnit.fromCode(unidadDeMedida) : null,
-             priceXUnd);
-    }
-
     public Product(String id, String name, MeasurementUnit measurementUnit, double unitPrice) {
         this.id = id;
         this.name = name;
         this.measurementUnit = measurementUnit;
         this.unitPrice = unitPrice;
-    }
-
-    @Deprecated
-    public Product(String id, String name, String unidadDeMedida, double priceXUnd) {
-        this(id,
-             name,
-             unidadDeMedida != null ? MeasurementUnit.fromCode(unidadDeMedida) : null,
-             priceXUnd);
     }
 
     public String getId() {
@@ -62,22 +47,12 @@ public class Product {
         this.measurementUnit = measurementUnit;
     }
 
-    public void setMeasurementUnitFromCode(String unidadDeMedida) {
-        if (unidadDeMedida == null) {
+    public void setMeasurementUnitFromCode(String measurementUnitCode) {
+        if (measurementUnitCode == null) {
             this.measurementUnit = null;
         } else {
-            this.measurementUnit = MeasurementUnit.fromCode(unidadDeMedida);
+            this.measurementUnit = MeasurementUnit.fromCode(measurementUnitCode);
         }
-    }
-
-    @Deprecated
-    public String getUnidadDeMedida() {
-        return getMeasurementUnitCode();
-    }
-
-    @Deprecated
-    public void setUnidadDeMedida(String unidadDeMedida) {
-        setMeasurementUnitFromCode(unidadDeMedida);
     }
 
     public double getUnitPrice() {
@@ -86,16 +61,6 @@ public class Product {
 
     public void setUnitPrice(double unitPrice) {
         this.unitPrice = unitPrice;
-    }
-
-    @Deprecated
-    public double getPriceXUnd() {
-        return getUnitPrice();
-    }
-
-    @Deprecated
-    public void setPriceXUnd(double priceXUnd) {
-        setUnitPrice(priceXUnd);
     }
 
     @Override

@@ -69,12 +69,12 @@ public interface IProductService {
     
     /**
      * Filtra productos por unidad de medida.
-     * 
-     * @param unidadDeMedida Unidad de medida (GALON, GARRAFA, etc.)
+     *
+     * @param measurementUnitCode Unidad de medida (GALON, GARRAFA, etc.)
      * @return Lista de productos con esa unidad
      * @throws DatabaseException Si hay error de BD
      */
-    List<Product> getProductsByUnidadDeMedida(String unidadDeMedida) throws DatabaseException;
+    List<Product> getProductsByMeasurementUnit(String measurementUnitCode) throws DatabaseException;
     
     // ============================================================================
     // UPDATE - OPERACIONES DE ACTUALIZACIÓN

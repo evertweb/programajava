@@ -91,7 +91,7 @@ public class VehicleManagerGUI extends JFrame {
                     v.getCategory(),
                     v.getCapacity(),
                     v.getFuelProductId() != null ? v.getFuelProductId() : "N/A",
-                    v.isHaveHorometer() ? "Sí" : "No"
+                    v.hasHorometer() ? "Sí" : "No"
                 });
             }
 

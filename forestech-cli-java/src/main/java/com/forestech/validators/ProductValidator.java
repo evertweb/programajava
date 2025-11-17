@@ -34,8 +34,8 @@ public class ProductValidator {
     public static void validate(Product product) throws ValidationException {
         validateNotNull(product);
         validateName(product.getName());
-        validatePrice(product.getPriceXUnd());
-        validateUnit(product.getUnidadDeMedida());
+        validatePrice(product.getUnitPrice());
+        validateUnit(product.getMeasurementUnitCode());
         // Note: Product model doesn't have category field, removed validation
     }
     

@@ -33,15 +33,6 @@ public class Vehicle {
         this.hasHorometer = hasHorometer;
     }
 
-    @Deprecated
-    public Vehicle(String name, String category, double capacity, String fuelProductId, boolean haveHorometer) {
-        this(name,
-             category != null ? VehicleCategory.fromCode(category) : null,
-             capacity,
-             fuelProductId,
-             haveHorometer);
-    }
-
     /**
      * Constructor para CARGAR desde la base de datos (usa ID existente).
      *
@@ -50,7 +41,7 @@ public class Vehicle {
      * @param category       Categoría
      * @param capacity       Capacidad en litros
      * @param fuelProductId  FK → oil_products.id
-     * @param haveHorometer  Tiene horómetro
+     * @param hasHorometer   Tiene horómetro
      */
     public Vehicle(String id, String name, VehicleCategory category, double capacity,
                    String fuelProductId, boolean hasHorometer) {
@@ -60,17 +51,6 @@ public class Vehicle {
         this.capacity = capacity;
         this.fuelProductId = fuelProductId;
         this.hasHorometer = hasHorometer;
-    }
-
-    @Deprecated
-    public Vehicle(String id, String name, String category, double capacity,
-                   String fuelProductId, boolean haveHorometer) {
-        this(id,
-             name,
-             category != null ? VehicleCategory.fromCode(category) : null,
-             capacity,
-             fuelProductId,
-             haveHorometer);
     }
 
     // ============================================================================
@@ -118,11 +98,6 @@ public class Vehicle {
         }
     }
 
-    @Deprecated
-    public void setCategory(String category) {
-        setCategoryFromCode(category);
-    }
-
     public double getCapacity() {
         return capacity;
     }
@@ -137,16 +112,6 @@ public class Vehicle {
 
     public void setHasHorometer(boolean hasHorometer) {
         this.hasHorometer = hasHorometer;
-    }
-
-    @Deprecated
-    public boolean isHaveHorometer() {
-        return hasHorometer();
-    }
-
-    @Deprecated
-    public void setHaveHorometer(boolean haveHorometer) {
-        setHasHorometer(haveHorometer);
     }
 
     @Override

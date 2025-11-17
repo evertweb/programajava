@@ -1,5 +1,6 @@
 package com.forestech.controllers;
 
+import com.forestech.enums.VehicleCategory;
 import com.forestech.exceptions.DatabaseException;
 import com.forestech.helpers.InputHelper;
 import com.forestech.models.Vehicle;
@@ -72,7 +73,7 @@ public class VehicleController {
             String tieneHorometroStr = InputHelper.readString("⏱️  ¿Tiene horómetro? (S/N): ");
             boolean tieneHorometro = tieneHorometroStr.equalsIgnoreCase("S");
 
-            Vehicle vehiculo = new Vehicle(nombre, categoria, capacidad, fuelProductId, tieneHorometro);
+            Vehicle vehiculo = new Vehicle(nombre, VehicleCategory.fromCode(categoria), capacidad, fuelProductId, tieneHorometro);
             new VehicleServices().insertVehicle(vehiculo);
 
             logger.info("Vehículo creado exitosamente - ID: {}, Nombre: {}", vehiculo.getId(), vehiculo.getName());
@@ -172,7 +173,7 @@ public class VehicleController {
             String tieneHorometroStr = InputHelper.readString("⏱️  ¿Tiene horómetro? (S/N): ");
             boolean tieneHorometro = tieneHorometroStr.equalsIgnoreCase("S");
 
-            Vehicle vehiculo = new Vehicle(id, nombre, categoria, capacidad, fuelProductId, tieneHorometro);
+            Vehicle vehiculo = new Vehicle(id, nombre, VehicleCategory.fromCode(categoria), capacidad, fuelProductId, tieneHorometro);
             boolean actualizado = new VehicleServices().updateVehicle(vehiculo);
 
             if (actualizado) {

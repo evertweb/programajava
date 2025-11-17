@@ -255,7 +255,7 @@ public class VehiclesPanel extends JPanel {
                 v.getCategory(),
                 String.format("%,.2f", v.getCapacity()),
                 v.getFuelProductId() != null ? v.getFuelProductId() : "Sin asignar",
-                v.isHaveHorometer() ? "Sí" : "No"
+                v.hasHorometer() ? "Sí" : "No"
             });
         }
     }
@@ -424,7 +424,7 @@ public class VehiclesPanel extends JPanel {
                 .append("\nCapacidad: ").append(String.format("%,.2f L", vehiculo.getCapacity()))
                 .append("\nCombustible: ")
                 .append(vehiculo.getFuelProductId() != null ? vehiculo.getFuelProductId() : "Sin asignar")
-                .append("\nHorómetro: ").append(vehiculo.isHaveHorometer() ? "Sí" : "No");
+                .append("\nHorómetro: ").append(vehiculo.hasHorometer() ? "Sí" : "No");
 
             JOptionPane.showMessageDialog(owner, detalle.toString(),
                 "Detalle de vehículo", JOptionPane.INFORMATION_MESSAGE);

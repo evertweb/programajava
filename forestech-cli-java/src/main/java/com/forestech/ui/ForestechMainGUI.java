@@ -1,5 +1,6 @@
 package com.forestech.ui;
 
+import com.forestech.enums.MeasurementUnit;
 import com.forestech.exceptions.DatabaseException;
 import com.forestech.models.Product;
 import com.forestech.models.Vehicle;
@@ -310,8 +311,8 @@ public class ForestechMainGUI extends JFrame {
                 modeloProductos.addRow(new Object[]{
                     p.getId(),
                     p.getName(),
-                    String.format("$%,.2f", p.getPriceXUnd()),
-                    p.getUnidadDeMedida()
+                    String.format("$%,.2f", p.getUnitPrice()),
+                    p.getMeasurementUnitCode()
                 });
             }
 
@@ -366,7 +367,7 @@ public class ForestechMainGUI extends JFrame {
                     m.getProductId(),
                     m.getVehicleId() != null ? m.getVehicleId() : "N/A",
                     m.getQuantity(),
-                    m.getMovementDate()
+                    m.getCreatedAt()
                 });
             }
 
@@ -391,7 +392,7 @@ public class ForestechMainGUI extends JFrame {
 
         try {
             double precio = Double.parseDouble(precioStr);
-            Product producto = new Product(nombre, "Litros", precio);
+            Product producto = new Product(nombre, MeasurementUnit.GALON, precio);
             new ProductServices().insertProduct(producto);
 
             JOptionPane.showMessageDialog(this, "Producto agregado correctamente",

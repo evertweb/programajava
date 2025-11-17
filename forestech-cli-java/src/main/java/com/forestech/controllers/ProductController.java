@@ -1,5 +1,6 @@
 package com.forestech.controllers;
 
+import com.forestech.enums.MeasurementUnit;
 import com.forestech.exceptions.DatabaseException;
 import com.forestech.helpers.InputHelper;
 import com.forestech.models.Product;
@@ -83,10 +84,10 @@ public class ProductController {
 
         try {
             String nombre = InputHelper.readString("📌 Nombre del producto: ");
-            String unidadDeMedida = InputHelper.readString("📏 Unidad de medida (Litro, Galon, etc.): ");
+            String measurementUnitCode = InputHelper.readString("📏 Unidad de medida (Litro, Galon, etc.): ");
             double precio = InputHelper.readDouble("💰 Precio por unidad: ");
 
-            Product producto = new Product(nombre, unidadDeMedida, precio);
+            Product producto = new Product(nombre, MeasurementUnit.fromCode(measurementUnitCode), precio);
             productServices.insertProduct(producto);
 
             logger.info("Producto creado exitosamente - ID: {}, Nombre: {}", producto.getId(), producto.getName());
@@ -94,8 +95,8 @@ public class ProductController {
             System.out.println("\n✅ Producto creado exitosamente!");
             System.out.println("   ID: " + producto.getId());
             System.out.println("   Nombre: " + producto.getName());
-            System.out.println("   Unidad: " + producto.getUnidadDeMedida());
-            System.out.println("   Precio: $" + producto.getPriceXUnd());
+            System.out.println("   Unidad: " + producto.getMeasurementUnitCode());
+            System.out.println("   Precio: $" + producto.getUnitPrice());
 
         } catch (DatabaseException e) {
             logger.error("Error al crear producto: {}", e.getMessage(), e);
@@ -163,7 +164,7 @@ public class ProductController {
         String unidad = InputHelper.readString("📏 Ingrese la unidad de medida: ");
 
         try {
-            List<Product> productos = productServices.getProductsByUnidadDeMedida(unidad);
+            List<Product> productos = productServices.getProductsByMeasurementUnit(unidad);
 
             if (productos.isEmpty()) {
                 System.out.println("⚠️  No se encontraron productos con la unidad: " + unidad);
@@ -191,7 +192,7 @@ public class ProductController {
         double nuevoPrecio = InputHelper.readDouble("💰 Nuevo precio: ");
 
         try {
-            Product producto = new Product(id, nuevoNombre, nuevaUnidad, nuevoPrecio);
+            Product producto = new Product(id, nuevoNombre, MeasurementUnit.fromCode(nuevaUnidad), nuevoPrecio);
             boolean actualizado = productServices.updateProduct(producto);
 
             if (actualizado) {

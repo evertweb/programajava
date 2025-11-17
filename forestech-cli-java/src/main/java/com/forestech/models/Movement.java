@@ -20,10 +20,10 @@ public class Movement {
     private double unitPrice;
     private LocalDateTime createdAt;
 
-    private String productoNombre;
-    private String productoCategoria;
-    private String vehiculoPlaca;
-    private String vehiculoTipo;
+    private String productName;
+    private String productCategory;
+    private String vehiclePlate;
+    private String vehicleType;
 
     public Movement(MovementType movementType, String productId, String vehicleId, String invoiceNumber,
                     MeasurementUnit measurementUnit, double quantity, double unitPrice) {
@@ -38,20 +38,6 @@ public class Movement {
         this.createdAt = LocalDateTime.now();
     }
 
-    @Deprecated
-    public Movement(String movementType, String productId, String vehicleId, String numeroFactura,
-                    String unidadDeMedida, double quantity, double unitPrice) {
-        this(
-            movementType != null ? MovementType.fromCode(movementType) : null,
-            productId,
-            vehicleId,
-            numeroFactura,
-            unidadDeMedida != null ? MeasurementUnit.fromCode(unidadDeMedida) : null,
-            quantity,
-            unitPrice
-        );
-    }
-
     public Movement(String id, MovementType movementType, String productId,
                     String vehicleId, String invoiceNumber, MeasurementUnit measurementUnit,
                     double quantity, double unitPrice, LocalDateTime createdAt) {
@@ -64,23 +50,6 @@ public class Movement {
         this.quantity = quantity;
         this.unitPrice = unitPrice;
         this.createdAt = createdAt;
-    }
-
-    @Deprecated
-    public Movement(String id, String movementType, String productId,
-                    String vehicleId, String numeroFactura, String unidadDeMedida,
-                    double quantity, double unitPrice, LocalDateTime createdAt) {
-        this(
-            id,
-            movementType != null ? MovementType.fromCode(movementType) : null,
-            productId,
-            vehicleId,
-            numeroFactura,
-            unidadDeMedida != null ? MeasurementUnit.fromCode(unidadDeMedida) : null,
-            quantity,
-            unitPrice,
-            createdAt
-        );
     }
 
     public Movement() {
@@ -106,11 +75,6 @@ public class Movement {
 
     public void setMovementType(@NotNull MovementType movementType) {
         this.movementType = movementType;
-    }
-
-    @Deprecated
-    public void setMovementType(@NotNull String movementType) {
-        setMovementType(MovementType.fromCode(movementType));
     }
 
     public void setMovementTypeFromCode(String movementTypeCode) {
@@ -145,16 +109,6 @@ public class Movement {
         this.invoiceNumber = invoiceNumber;
     }
 
-    @Deprecated
-    public String getNumeroFactura() {
-        return invoiceNumber;
-    }
-
-    @Deprecated
-    public void setNumeroFactura(String numeroFactura) {
-        setInvoiceNumber(numeroFactura);
-    }
-
     public MeasurementUnit getMeasurementUnit() {
         return measurementUnit;
     }
@@ -167,22 +121,12 @@ public class Movement {
         this.measurementUnit = measurementUnit;
     }
 
-    public void setMeasurementUnitFromCode(String unidad) {
-        if (unidad == null) {
+    public void setMeasurementUnitFromCode(String measurementUnitCode) {
+        if (measurementUnitCode == null) {
             this.measurementUnit = null;
         } else {
-            this.measurementUnit = MeasurementUnit.fromCode(unidad);
+            this.measurementUnit = MeasurementUnit.fromCode(measurementUnitCode);
         }
-    }
-
-    @Deprecated
-    public String getUnidadDeMedida() {
-        return getMeasurementUnitCode();
-    }
-
-    @Deprecated
-    public void setUnidadDeMedida(String unidad) {
-        setMeasurementUnitFromCode(unidad);
     }
 
     public double getQuantity() {
@@ -221,41 +165,36 @@ public class Movement {
         this.createdAt = createdAt;
     }
 
-    @Deprecated
-    public String getMovementDate() {
-        return createdAt != null ? createdAt.toString() : "";
+    public String getProductName() {
+        return productName;
     }
 
-    public String getProductoNombre() {
-        return productoNombre;
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
 
-    public void setProductoNombre(String productoNombre) {
-        this.productoNombre = productoNombre;
+    public String getProductCategory() {
+        return productCategory;
     }
 
-    public String getProductoCategoria() {
-        return productoCategoria;
+    public void setProductCategory(String productCategory) {
+        this.productCategory = productCategory;
     }
 
-    public void setProductoCategoria(String productoCategoria) {
-        this.productoCategoria = productoCategoria;
+    public String getVehiclePlate() {
+        return vehiclePlate;
     }
 
-    public String getVehiculoPlaca() {
-        return vehiculoPlaca;
+    public void setVehiclePlate(String vehiclePlate) {
+        this.vehiclePlate = vehiclePlate;
     }
 
-    public void setVehiculoPlaca(String vehiculoPlaca) {
-        this.vehiculoPlaca = vehiculoPlaca;
+    public String getVehicleType() {
+        return vehicleType;
     }
 
-    public String getVehiculoTipo() {
-        return vehiculoTipo;
-    }
-
-    public void setVehiculoTipo(String vehiculoTipo) {
-        this.vehiculoTipo = vehiculoTipo;
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = vehicleType;
     }
 
     @Override

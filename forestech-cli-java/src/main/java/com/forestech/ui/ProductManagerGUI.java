@@ -1,5 +1,6 @@
 package com.forestech.ui;
 
+import com.forestech.enums.MeasurementUnit;
 import com.forestech.exceptions.DatabaseException;
 import com.forestech.models.Product;
 import com.forestech.services.ProductServices;
@@ -175,8 +176,8 @@ public class ProductManagerGUI extends JFrame {
                 Object[] fila = {
                     p.getId(),
                     p.getName(),
-                    String.format("$%,.2f", p.getPriceXUnd()),
-                    p.getUnidadDeMedida()
+                    String.format("$%,.2f", p.getUnitPrice()),
+                    p.getMeasurementUnitCode()
                 };
                 modeloTabla.addRow(fila);
             }
@@ -254,7 +255,7 @@ public class ProductManagerGUI extends JFrame {
 
         // PASO 2: CREAR OBJETO PRODUCT
         // El constructor de Product genera automáticamente el ID
-        Product nuevoProducto = new Product(nombre, unidad, precio);
+        Product nuevoProducto = new Product(nombre, MeasurementUnit.fromCode(unidad), precio);
 
         // PASO 3: INSERTAR EN BD MEDIANTE SERVICES
         try {
@@ -265,7 +266,7 @@ public class ProductManagerGUI extends JFrame {
                 "Producto agregado exitosamente:\n\n" +
                 "ID: " + nuevoProducto.getId() + "\n" +
                 "Nombre: " + nuevoProducto.getName() + "\n" +
-                "Precio: $" + String.format("%,.2f", nuevoProducto.getPriceXUnd()),
+                "Precio: $" + String.format("%,.2f", nuevoProducto.getUnitPrice()),
                 "Éxito",
                 JOptionPane.INFORMATION_MESSAGE);
 

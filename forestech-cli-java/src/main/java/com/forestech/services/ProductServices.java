@@ -139,10 +139,10 @@ public class ProductServices implements IProductService {
      * Filtra productos por unidad de medida.
      */
     @Override
-    public List<Product> getProductsByUnidadDeMedida(String unidadDeMedida) throws DatabaseException {
+    public List<Product> getProductsByMeasurementUnit(String measurementUnitCode) throws DatabaseException {
         try {
-            List<Product> products = productDAO.findByCategory(unidadDeMedida);
-            System.out.println("✅ Encontrados " + products.size() + " productos con unidad: " + unidadDeMedida);
+            List<Product> products = productDAO.findByCategory(measurementUnitCode);
+            System.out.println("✅ Encontrados " + products.size() + " productos con unidad: " + measurementUnitCode);
             return products;
         } catch (Exception e) {
             throw new DatabaseException("Error al filtrar productos por unidad", e);

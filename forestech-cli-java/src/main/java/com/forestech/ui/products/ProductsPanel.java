@@ -208,7 +208,7 @@ public class ProductsPanel extends JPanel {
 
                 if (unidadSeleccionada != null && !"Todas".equalsIgnoreCase(unidadSeleccionada)) {
                     productos = productos.stream()
-                        .filter(p -> unidadSeleccionada.equalsIgnoreCase(p.getUnidadDeMedida()))
+                        .filter(p -> unidadSeleccionada.equalsIgnoreCase(p.getMeasurementUnitCode()))
                         .collect(Collectors.toList());
                 }
 
@@ -230,8 +230,8 @@ public class ProductsPanel extends JPanel {
                         modeloProductos.addRow(new Object[]{
                             p.getId(),
                             p.getName(),
-                            UIUtils.formatCurrency(p.getPriceXUnd()),
-                            p.getUnidadDeMedida(),
+                            UIUtils.formatCurrency(p.getUnitPrice()),
+                            p.getMeasurementUnitCode(),
                             stock
                         });
                     }
@@ -315,7 +315,7 @@ public class ProductsPanel extends JPanel {
 
         String seleccionActual = (String) cmbFiltroUnidad.getSelectedItem();
         Set<String> unidades = productos.stream()
-            .map(Product::getUnidadDeMedida)
+            .map(Product::getMeasurementUnitCode)
             .filter(unidad -> unidad != null && !unidad.isBlank())
             .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
 
@@ -461,8 +461,8 @@ public class ProductsPanel extends JPanel {
             double stock = new MovementServices().getProductStock(id);
             String mensaje = "ID: " + producto.getId() +
                 "\nNombre: " + producto.getName() +
-                "\nUnidad: " + producto.getUnidadDeMedida() +
-                "\nPrecio: " + UIUtils.formatCurrency(producto.getPriceXUnd()) +
+                "\nUnidad: " + producto.getMeasurementUnitCode() +
+                "\nPrecio: " + UIUtils.formatCurrency(producto.getUnitPrice()) +
                 "\nStock actual: " + String.format("%,.2f", stock);
 
             JOptionPane.showMessageDialog(owner, mensaje,

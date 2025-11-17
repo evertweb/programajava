@@ -1,5 +1,6 @@
 package com.forestech.ui;
 
+import com.forestech.enums.VehicleCategory;
 import com.forestech.exceptions.DatabaseException;
 import com.forestech.models.Product;
 import com.forestech.models.Vehicle;
@@ -112,7 +113,7 @@ public class VehicleDialogForm extends JDialog {
         txtNombre.setText(vehiculoExistente.getName());
         txtCategoria.setText(vehiculoExistente.getCategory() != null ? vehiculoExistente.getCategory().getCode() : "");
         txtCapacidad.setText(String.valueOf(vehiculoExistente.getCapacity()));
-        chkTieneHorometro.setSelected(vehiculoExistente.isHaveHorometer());
+        chkTieneHorometro.setSelected(vehiculoExistente.hasHorometer());
 
         // Seleccionar el combustible correcto en el combo
         String fuelId = vehiculoExistente.getFuelProductId();
@@ -156,17 +157,18 @@ public class VehicleDialogForm extends JDialog {
         boolean tieneHorometro = chkTieneHorometro.isSelected();
 
         try {
+            VehicleCategory vehicleCategory = VehicleCategory.fromCode(categoria);
             if (vehiculoExistente == null) {
-                Vehicle nuevoVehiculo = new Vehicle(nombre, categoria, capacidad, fuelProductId, tieneHorometro);
+                Vehicle nuevoVehiculo = new Vehicle(nombre, vehicleCategory, capacidad, fuelProductId, tieneHorometro);
                 new VehicleServices().insertVehicle(nuevoVehiculo);
                 JOptionPane.showMessageDialog(this, "Vehículo agregado exitosamente",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 vehiculoExistente.setName(nombre);
-                vehiculoExistente.setCategory(categoria);
+                vehiculoExistente.setCategory(vehicleCategory);
                 vehiculoExistente.setCapacity(capacidad);
                 vehiculoExistente.setFuelProductId(fuelProductId);
-                vehiculoExistente.setHaveHorometer(tieneHorometro);
+                vehiculoExistente.setHasHorometer(tieneHorometro);
                 new VehicleServices().updateVehicle(vehiculoExistente);
                 JOptionPane.showMessageDialog(this, "Vehículo actualizado exitosamente",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);

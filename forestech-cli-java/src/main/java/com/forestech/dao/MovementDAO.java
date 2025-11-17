@@ -312,10 +312,10 @@ public class MovementDAO implements GenericDAO<Movement> {
             timestamp != null ? timestamp.toLocalDateTime() : LocalDateTime.now()
         );
 
-        movement.setProductoNombre(rs.getString("producto_nombre"));
-        movement.setProductoCategoria(rs.getString("producto_categoria"));
-        movement.setVehiculoPlaca(rs.getString("vehiculo_placa"));
-        movement.setVehiculoTipo(rs.getString("vehiculo_tipo"));
+        movement.setProductName(rs.getString("producto_nombre"));
+        movement.setProductCategory(rs.getString("producto_categoria"));
+        movement.setVehiclePlate(rs.getString("vehiculo_placa"));
+        movement.setVehicleType(rs.getString("vehiculo_tipo"));
 
         return movement;
     }

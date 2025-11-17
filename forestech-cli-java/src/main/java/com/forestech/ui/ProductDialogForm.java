@@ -1,5 +1,6 @@
 package com.forestech.ui;
 
+import com.forestech.enums.MeasurementUnit;
 import com.forestech.exceptions.DatabaseException;
 import com.forestech.models.Product;
 import com.forestech.services.ProductServices;
@@ -140,8 +141,8 @@ public class ProductDialogForm extends JDialog {
      */
     private void cargarDatosExistentes() {
         txtNombre.setText(productoExistente.getName());
-        txtPrecio.setText(String.valueOf(productoExistente.getPriceXUnd()));
-        cmbUnidad.setSelectedItem(productoExistente.getUnidadDeMedida());
+        txtPrecio.setText(String.valueOf(productoExistente.getUnitPrice()));
+        cmbUnidad.setSelectedItem(productoExistente.getMeasurementUnitCode());
     }
 
     /**
@@ -199,14 +200,14 @@ public class ProductDialogForm extends JDialog {
         try {
             if (productoExistente == null) {
                 // MODO AGREGAR: Crear nuevo producto
-                Product nuevoProducto = new Product(nombre, unidad, precio);
+                Product nuevoProducto = new Product(nombre, MeasurementUnit.fromCode(unidad), precio);
                 new ProductServices().insertProduct(nuevoProducto);
 
                 JOptionPane.showMessageDialog(this,
                     "Producto agregado exitosamente:\n\n" +
                     "ID: " + nuevoProducto.getId() + "\n" +
                     "Nombre: " + nuevoProducto.getName() + "\n" +
-                    "Precio: $" + String.format("%,.2f", nuevoProducto.getPriceXUnd()),
+                    "Precio: $" + String.format("%,.2f", nuevoProducto.getUnitPrice()),
                     "Éxito",
                     JOptionPane.INFORMATION_MESSAGE);
 
@@ -215,8 +216,8 @@ public class ProductDialogForm extends JDialog {
             } else {
                 // MODO EDITAR: Actualizar producto existente
                 productoExistente.setName(nombre);
-                productoExistente.setPriceXUnd(precio);
-                productoExistente.setUnidadDeMedida(unidad);
+                productoExistente.setUnitPrice(precio);
+                productoExistente.setMeasurementUnitFromCode(unidad);
 
                 new ProductServices().updateProduct(productoExistente);
 
@@ -224,7 +225,7 @@ public class ProductDialogForm extends JDialog {
                     "Producto actualizado exitosamente:\n\n" +
                     "ID: " + productoExistente.getId() + "\n" +
                     "Nombre: " + productoExistente.getName() + "\n" +
-                    "Precio: $" + String.format("%,.2f", productoExistente.getPriceXUnd()),
+                    "Precio: $" + String.format("%,.2f", productoExistente.getUnitPrice()),
                     "Éxito",
                     JOptionPane.INFORMATION_MESSAGE);
 
@@ -301,7 +302,7 @@ public class ProductDialogForm extends JDialog {
             btnEditar.setBackground(new Color(150, 150, 255));
             btnEditar.addActionListener(e -> {
                 // Simular un producto existente
-                Product productoSimulado = new Product("Diesel Premium", "Litros", 12500.0);
+                Product productoSimulado = new Product("Diesel Premium", MeasurementUnit.GALON, 12500.0);
 
                 ProductDialogForm dialogo = new ProductDialogForm(framePadre, true, productoSimulado);
 

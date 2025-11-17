@@ -1,5 +1,7 @@
 package com.forestech.ui;
 
+import com.forestech.enums.MeasurementUnit;
+import com.forestech.enums.MovementType;
 import com.forestech.exceptions.DatabaseException;
 import com.forestech.exceptions.InsufficientStockException;
 import com.forestech.models.Movement;
@@ -225,8 +227,16 @@ public class MovementDialogForm extends JDialog {
 
         // Crear y guardar movimiento
         try {
-            // Constructor requiere: tipo, productId, vehicleId, numeroFactura, unidadDeMedida, quantity, unitPrice
-            Movement nuevoMovimiento = new Movement(tipo, productId, vehicleId, numeroFactura, "Litros", cantidad, 0.0);
+            // Constructor requiere: MovementType, productId, vehicleId, numeroFactura, MeasurementUnit, quantity, unitPrice
+            Movement nuevoMovimiento = new Movement(
+                MovementType.fromCode(tipo),
+                productId,
+                vehicleId,
+                numeroFactura,
+                MeasurementUnit.GALON,
+                cantidad,
+                0.0
+            );
             new MovementServices().insertMovement(nuevoMovimiento);
 
             JOptionPane.showMessageDialog(this,
