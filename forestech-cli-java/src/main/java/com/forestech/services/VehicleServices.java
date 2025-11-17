@@ -23,24 +23,32 @@ import java.util.List;
  */
 public class VehicleServices implements IVehicleService {
 
+    // Singleton instance (lazy initialization)
+    private static VehicleServices instance;
+
     private static final Logger logger = LoggerFactory.getLogger(VehicleServices.class);
     private final VehicleDAO vehicleDAO;
     private final ProductServices productServices;
 
     /**
-     * Constructor con inyección de dependencias.
+     * Constructor PRIVADO (Singleton pattern).
+     * Usa getInstance() de ProductServices para la dependencia.
      */
-    public VehicleServices(ProductServices productServices) {
+    private VehicleServices() {
         this.vehicleDAO = new VehicleDAO();
-        this.productServices = productServices;
+        this.productServices = ProductServices.getInstance();
     }
 
     /**
-     * Constructor por defecto (crea dependencias internamente).
+     * Obtiene la instancia única de VehicleServices (thread-safe).
+     *
+     * @return Instancia única de VehicleServices
      */
-    public VehicleServices() {
-        this.vehicleDAO = new VehicleDAO();
-        this.productServices = new ProductServices();
+    public static synchronized VehicleServices getInstance() {
+        if (instance == null) {
+            instance = new VehicleServices();
+        }
+        return instance;
     }
 
     // ============================================================================

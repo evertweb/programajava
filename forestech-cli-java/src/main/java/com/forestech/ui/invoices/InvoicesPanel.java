@@ -45,15 +45,23 @@ public class InvoicesPanel extends JPanel {
     private final Runnable dashboardRefresh;
     private final AsyncLoadManager loadManager;
 
+    // Services (Dependency Injection)
+    private final FacturaServices facturaServices;
+    private final SupplierServices supplierServices;
+
     private JTable tablaFacturas;
     private DefaultTableModel modeloFacturas;
 
     public InvoicesPanel(JFrame owner,
                          Consumer<String> logger,
-                         Runnable dashboardRefresh) {
+                         Runnable dashboardRefresh,
+                         FacturaServices facturaServices,
+                         SupplierServices supplierServices) {
         this.owner = owner;
         this.logger = logger;
         this.dashboardRefresh = dashboardRefresh;
+        this.facturaServices = facturaServices;
+        this.supplierServices = supplierServices;
         this.loadManager = new AsyncLoadManager("Facturas", logger, this::refreshAsync);
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -119,7 +127,7 @@ public class InvoicesPanel extends JPanel {
         SwingWorker<List<Factura>, Void> worker = new SwingWorker<>() {
             @Override
             protected List<Factura> doInBackground() throws Exception {
-                return new FacturaServices().getAllFacturas();
+                return facturaServices.getAllFacturas();
             }
 
             @Override
@@ -188,7 +196,7 @@ public class InvoicesPanel extends JPanel {
 
         JComboBox<String> cmbProveedor = new JComboBox<>();
         try {
-            List<Supplier> proveedores = new SupplierServices().getAllSuppliers();
+            List<Supplier> proveedores = supplierServices.getAllSuppliers();
             cmbProveedor.addItem("--- Sin proveedor ---");
             for (Supplier s : proveedores) {
                 cmbProveedor.addItem(s.getId() + " - " + s.getName());
@@ -257,7 +265,7 @@ public class InvoicesPanel extends JPanel {
                     null
                 );
 
-                new FacturaServices().createFacturaWithDetails(factura, new ArrayList<>());
+                facturaServices.createFacturaWithDetails(factura, new ArrayList<>());
 
                 JOptionPane.showMessageDialog(dialog,
                     "Factura creada correctamente\nTotal: " + UIUtils.formatCurrency(total),
@@ -298,7 +306,7 @@ public class InvoicesPanel extends JPanel {
         String numeroFactura = (String) modeloFacturas.getValueAt(fila, 0);
 
         try {
-            List<DetalleFactura> detalles = new FacturaServices().getDetallesByFactura(numeroFactura);
+            List<DetalleFactura> detalles = facturaServices.getDetallesByFactura(numeroFactura);
 
             if (detalles.isEmpty()) {
                 JOptionPane.showMessageDialog(owner,

@@ -20,21 +20,30 @@ import java.util.List;
  */
 public class FacturaServices implements IFacturaService {
 
+    // Singleton instance (lazy initialization)
+    private static FacturaServices instance;
+
     private static final Logger logger = LoggerFactory.getLogger(FacturaServices.class);
     private final SupplierServices supplierServices;
 
     /**
-     * Constructor con inyección de dependencias.
+     * Constructor PRIVADO (Singleton pattern).
+     * Usa getInstance() de SupplierServices para la dependencia.
      */
-    public FacturaServices(SupplierServices supplierServices) {
-        this.supplierServices = supplierServices;
+    private FacturaServices() {
+        this.supplierServices = SupplierServices.getInstance();
     }
 
     /**
-     * Constructor por defecto (crea dependencias internamente).
+     * Obtiene la instancia única de FacturaServices (thread-safe).
+     *
+     * @return Instancia única de FacturaServices
      */
-    public FacturaServices() {
-        this.supplierServices = new SupplierServices();
+    public static synchronized FacturaServices getInstance() {
+        if (instance == null) {
+            instance = new FacturaServices();
+        }
+        return instance;
     }
 
     /**

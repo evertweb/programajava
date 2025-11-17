@@ -23,14 +23,29 @@ import java.util.List;
  */
 public class ProductServices implements IProductService {
 
+    // Singleton instance (lazy initialization)
+    private static ProductServices instance;
+
     private static final Logger logger = LoggerFactory.getLogger(ProductServices.class);
     private final ProductDAO productDAO;
 
     /**
-     * Constructor sin parámetros.
+     * Constructor PRIVADO (Singleton pattern).
      */
-    public ProductServices() {
+    private ProductServices() {
         this.productDAO = new ProductDAO();
+    }
+
+    /**
+     * Obtiene la instancia única de ProductServices (thread-safe).
+     *
+     * @return Instancia única de ProductServices
+     */
+    public static synchronized ProductServices getInstance() {
+        if (instance == null) {
+            instance = new ProductServices();
+        }
+        return instance;
     }
 
     // ============================================================================

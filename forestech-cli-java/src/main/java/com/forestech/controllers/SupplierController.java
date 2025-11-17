@@ -17,9 +17,11 @@ public class SupplierController {
 
     private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
     private Scanner scanner;
-    
-    public SupplierController(Scanner scanner) {
+    private final SupplierServices supplierServices;
+
+    public SupplierController(Scanner scanner, SupplierServices supplierServices) {
         this.scanner = scanner;
+        this.supplierServices = supplierServices;
     }
     
     public void gestionarProveedores() {
@@ -70,7 +72,7 @@ public class SupplierController {
             String direccion = InputHelper.readString("📍 Dirección: ");
 
             Supplier proveedor = new Supplier(nombre, nit, telefono, email, direccion);
-            new SupplierServices().insertSupplier(proveedor);
+            supplierServices.insertSupplier(proveedor);
 
             logger.info("Proveedor creado exitosamente - ID: {}, Nombre: {}", proveedor.getId(), proveedor.getName());
 
@@ -89,7 +91,7 @@ public class SupplierController {
         System.out.println("═══════════════════════════════════════\n");
 
         try {
-            List<Supplier> proveedores = new SupplierServices().getAllSuppliers();
+            List<Supplier> proveedores = supplierServices.getAllSuppliers();
 
             if (proveedores.isEmpty()) {
                 System.out.println("⚠️  No hay proveedores registrados.");
@@ -114,7 +116,7 @@ public class SupplierController {
         String id = InputHelper.readString("🆔 Ingrese el ID del proveedor: ");
 
         try {
-            Supplier s = new SupplierServices().getSupplierById(id);
+            Supplier s = supplierServices.getSupplierById(id);
 
             if (s == null) {
                 System.out.println("⚠️  No se encontró el proveedor.");
@@ -143,7 +145,7 @@ public class SupplierController {
             String direccion = InputHelper.readString("📍 Nueva dirección: ");
 
             Supplier proveedor = new Supplier(id, nombre, nit, telefono, email, direccion);
-            boolean actualizado = new SupplierServices().updateSupplier(proveedor);
+            boolean actualizado = supplierServices.updateSupplier(proveedor);
 
             if (actualizado) {
                 logger.info("Proveedor actualizado exitosamente - ID: {}", id);
@@ -172,7 +174,7 @@ public class SupplierController {
         }
 
         try {
-            boolean eliminado = new SupplierServices().deleteSupplier(id);
+            boolean eliminado = supplierServices.deleteSupplier(id);
 
             if (eliminado) {
                 logger.info("Proveedor eliminado exitosamente - ID: {}", id);

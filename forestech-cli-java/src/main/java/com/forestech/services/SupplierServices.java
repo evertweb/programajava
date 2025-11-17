@@ -30,14 +30,29 @@ import java.util.List;
  */
 public class SupplierServices implements ISupplierService {
 
+    // Singleton instance (lazy initialization)
+    private static SupplierServices instance;
+
     private static final Logger logger = LoggerFactory.getLogger(SupplierServices.class);
     private final SupplierDAO supplierDAO;
 
     /**
-     * Constructor sin parámetros.
+     * Constructor PRIVADO (Singleton pattern).
      */
-    public SupplierServices() {
+    private SupplierServices() {
         this.supplierDAO = new SupplierDAO();
+    }
+
+    /**
+     * Obtiene la instancia única de SupplierServices (thread-safe).
+     *
+     * @return Instancia única de SupplierServices
+     */
+    public static synchronized SupplierServices getInstance() {
+        if (instance == null) {
+            instance = new SupplierServices();
+        }
+        return instance;
     }
 
     // ============================================================================

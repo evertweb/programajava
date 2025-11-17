@@ -45,6 +45,9 @@ public class VehiclesPanel extends JPanel {
     private final AsyncLoadManager loadManager;
     private boolean suppressFilterEvents;
 
+    // Services (Dependency Injection)
+    private final VehicleServices vehicleServices;
+
     private JTable tablaVehiculos;
     private DefaultTableModel modeloVehiculos;
     private JTextField txtBuscarVehiculo;
@@ -53,10 +56,12 @@ public class VehiclesPanel extends JPanel {
 
     public VehiclesPanel(JFrame owner,
                          Consumer<String> logger,
-                         Runnable dashboardRefresh) {
+                         Runnable dashboardRefresh,
+                         VehicleServices vehicleServices) {
         this.owner = owner;
         this.logger = logger;
         this.dashboardRefresh = dashboardRefresh;
+        this.vehicleServices = vehicleServices;
         this.loadManager = new AsyncLoadManager("Vehículos", logger, this::refreshAsync);
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -193,7 +198,7 @@ public class VehiclesPanel extends JPanel {
         SwingWorker<VehiclesPayload, Void> worker = new SwingWorker<>() {
             @Override
             protected VehiclesPayload doInBackground() throws Exception {
-                List<Vehicle> vehiculos = new VehicleServices().getAllVehicles();
+                List<Vehicle> vehiculos = vehicleServices.getAllVehicles();
                 List<Vehicle> filtrados = aplicarFiltros(vehiculos, criterio, categoriaSeleccionada);
                 return new VehiclesPayload(vehiculos, filtrados, criterio, categoriaSeleccionada);
             }
@@ -347,7 +352,7 @@ public class VehiclesPanel extends JPanel {
 
         String id = (String) modeloVehiculos.getValueAt(fila, 0);
         try {
-            Vehicle vehiculo = new VehicleServices().getVehicleById(id);
+            Vehicle vehiculo = vehicleServices.getVehicleById(id);
             if (vehiculo == null) {
                 JOptionPane.showMessageDialog(owner, "El vehículo ya no existe",
                     "Error", JOptionPane.ERROR_MESSAGE);
@@ -384,7 +389,7 @@ public class VehiclesPanel extends JPanel {
 
         if (confirmacion == JOptionPane.YES_OPTION) {
             try {
-                new VehicleServices().deleteVehicle(id);
+                vehicleServices.deleteVehicle(id);
                 JOptionPane.showMessageDialog(owner, "Vehículo eliminado",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 refresh();
@@ -409,7 +414,7 @@ public class VehiclesPanel extends JPanel {
 
         String id = (String) modeloVehiculos.getValueAt(fila, 0);
         try {
-            Vehicle vehiculo = new VehicleServices().getVehicleById(id);
+            Vehicle vehiculo = vehicleServices.getVehicleById(id);
             if (vehiculo == null) {
                 JOptionPane.showMessageDialog(owner, "No se encontró el vehículo",
                     "Error", JOptionPane.ERROR_MESSAGE);

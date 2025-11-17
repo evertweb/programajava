@@ -20,9 +20,9 @@ public class ProductController {
     private Scanner scanner;
     private final ProductServices productServices;
 
-    public ProductController(Scanner scanner) {
+    public ProductController(Scanner scanner, ProductServices productServices) {
         this.scanner = scanner;
-        this.productServices = new ProductServices();
+        this.productServices = productServices;
     }
     
     public void gestionarProductos() {

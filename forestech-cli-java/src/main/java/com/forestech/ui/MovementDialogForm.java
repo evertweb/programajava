@@ -95,7 +95,7 @@ public class MovementDialogForm extends JDialog {
 
     private void cargarProductos() {
         try {
-            List<Product> productos = new ProductServices().getAllProducts();
+            List<Product> productos = ProductServices.getInstance().getAllProducts();
             for (Product p : productos) {
                 cmbProducto.addItem(new ComboItem(p.getId(), p.getName()));
             }
@@ -109,7 +109,7 @@ public class MovementDialogForm extends JDialog {
     private void cargarVehiculos() {
         try {
             cmbVehiculo.addItem(new ComboItem(null, "(Opcional)"));
-            List<Vehicle> vehiculos = new VehicleServices().getAllVehicles();
+            List<Vehicle> vehiculos = VehicleServices.getInstance().getAllVehicles();
             for (Vehicle v : vehiculos) {
                 cmbVehiculo.addItem(new ComboItem(v.getId(), v.getName()));
             }
@@ -123,7 +123,7 @@ public class MovementDialogForm extends JDialog {
     private void cargarFacturas() {
         try {
             cmbFactura.addItem(new ComboItem(null, "(Opcional)"));
-            List<Factura> facturas = new FacturaServices().getAllFacturas();
+            List<Factura> facturas = FacturaServices.getInstance().getAllFacturas();
             for (Factura f : facturas) {
                 cmbFactura.addItem(new ComboItem(f.getNumeroFactura(),
                     "Factura #" + f.getNumeroFactura() + " - " + f.getFechaEmision()));
@@ -237,7 +237,7 @@ public class MovementDialogForm extends JDialog {
                 cantidad,
                 0.0
             );
-            new MovementServices().insertMovement(nuevoMovimiento);
+            MovementServices.getInstance().insertMovement(nuevoMovimiento);
 
             JOptionPane.showMessageDialog(this,
                 String.format("Movimiento registrado exitosamente:\n\n" +

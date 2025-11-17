@@ -39,15 +39,19 @@ public class SuppliersPanel extends JPanel {
     private final Consumer<String> logger;
     private final AsyncLoadManager loadManager;
 
+    // Services (Dependency Injection)
+    private final SupplierServices supplierServices;
+
     private JTable tablaProveedores;
     private DefaultTableModel modeloProveedores;
     private JTextField txtBuscarProveedor;
     private JComboBox<String> cmbFiltroContacto;
     private JLabel lblResumenProveedores;
 
-    public SuppliersPanel(JFrame owner, Consumer<String> logger) {
+    public SuppliersPanel(JFrame owner, Consumer<String> logger, SupplierServices supplierServices) {
         this.owner = owner;
         this.logger = logger;
+        this.supplierServices = supplierServices;
         this.loadManager = new AsyncLoadManager("Proveedores", logger, this::cargarProveedores);
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -178,7 +182,7 @@ public class SuppliersPanel extends JPanel {
         SwingWorker<List<Supplier>, Void> worker = new SwingWorker<>() {
             @Override
             protected List<Supplier> doInBackground() throws Exception {
-                List<Supplier> proveedores = new SupplierServices().getAllSuppliers();
+                List<Supplier> proveedores = supplierServices.getAllSuppliers();
 
                 if (!criterio.isBlank()) {
                     proveedores = proveedores.stream()
@@ -299,7 +303,7 @@ public class SuppliersPanel extends JPanel {
         }
 
         try {
-            new SupplierServices().insertSupplier(nuevo);
+            supplierServices.insertSupplier(nuevo);
             JOptionPane.showMessageDialog(owner,
                 "Proveedor creado correctamente",
                 "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -320,7 +324,7 @@ public class SuppliersPanel extends JPanel {
         }
 
         try {
-            Supplier existente = new SupplierServices().getSupplierById(proveedorId);
+            Supplier existente = supplierServices.getSupplierById(proveedorId);
             if (existente == null) {
                 JOptionPane.showMessageDialog(owner,
                     "El proveedor ya no existe",
@@ -335,7 +339,7 @@ public class SuppliersPanel extends JPanel {
                 return;
             }
 
-            if (new SupplierServices().updateSupplier(actualizado)) {
+            if (supplierServices.updateSupplier(actualizado)) {
                 JOptionPane.showMessageDialog(owner,
                     "Proveedor actualizado",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -365,7 +369,7 @@ public class SuppliersPanel extends JPanel {
         }
 
         try {
-            if (new SupplierServices().deleteSupplier(proveedorId)) {
+            if (supplierServices.deleteSupplier(proveedorId)) {
                 JOptionPane.showMessageDialog(owner,
                     "Proveedor eliminado",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -387,7 +391,7 @@ public class SuppliersPanel extends JPanel {
         }
 
         try {
-            Supplier proveedor = new SupplierServices().getSupplierById(proveedorId);
+            Supplier proveedor = supplierServices.getSupplierById(proveedorId);
             if (proveedor == null) {
                 JOptionPane.showMessageDialog(owner,
                     "El proveedor ya no existe",

@@ -34,9 +34,20 @@ public class MovementController {
 
     private static final Logger logger = LoggerFactory.getLogger(MovementController.class);
     private Scanner scanner;
-    
-    public MovementController(Scanner scanner) {
+
+    // Services (Dependency Injection)
+    private final MovementServices movementServices;
+    private final ProductServices productServices;
+    private final VehicleServices vehicleServices;
+
+    public MovementController(Scanner scanner,
+                              MovementServices movementServices,
+                              ProductServices productServices,
+                              VehicleServices vehicleServices) {
         this.scanner = scanner;
+        this.movementServices = movementServices;
+        this.productServices = productServices;
+        this.vehicleServices = vehicleServices;
     }
     
     /**
@@ -127,7 +138,7 @@ public class MovementController {
                 .unitPrice(precio)
                 .build();
 
-            new MovementServices().insertMovement(entrada);
+            movementServices.insertMovement(entrada);
 
             logger.info("ENTRADA registrada exitosamente - ID: {}, Producto: {}, Cantidad: {}",
                 entrada.getId(), productId, cantidad);
@@ -158,7 +169,7 @@ public class MovementController {
             String productId = seleccionarProducto();
             if (productId == null) return;
 
-            double stockActual = new MovementServices().getProductStock(productId);
+            double stockActual = movementServices.getProductStock(productId);
             System.out.println("\n📦 Stock disponible: " + stockActual + " unidades");
 
             double cantidad = InputHelper.readDouble("\n💧 Ingrese la cantidad a retirar: ");
@@ -178,7 +189,7 @@ public class MovementController {
                 .unitPrice(precio)
                 .build();
 
-            new MovementServices().insertMovement(salida);
+            movementServices.insertMovement(salida);
 
             logger.info("SALIDA registrada exitosamente - ID: {}, Producto: {}, Vehículo: {}, Cantidad: {}",
                 salida.getId(), productId, vehicleId, cantidad);
@@ -208,7 +219,7 @@ public class MovementController {
         System.out.println("═══════════════════════════════════════\n");
 
         try {
-            List<Movement> movimientos = new MovementServices().getAllMovements();
+            List<Movement> movimientos = movementServices.getAllMovements();
             
             if (movimientos.isEmpty()) {
                 System.out.println("ℹ️  No hay movimientos registrados.");
@@ -248,8 +259,8 @@ public class MovementController {
         String id = InputHelper.readString("🔑 Ingrese el ID del movimiento: ");
 
         try {
-            Movement m = new MovementServices().getMovementById(id);
-            
+            Movement m = movementServices.getMovementById(id);
+
             if (m == null) {
                 System.out.println("❌ No se encontró movimiento con ID: " + id);
                 return;
@@ -280,7 +291,7 @@ public class MovementController {
         if (productId == null) return;
 
         try {
-            double stock = new MovementServices().getProductStock(productId);
+            double stock = movementServices.getProductStock(productId);
             
             System.out.println("\n📦 Stock actual del producto " + productId + ":");
             System.out.println("   " + stock + " unidades");
@@ -299,7 +310,6 @@ public class MovementController {
         String id = InputHelper.readString("🔑 ID del movimiento a actualizar: ");
 
         try {
-            MovementServices movementServices = new MovementServices();
             Movement m = movementServices.getMovementById(id);
             if (m == null) {
                 System.out.println("❌ No existe movimiento con ID: " + id);
@@ -337,7 +347,7 @@ public class MovementController {
         String id = InputHelper.readString("🔑 ID del movimiento a eliminar: ");
 
         try {
-            Movement m = new MovementServices().getMovementById(id);
+            Movement m = movementServices.getMovementById(id);
             if (m == null) {
                 System.out.println("❌ No existe movimiento con ID: " + id);
                 return;
@@ -352,7 +362,7 @@ public class MovementController {
             String confirmacion = InputHelper.readString("\nEscriba 'SI' para confirmar: ");
 
             if (confirmacion.equalsIgnoreCase("SI")) {
-                new MovementServices().deleteMovement(id);
+                movementServices.deleteMovement(id);
                 logger.info("Movimiento eliminado exitosamente - ID: {}", id);
                 System.out.println("\n✅ Movimiento eliminado exitosamente!");
             } else {
@@ -388,7 +398,7 @@ public class MovementController {
     
     private String seleccionarProducto() {
         try {
-            List<Product> productos = new ProductServices().getAllProducts();
+            List<Product> productos = productServices.getAllProducts();
             
             if (productos.isEmpty()) {
                 System.out.println("❌ No hay productos registrados. Cree uno primero.");
@@ -422,7 +432,7 @@ public class MovementController {
     
     private String seleccionarVehiculo() {
         try {
-            List<Vehicle> vehiculos = new VehicleServices().getAllVehicles();
+            List<Vehicle> vehiculos = vehicleServices.getAllVehicles();
             
             if (vehiculos.isEmpty()) {
                 System.out.println("❌ No hay vehículos registrados. Cree uno primero.");

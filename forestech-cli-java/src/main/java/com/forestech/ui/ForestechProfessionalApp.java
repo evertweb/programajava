@@ -1,5 +1,6 @@
 package com.forestech.ui;
 
+import com.forestech.services.ServiceFactory;
 import com.forestech.ui.dashboard.DashboardPanel;
 import com.forestech.ui.invoices.InvoicesPanel;
 import com.forestech.ui.logs.LogsPanel;
@@ -191,15 +192,61 @@ public class ForestechProfessionalApp extends JFrame {
     }
 
     private void inicializarPaneles() {
+        // Obtener ServiceFactory para inyectar dependencias
+        ServiceFactory factory = ServiceFactory.getInstance();
+
         Runnable dashboardReload = this::refrescarDashboard;
-        productsPanel = new ProductsPanel(this, this::registrarLog, dashboardReload);
-        vehiclesPanel = new VehiclesPanel(this, this::registrarLog, dashboardReload);
-        suppliersPanel = new SuppliersPanel(this, this::registrarLog);
-        movementsPanel = new MovementsPanel(this, this::registrarLog, dashboardReload,
-            origen -> productsPanel.requestRefresh(origen));
-        invoicesPanel = new InvoicesPanel(this, this::registrarLog, dashboardReload);
+
+        // Inicializar Panels con Dependency Injection
+        productsPanel = new ProductsPanel(
+            this,
+            this::registrarLog,
+            dashboardReload,
+            factory.getProductServices(),
+            factory.getMovementServices()
+        );
+
+        vehiclesPanel = new VehiclesPanel(
+            this,
+            this::registrarLog,
+            dashboardReload,
+            factory.getVehicleServices()
+        );
+
+        suppliersPanel = new SuppliersPanel(
+            this,
+            this::registrarLog,
+            factory.getSupplierServices()
+        );
+
+        movementsPanel = new MovementsPanel(
+            this,
+            this::registrarLog,
+            dashboardReload,
+            origen -> productsPanel.requestRefresh(origen),
+            factory.getMovementServices(),
+            factory.getProductServices(),
+            factory.getVehicleServices()
+        );
+
+        invoicesPanel = new InvoicesPanel(
+            this,
+            this::registrarLog,
+            dashboardReload,
+            factory.getFacturaServices(),
+            factory.getSupplierServices()
+        );
+
         logsPanel = new LogsPanel();
-        dashboardPanel = new DashboardPanel(new DashboardCallbacks(), this::registrarLog);
+
+        dashboardPanel = new DashboardPanel(
+            new DashboardCallbacks(),
+            this::registrarLog,
+            factory.getProductServices(),
+            factory.getVehicleServices(),
+            factory.getMovementServices(),
+            factory.getFacturaServices()
+        );
     }
 
     /**

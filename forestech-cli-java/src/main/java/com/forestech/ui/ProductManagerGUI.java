@@ -166,7 +166,7 @@ public class ProductManagerGUI extends JFrame {
     private void cargarProductosDesdeDB() {
         try {
             // LLAMADA A LA CAPA DE SERVICES
-            List<Product> productos = new ProductServices().getAllProducts();
+            List<Product> productos = ProductServices.getInstance().getAllProducts();
 
             // Limpiar tabla antes de cargar
             modeloTabla.setRowCount(0);
@@ -259,7 +259,7 @@ public class ProductManagerGUI extends JFrame {
 
         // PASO 3: INSERTAR EN BD MEDIANTE SERVICES
         try {
-            new ProductServices().insertProduct(nuevoProducto);
+            ProductServices.getInstance().insertProduct(nuevoProducto);
 
             // ÉXITO: Mostrar mensaje y refrescar
             JOptionPane.showMessageDialog(this,
@@ -325,7 +325,7 @@ public class ProductManagerGUI extends JFrame {
         if (confirmacion == JOptionPane.YES_OPTION) {
             try {
                 // Llamar a Services para eliminar
-                new ProductServices().deleteProduct(productId);
+                ProductServices.getInstance().deleteProduct(productId);
 
                 JOptionPane.showMessageDialog(this,
                     "Producto eliminado correctamente",

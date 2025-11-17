@@ -48,6 +48,10 @@ public class ProductsPanel extends JPanel {
     private final Runnable dashboardRefresh;
     private final AsyncLoadManager loadManager;
 
+    // Services (Dependency Injection)
+    private final ProductServices productServices;
+    private final MovementServices movementServices;
+
     private JTable tablaProductos;
     private DefaultTableModel modeloProductos;
     private JTextField txtBuscarProducto;
@@ -57,10 +61,14 @@ public class ProductsPanel extends JPanel {
 
     public ProductsPanel(JFrame owner,
                          Consumer<String> logger,
-                         Runnable dashboardRefresh) {
+                         Runnable dashboardRefresh,
+                         ProductServices productServices,
+                         MovementServices movementServices) {
         this.owner = owner;
         this.logger = logger;
         this.dashboardRefresh = dashboardRefresh;
+        this.productServices = productServices;
+        this.movementServices = movementServices;
         this.loadManager = new AsyncLoadManager("Productos", logger, this::cargarProductos);
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -203,8 +211,8 @@ public class ProductsPanel extends JPanel {
             @Override
             protected List<Product> doInBackground() throws Exception {
                 List<Product> productos = criterio.isEmpty()
-                    ? new ProductServices().getAllProducts()
-                    : new ProductServices().searchProductsByName(criterio);
+                    ? productServices.getAllProducts()
+                    : productServices.searchProductsByName(criterio);
 
                 if (unidadSeleccionada != null && !"Todas".equalsIgnoreCase(unidadSeleccionada)) {
                     productos = productos.stream()
@@ -214,7 +222,7 @@ public class ProductsPanel extends JPanel {
 
                 if (!productos.isEmpty()) {
                     List<String> ids = productos.stream().map(Product::getId).toList();
-                    stockPorProducto = new MovementServices().getStockByProductIds(ids);
+                    stockPorProducto = movementServices.getStockByProductIds(ids);
                 }
 
                 return productos;
@@ -392,7 +400,7 @@ public class ProductsPanel extends JPanel {
 
         if (confirmacion == JOptionPane.YES_OPTION) {
             try {
-                new ProductServices().deleteProduct(id);
+                productServices.deleteProduct(id);
                 JOptionPane.showMessageDialog(owner, "Producto eliminado",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 requestRefresh("Post Eliminación Producto");
@@ -417,7 +425,7 @@ public class ProductsPanel extends JPanel {
 
         String id = (String) modeloProductos.getValueAt(fila, 0);
         try {
-            Product producto = new ProductServices().getProductById(id);
+            Product producto = productServices.getProductById(id);
             if (producto == null) {
                 JOptionPane.showMessageDialog(owner, "El producto ya no existe",
                     "Error", JOptionPane.ERROR_MESSAGE);
@@ -450,7 +458,7 @@ public class ProductsPanel extends JPanel {
 
         String id = (String) modeloProductos.getValueAt(fila, 0);
         try {
-            Product producto = new ProductServices().getProductById(id);
+            Product producto = productServices.getProductById(id);
             if (producto == null) {
                 JOptionPane.showMessageDialog(owner, "No se encontró el producto",
                     "Error", JOptionPane.ERROR_MESSAGE);
@@ -458,7 +466,7 @@ public class ProductsPanel extends JPanel {
                 return;
             }
 
-            double stock = new MovementServices().getProductStock(id);
+            double stock = movementServices.getProductStock(id);
             String mensaje = "ID: " + producto.getId() +
                 "\nNombre: " + producto.getName() +
                 "\nUnidad: " + producto.getMeasurementUnitCode() +

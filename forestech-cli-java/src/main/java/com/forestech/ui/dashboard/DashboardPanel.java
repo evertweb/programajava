@@ -39,14 +39,29 @@ public class DashboardPanel extends JPanel {
     private final Consumer<String> logger;
     private final AsyncLoadManager loadManager;
 
+    // Services (Dependency Injection)
+    private final ProductServices productServices;
+    private final VehicleServices vehicleServices;
+    private final MovementServices movementServices;
+    private final FacturaServices facturaServices;
+
     private JLabel lblTotalProductos;
     private JLabel lblTotalVehiculos;
     private JLabel lblMovimientosHoy;
     private JLabel lblTotalFacturas;
 
-    public DashboardPanel(DashboardActions actions, Consumer<String> logger) {
+    public DashboardPanel(DashboardActions actions,
+                          Consumer<String> logger,
+                          ProductServices productServices,
+                          VehicleServices vehicleServices,
+                          MovementServices movementServices,
+                          FacturaServices facturaServices) {
         this.actions = actions;
         this.logger = logger;
+        this.productServices = productServices;
+        this.vehicleServices = vehicleServices;
+        this.movementServices = movementServices;
+        this.facturaServices = facturaServices;
         this.loadManager = new AsyncLoadManager("Dashboard", logger, this::refreshStatsAsync);
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -145,10 +160,10 @@ public class DashboardPanel extends JPanel {
         SwingWorker<DashboardMetrics, Void> worker = new SwingWorker<>() {
             @Override
             protected DashboardMetrics doInBackground() throws Exception {
-                List<Product> productos = new ProductServices().getAllProducts();
-                List<Vehicle> vehiculos = new VehicleServices().getAllVehicles();
-                List<Movement> movimientos = new MovementServices().getAllMovements();
-                List<Factura> facturas = new FacturaServices().getAllFacturas();
+                List<Product> productos = productServices.getAllProducts();
+                List<Vehicle> vehiculos = vehicleServices.getAllVehicles();
+                List<Movement> movimientos = movementServices.getAllMovements();
+                List<Factura> facturas = facturaServices.getAllFacturas();
                 return new DashboardMetrics(
                     productos.size(),
                     vehiculos.size(),

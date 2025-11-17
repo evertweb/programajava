@@ -18,9 +18,11 @@ public class VehicleController {
 
     private static final Logger logger = LoggerFactory.getLogger(VehicleController.class);
     private Scanner scanner;
-    
-    public VehicleController(Scanner scanner) {
+    private final VehicleServices vehicleServices;
+
+    public VehicleController(Scanner scanner, VehicleServices vehicleServices) {
         this.scanner = scanner;
+        this.vehicleServices = vehicleServices;
     }
     
     public void gestionarVehiculos() {
@@ -74,7 +76,7 @@ public class VehicleController {
             boolean tieneHorometro = tieneHorometroStr.equalsIgnoreCase("S");
 
             Vehicle vehiculo = new Vehicle(nombre, VehicleCategory.fromCode(categoria), capacidad, fuelProductId, tieneHorometro);
-            new VehicleServices().insertVehicle(vehiculo);
+            vehicleServices.insertVehicle(vehiculo);
 
             logger.info("Vehículo creado exitosamente - ID: {}, Nombre: {}", vehiculo.getId(), vehiculo.getName());
 
@@ -93,7 +95,7 @@ public class VehicleController {
         System.out.println("═══════════════════════════════════════\n");
 
         try {
-            List<Vehicle> vehiculos = new VehicleServices().getAllVehicles();
+            List<Vehicle> vehiculos = vehicleServices.getAllVehicles();
 
             if (vehiculos.isEmpty()) {
                 System.out.println("⚠️  No hay vehículos registrados.");
@@ -118,7 +120,7 @@ public class VehicleController {
         String id = InputHelper.readString("🆔 Ingrese el ID del vehículo: ");
 
         try {
-            Vehicle v = new VehicleServices().getVehicleById(id);
+            Vehicle v = vehicleServices.getVehicleById(id);
 
             if (v == null) {
                 System.out.println("⚠️  No se encontró el vehículo.");
@@ -140,7 +142,7 @@ public class VehicleController {
         String categoria = InputHelper.readString("📋 Ingrese la categoría (Camión, Excavadora, Motosierra, etc.): ");
 
         try {
-            List<Vehicle> vehiculos = new VehicleServices().getVehiclesByCategory(categoria);
+            List<Vehicle> vehiculos = vehicleServices.getVehiclesByCategory(categoria);
 
             if (vehiculos.isEmpty()) {
                 System.out.println("⚠️  No se encontraron vehículos en la categoría: " + categoria);
@@ -174,7 +176,7 @@ public class VehicleController {
             boolean tieneHorometro = tieneHorometroStr.equalsIgnoreCase("S");
 
             Vehicle vehiculo = new Vehicle(id, nombre, VehicleCategory.fromCode(categoria), capacidad, fuelProductId, tieneHorometro);
-            boolean actualizado = new VehicleServices().updateVehicle(vehiculo);
+            boolean actualizado = vehicleServices.updateVehicle(vehiculo);
 
             if (actualizado) {
                 logger.info("Vehículo actualizado exitosamente - ID: {}", id);
@@ -203,7 +205,7 @@ public class VehicleController {
         }
 
         try {
-            boolean eliminado = new VehicleServices().deleteVehicle(id);
+            boolean eliminado = vehicleServices.deleteVehicle(id);
 
             if (eliminado) {
                 logger.info("Vehículo eliminado exitosamente - ID: {}", id);

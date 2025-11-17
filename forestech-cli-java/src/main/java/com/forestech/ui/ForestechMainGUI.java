@@ -304,7 +304,7 @@ public class ForestechMainGUI extends JFrame {
      */
     private void cargarProductos() {
         try {
-            List<Product> productos = new ProductServices().getAllProducts();
+            List<Product> productos = ProductServices.getInstance().getAllProducts();
             modeloProductos.setRowCount(0);
 
             for (Product p : productos) {
@@ -330,7 +330,7 @@ public class ForestechMainGUI extends JFrame {
      */
     private void cargarVehiculos() {
         try {
-            List<Vehicle> vehiculos = new VehicleServices().getAllVehicles();
+            List<Vehicle> vehiculos = VehicleServices.getInstance().getAllVehicles();
             modeloVehiculos.setRowCount(0);
 
             for (Vehicle v : vehiculos) {
@@ -357,7 +357,7 @@ public class ForestechMainGUI extends JFrame {
      */
     private void cargarMovimientos() {
         try {
-            List<Movement> movimientos = new MovementServices().getAllMovements();
+            List<Movement> movimientos = MovementServices.getInstance().getAllMovements();
             modeloMovimientos.setRowCount(0);
 
             for (Movement m : movimientos) {
@@ -393,7 +393,7 @@ public class ForestechMainGUI extends JFrame {
         try {
             double precio = Double.parseDouble(precioStr);
             Product producto = new Product(nombre, MeasurementUnit.GALON, precio);
-            new ProductServices().insertProduct(producto);
+            ProductServices.getInstance().insertProduct(producto);
 
             JOptionPane.showMessageDialog(this, "Producto agregado correctamente",
                 "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -427,7 +427,7 @@ public class ForestechMainGUI extends JFrame {
 
         if (confirmacion == JOptionPane.YES_OPTION) {
             try {
-                new ProductServices().deleteProduct(id);
+                ProductServices.getInstance().deleteProduct(id);
                 JOptionPane.showMessageDialog(this, "Producto eliminado",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 cargarProductos();

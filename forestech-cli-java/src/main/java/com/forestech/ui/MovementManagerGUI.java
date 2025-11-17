@@ -128,7 +128,7 @@ public class MovementManagerGUI extends JFrame {
 
     private void cargarMovimientos() {
         try {
-            List<Movement> movimientos = new MovementServices().getAllMovements();
+            List<Movement> movimientos = MovementServices.getInstance().getAllMovements();
             modeloTabla.setRowCount(0);
 
             for (Movement m : movimientos) {
@@ -165,10 +165,10 @@ public class MovementManagerGUI extends JFrame {
             List<Movement> movimientos;
 
             if ("Todos".equals(filtro)) {
-                movimientos = new MovementServices().getAllMovements();
+                movimientos = MovementServices.getInstance().getAllMovements();
             } else {
                 MovementType movementType = MovementType.fromCode(filtro);
-                movimientos = new MovementServices().getMovementsByType(movementType);
+                movimientos = MovementServices.getInstance().getMovementsByType(movementType);
             }
 
             modeloTabla.setRowCount(0);
@@ -203,7 +203,7 @@ public class MovementManagerGUI extends JFrame {
     private void calcularTotales() {
         try {
             // Calcular manualmente desde la lista de movimientos
-            List<Movement> movimientos = new MovementServices().getAllMovements();
+            List<Movement> movimientos = MovementServices.getInstance().getAllMovements();
             double totalEntradas = 0;
             double totalSalidas = 0;
 
@@ -247,7 +247,7 @@ public class MovementManagerGUI extends JFrame {
     private void mostrarReporte() {
         try {
             // Calcular manualmente
-            List<Movement> movimientos = new MovementServices().getAllMovements();
+            List<Movement> movimientos = MovementServices.getInstance().getAllMovements();
             double totalEntradas = 0;
             double totalSalidas = 0;
             int contEntradas = 0;

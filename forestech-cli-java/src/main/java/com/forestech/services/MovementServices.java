@@ -34,6 +34,9 @@ import java.util.Optional;
  */
 public class MovementServices implements IMovementService {
 
+    // Singleton instance (lazy initialization)
+    private static MovementServices instance;
+
     private static final Logger logger = LoggerFactory.getLogger(MovementServices.class);
     private final MovementDAO dao;
     private final ProductServices productServices;
@@ -41,25 +44,26 @@ public class MovementServices implements IMovementService {
     private final FacturaServices facturaServices;
 
     /**
-     * Constructor con inyección de dependencias.
+     * Constructor PRIVADO (Singleton pattern).
+     * Usa getInstance() de cada Service para las dependencias.
      */
-    public MovementServices(ProductServices productServices,
-                            VehicleServices vehicleServices,
-                            FacturaServices facturaServices) {
+    private MovementServices() {
         this.dao = new MovementDAO();
-        this.productServices = productServices;
-        this.vehicleServices = vehicleServices;
-        this.facturaServices = facturaServices;
+        this.productServices = ProductServices.getInstance();
+        this.vehicleServices = VehicleServices.getInstance();
+        this.facturaServices = FacturaServices.getInstance();
     }
 
     /**
-     * Constructor por defecto (crea dependencias internamente).
+     * Obtiene la instancia única de MovementServices (thread-safe).
+     *
+     * @return Instancia única de MovementServices
      */
-    public MovementServices() {
-        this.dao = new MovementDAO();
-        this.productServices = new ProductServices();
-        this.vehicleServices = new VehicleServices();
-        this.facturaServices = new FacturaServices();
+    public static synchronized MovementServices getInstance() {
+        if (instance == null) {
+            instance = new MovementServices();
+        }
+        return instance;
     }
 
     // ============================================================================

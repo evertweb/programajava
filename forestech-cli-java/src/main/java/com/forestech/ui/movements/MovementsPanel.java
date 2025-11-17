@@ -4,6 +4,8 @@ import com.forestech.exceptions.DatabaseException;
 import com.forestech.exceptions.InsufficientStockException;
 import com.forestech.models.Movement;
 import com.forestech.services.MovementServices;
+import com.forestech.services.ProductServices;
+import com.forestech.services.VehicleServices;
 import com.forestech.ui.MovementDialogForm;
 import com.forestech.ui.utils.AsyncLoadManager;
 import com.forestech.ui.utils.UIUtils;
@@ -47,6 +49,11 @@ public class MovementsPanel extends JPanel {
     private final Consumer<String> productReloadRequest;
     private final AsyncLoadManager loadManager;
 
+    // Services (Dependency Injection)
+    private final MovementServices movementServices;
+    private final ProductServices productServices;
+    private final VehicleServices vehicleServices;
+
     // Componentes de UI
     private JTable movementsTable;
     private MovementsTableModel tableModel;
@@ -67,13 +74,19 @@ public class MovementsPanel extends JPanel {
     public MovementsPanel(JFrame owner,
                           Consumer<String> logger,
                           Runnable dashboardRefresh,
-                          Consumer<String> productReloadRequest) {
+                          Consumer<String> productReloadRequest,
+                          MovementServices movementServices,
+                          ProductServices productServices,
+                          VehicleServices vehicleServices) {
         this.owner = owner;
         this.logger = logger;
         this.dashboardRefresh = dashboardRefresh;
         this.productReloadRequest = productReloadRequest;
+        this.movementServices = movementServices;
+        this.productServices = productServices;
+        this.vehicleServices = vehicleServices;
         this.loadManager = new AsyncLoadManager("Movimientos", logger, this::loadMovements);
-        this.dataLoader = new MovementsDataLoader();
+        this.dataLoader = new MovementsDataLoader(movementServices);
 
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -331,7 +344,7 @@ public class MovementsPanel extends JPanel {
         if (movementId == null) return;
 
         try {
-            Movement movement = new MovementServices().getMovementById(movementId);
+            Movement movement = movementServices.getMovementById(movementId);
             if (movement == null) {
                 JOptionPane.showMessageDialog(owner, "El movimiento ya no existe. Actualizando lista...", "Información", JOptionPane.INFORMATION_MESSAGE);
                 requestRefresh("Movimiento desaparecido");
@@ -347,7 +360,7 @@ public class MovementsPanel extends JPanel {
             double newQuantity = Double.parseDouble(quantityStr);
             double newPrice = Double.parseDouble(priceStr);
 
-            new MovementServices().updateMovement(movementId, newQuantity, newPrice);
+            movementServices.updateMovement(movementId, newQuantity, newPrice);
             JOptionPane.showMessageDialog(owner, "Movimiento actualizado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
             logger.accept("Movimientos: edición aplicada sobre " + movementId);
@@ -371,7 +384,7 @@ public class MovementsPanel extends JPanel {
         if (confirmation != JOptionPane.YES_OPTION) return;
 
         try {
-            if (new MovementServices().deleteMovement(movementId)) {
+            if (movementServices.deleteMovement(movementId)) {
                 JOptionPane.showMessageDialog(owner, "Movimiento eliminado", "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 logger.accept("Movimientos: eliminado " + movementId);
                 requestRefresh("Eliminación movimiento");
@@ -390,7 +403,7 @@ public class MovementsPanel extends JPanel {
         if (movementId == null) return;
 
         try {
-            Movement movement = new MovementServices().getMovementById(movementId);
+            Movement movement = movementServices.getMovementById(movementId);
             if (movement == null) {
                 JOptionPane.showMessageDialog(owner, "El movimiento ya no existe", "Advertencia", JOptionPane.WARNING_MESSAGE);
                 requestRefresh("Movimiento faltante");

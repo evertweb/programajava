@@ -4,6 +4,7 @@ import com.forestech.config.DatabaseConnection;
 import com.forestech.config.HikariCPDataSource;
 import com.forestech.controllers.*;
 import com.forestech.helpers.*;
+import com.forestech.services.ServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,13 +62,25 @@ public class AppController {
     public AppController() {
         this.scanner = new Scanner(System.in);
         this.ejecutando = true;
-        
-        // Inicializar controladores especializados
-        this.movementController = new MovementController(scanner);
-        this.productController = new ProductController(scanner);
-        this.vehicleController = new VehicleController(scanner);
-        this.supplierController = new SupplierController(scanner);
-        this.reportController = new ReportController(scanner);
+
+        // Obtener ServiceFactory para inyectar dependencias
+        ServiceFactory factory = ServiceFactory.getInstance();
+
+        // Inicializar controladores especializados con Dependency Injection
+        this.movementController = new MovementController(
+            scanner,
+            factory.getMovementServices(),
+            factory.getProductServices(),
+            factory.getVehicleServices()
+        );
+        this.productController = new ProductController(scanner, factory.getProductServices());
+        this.vehicleController = new VehicleController(scanner, factory.getVehicleServices());
+        this.supplierController = new SupplierController(scanner, factory.getSupplierServices());
+        this.reportController = new ReportController(
+            scanner,
+            factory.getProductServices(),
+            factory.getMovementServices()
+        );
     }
 
     /**

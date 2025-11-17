@@ -17,6 +17,12 @@ import java.util.stream.Collectors;
  */
 public class MovementsDataLoader {
 
+    private final MovementServices movementServices;
+
+    public MovementsDataLoader(MovementServices movementServices) {
+        this.movementServices = movementServices;
+    }
+
     /**
      * Carga y filtra movimientos según criterios especificados.
      *
@@ -31,7 +37,7 @@ public class MovementsDataLoader {
                                              LocalDate startDate,
                                              LocalDate endDate) throws DatabaseException {
         // Cargar todos los movimientos
-        List<Movement> allMovements = new MovementServices().getAllMovements();
+        List<Movement> allMovements = movementServices.getAllMovements();
 
         // Obtener nombres desde el cache
         Map<String, String> productNames = CatalogCache.getInstance().getProductNames();
