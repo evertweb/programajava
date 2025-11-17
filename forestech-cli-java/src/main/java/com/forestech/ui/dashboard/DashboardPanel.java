@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
+import com.forestech.ui.utils.ColorScheme;
 
 import com.forestech.ui.utils.UIUtils;
 
@@ -65,7 +66,7 @@ public class DashboardPanel extends JPanel {
         this.loadManager = new AsyncLoadManager("Dashboard", logger, this::refreshStatsAsync);
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        setBackground(Color.WHITE);
+        setBackground(ColorScheme.BACKGROUND_LIGHT);
 
         add(createTitle(), BorderLayout.NORTH);
         add(createCards(), BorderLayout.CENTER);
@@ -80,15 +81,15 @@ public class DashboardPanel extends JPanel {
 
     private JPanel createCards() {
         JPanel cards = new JPanel(new GridLayout(2, 3, 20, 20));
-        cards.setBackground(Color.WHITE);
+        cards.setBackground(ColorScheme.BACKGROUND_LIGHT);
         cards.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 
-        cards.add(createCard("📦 Total Productos", label -> lblTotalProductos = label, new Color(52, 152, 219)));
-        cards.add(createCard("🚛 Total Vehículos", label -> lblTotalVehiculos = label, new Color(46, 204, 113)));
-        cards.add(createCard("📊 Movimientos Hoy", label -> lblMovimientosHoy = label, new Color(155, 89, 182)));
-        cards.add(createCard("🧾 Total Facturas", label -> lblTotalFacturas = label, new Color(230, 126, 34)));
-        cards.add(createCard("⚠️ Stock Bajo", null, new Color(231, 76, 60)));
-        cards.add(createCard("✅ Sistema Activo", null, new Color(26, 188, 156)));
+        cards.add(createCard("📦 Total Productos", label -> lblTotalProductos = label, ColorScheme.STATUS_INFO));
+        cards.add(createCard("🚛 Total Vehículos", label -> lblTotalVehiculos = label, ColorScheme.STATUS_SUCCESS));
+        cards.add(createCard("📊 Movimientos Hoy", label -> lblMovimientosHoy = label, ColorScheme.STATUS_SECONDARY));
+        cards.add(createCard("🧾 Total Facturas", label -> lblTotalFacturas = label, ColorScheme.STATUS_WARNING));
+        cards.add(createCard("⚠️ Stock Bajo", null, ColorScheme.STATUS_DANGER));
+        cards.add(createCard("✅ Sistema Activo", null, ColorScheme.STATUS_SUCCESS));
 
         return cards;
     }
@@ -100,11 +101,11 @@ public class DashboardPanel extends JPanel {
 
         JLabel lblTitle = new JLabel(title, JLabel.CENTER);
         lblTitle.setFont(new Font("Arial", Font.BOLD, 14));
-        lblTitle.setForeground(Color.WHITE);
+        lblTitle.setForeground(ColorScheme.FOREGROUND_SECONDARY);
 
         JLabel lblValue = new JLabel("0", JLabel.CENTER);
         lblValue.setFont(new Font("Arial", Font.BOLD, 36));
-        lblValue.setForeground(Color.WHITE);
+        lblValue.setForeground(ColorScheme.FOREGROUND_SECONDARY);
 
         if (holder != null) {
             holder.accept(lblValue);
@@ -117,13 +118,13 @@ public class DashboardPanel extends JPanel {
 
     private JPanel createQuickActions() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
-        panel.setBackground(Color.WHITE);
+        panel.setBackground(ColorScheme.BACKGROUND_LIGHT);
 
-        panel.add(createActionButton("Nuevo Producto", "productos", new Color(52, 152, 219), actions::requestProductCreation));
-        panel.add(createActionButton("Nuevo Vehículo", "vehiculos", new Color(46, 204, 113), actions::requestVehicleCreation));
+        panel.add(createActionButton("Nuevo Producto", "productos", ColorScheme.STATUS_INFO, actions::requestProductCreation));
+        panel.add(createActionButton("Nuevo Vehículo", "vehiculos", ColorScheme.STATUS_SUCCESS, actions::requestVehicleCreation));
         panel.add(createActionButton("Nuevo Proveedor", "proveedores", new Color(241, 196, 15), actions::requestSupplierCreation));
-        panel.add(createActionButton("Registrar Movimiento", "movimientos", new Color(155, 89, 182), actions::requestMovementCreation));
-        panel.add(createActionButton("Nueva Factura", "facturas", new Color(230, 126, 34), actions::requestInvoiceCreation));
+        panel.add(createActionButton("Registrar Movimiento", "movimientos", ColorScheme.STATUS_SECONDARY, actions::requestMovementCreation));
+        panel.add(createActionButton("Nueva Factura", "facturas", ColorScheme.STATUS_WARNING, actions::requestInvoiceCreation));
 
         return panel;
     }
@@ -131,7 +132,7 @@ public class DashboardPanel extends JPanel {
     private JButton createActionButton(String text, String targetCard, Color color, Runnable action) {
         JButton button = new JButton(text);
         button.setBackground(color);
-        button.setForeground(Color.WHITE);
+        button.setForeground(ColorScheme.FOREGROUND_SECONDARY);
         button.setFocusPainted(false);
         button.addActionListener(e -> {
             actions.navigateTo(targetCard);
@@ -156,6 +157,14 @@ public class DashboardPanel extends JPanel {
 
     private void refreshStatsAsync(String origin) {
         setBusyCursor(true);
+
+        // Mostrar indicadores de carga
+        lblTotalProductos.setText("...");
+        lblTotalVehiculos.setText("...");
+        lblMovimientosHoy.setText("...");
+        lblTotalFacturas.setText("...");
+        logger.accept("Cargando estadísticas del Dashboard...");
+
         final long inicio = System.currentTimeMillis();
         SwingWorker<DashboardMetrics, Void> worker = new SwingWorker<>() {
             @Override
@@ -180,8 +189,14 @@ public class DashboardPanel extends JPanel {
                     lblTotalVehiculos.setText(String.valueOf(metrics.totalVehiculos));
                     lblMovimientosHoy.setText(String.valueOf(metrics.movimientosHoy));
                     lblTotalFacturas.setText(String.valueOf(metrics.totalFacturas));
-                    logger.accept(String.format("Dashboard actualizado (%s)", origin));
+                    long duracion = System.currentTimeMillis() - inicio;
+                    logger.accept(String.format("✅ Dashboard actualizado en %d ms (%s)", duracion, origin));
                 } catch (ExecutionException ex) {
+                    // Restaurar labels en caso de error
+                    lblTotalProductos.setText("ERROR");
+                    lblTotalVehiculos.setText("ERROR");
+                    lblMovimientosHoy.setText("ERROR");
+                    lblTotalFacturas.setText("ERROR");
                     handleError(ex.getCause() != null ? ex.getCause() : ex);
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
@@ -202,10 +217,32 @@ public class DashboardPanel extends JPanel {
         String mensaje = error instanceof DatabaseException
             ? error.getMessage()
             : "Error inesperado en dashboard: " + error.getMessage();
-        JOptionPane.showMessageDialog(this,
-            "Error al cargar estadísticas: " + mensaje,
-            "Error",
-            JOptionPane.ERROR_MESSAGE);
+
+        // Log detallado del error
+        logger.accept("❌ Error al cargar dashboard: " + mensaje);
+        error.printStackTrace();
+
+        // Mostrar diálogo con opción de reintentar
+        int opcion = JOptionPane.showOptionDialog(
+            this,
+            "No se pudieron cargar las estadísticas del Dashboard.\n\n" +
+            "Detalles: " + mensaje + "\n\n" +
+            "Posibles causas:\n" +
+            "• MySQL no está corriendo\n" +
+            "• Credenciales incorrectas\n" +
+            "• Base de datos FORESTECHOIL no existe\n\n" +
+            "¿Deseas reintentar?",
+            "Error de Conexión a Base de Datos",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.ERROR_MESSAGE,
+            null,
+            new Object[]{"Reintentar", "Cancelar"},
+            "Reintentar"
+        );
+
+        if (opcion == JOptionPane.YES_OPTION) {
+            refreshStats();
+        }
     }
 
     private long countTodayMovements(List<Movement> movimientos) {

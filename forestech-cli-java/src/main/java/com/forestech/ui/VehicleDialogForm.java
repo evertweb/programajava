@@ -6,10 +6,13 @@ import com.forestech.models.Product;
 import com.forestech.models.Vehicle;
 import com.forestech.services.ProductServices;
 import com.forestech.services.VehicleServices;
+import com.forestech.ui.utils.ColorScheme;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import java.util.Objects;
+import com.forestech.ui.utils.ColorScheme;
 
 /**
  * Checkpoint 9.10: VehicleDialogForm - Formulario Modal para Vehículos
@@ -27,14 +30,25 @@ public class VehicleDialogForm extends JDialog {
 
     private Vehicle vehiculoExistente;
     private boolean guardadoExitoso = false;
+    private final VehicleServices vehicleServices;
+    private final ProductServices productServices;
 
-    public VehicleDialogForm(JFrame parent, boolean modal) {
-        this(parent, modal, null);
+    public VehicleDialogForm(JFrame parent,
+                             boolean modal,
+                             VehicleServices vehicleServices,
+                             ProductServices productServices) {
+        this(parent, modal, null, vehicleServices, productServices);
     }
 
-    public VehicleDialogForm(JFrame parent, boolean modal, Vehicle vehiculoExistente) {
+    public VehicleDialogForm(JFrame parent,
+                             boolean modal,
+                             Vehicle vehiculoExistente,
+                             VehicleServices vehicleServices,
+                             ProductServices productServices) {
         super(parent, vehiculoExistente == null ? "Agregar Vehículo" : "Editar Vehículo", modal);
         this.vehiculoExistente = vehiculoExistente;
+        this.vehicleServices = Objects.requireNonNull(vehicleServices, "vehicleServices");
+        this.productServices = Objects.requireNonNull(productServices, "productServices");
 
         setSize(500, 400);
         setLocationRelativeTo(parent);
@@ -81,7 +95,7 @@ public class VehicleDialogForm extends JDialog {
 
     private void cargarProductosCombustible() {
         try {
-            List<Product> productos = ProductServices.getInstance().getAllProducts();
+            List<Product> productos = productServices.getAllProducts();
             cmbCombustible.addItem(new ComboItem(null, "(Sin asignar)"));
             for (Product p : productos) {
                 cmbCombustible.addItem(new ComboItem(p.getId(), p.getName()));
@@ -97,12 +111,12 @@ public class VehicleDialogForm extends JDialog {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
 
         JButton btnGuardar = new JButton(vehiculoExistente == null ? "Agregar" : "Guardar");
-        btnGuardar.setBackground(new Color(100, 200, 100));
+        btnGuardar.setBackground(ColorScheme.BUTTON_SUCCESS_BG);
         btnGuardar.addActionListener(e -> guardarVehiculo());
         panel.add(btnGuardar);
 
         JButton btnCancelar = new JButton("Cancelar");
-        btnCancelar.setBackground(new Color(255, 150, 150));
+        btnCancelar.setBackground(ColorScheme.BUTTON_DANGER_BG);
         btnCancelar.addActionListener(e -> dispose());
         panel.add(btnCancelar);
 
@@ -160,7 +174,7 @@ public class VehicleDialogForm extends JDialog {
             VehicleCategory vehicleCategory = VehicleCategory.fromCode(categoria);
             if (vehiculoExistente == null) {
                 Vehicle nuevoVehiculo = new Vehicle(nombre, vehicleCategory, capacidad, fuelProductId, tieneHorometro);
-                VehicleServices.getInstance().insertVehicle(nuevoVehiculo);
+                vehicleServices.insertVehicle(nuevoVehiculo);
                 JOptionPane.showMessageDialog(this, "Vehículo agregado exitosamente",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
             } else {
@@ -169,7 +183,7 @@ public class VehicleDialogForm extends JDialog {
                 vehiculoExistente.setCapacity(capacidad);
                 vehiculoExistente.setFuelProductId(fuelProductId);
                 vehiculoExistente.setHasHorometer(tieneHorometro);
-                VehicleServices.getInstance().updateVehicle(vehiculoExistente);
+                vehicleServices.updateVehicle(vehiculoExistente);
                 JOptionPane.showMessageDialog(this, "Vehículo actualizado exitosamente",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
             }

@@ -10,17 +10,26 @@ import java.time.format.DateTimeParseException;
 
 /**
  * Conjunto de pequeñas utilidades reutilizables para la capa de UI.
+ * Integra ColorScheme para coherencia visual en toda la aplicación.
  */
 public final class UIUtils {
 
     private UIUtils() {
     }
 
+    /**
+     * Aplica estilo estándar a tablas usando ColorScheme.
+     * Garantiza contraste adecuado entre fuente y fondo.
+     */
     public static void styleTable(JTable table) {
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
-        table.getTableHeader().setBackground(new Color(70, 130, 180));
-        table.getTableHeader().setForeground(Color.WHITE);
+        table.getTableHeader().setBackground(ColorScheme.TABLE_HEADER_BG);
+        table.getTableHeader().setForeground(ColorScheme.FOREGROUND_SECONDARY);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        // Garantizar que las filas de la tabla usen el color primario en fondo claro
+        table.setForeground(ColorScheme.FOREGROUND_PRIMARY);
+        table.setBackground(ColorScheme.BACKGROUND_LIGHT);
     }
 
     public static String formatCurrency(double value) {

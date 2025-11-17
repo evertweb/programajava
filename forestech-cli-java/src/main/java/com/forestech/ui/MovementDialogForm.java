@@ -12,10 +12,13 @@ import com.forestech.services.MovementServices;
 import com.forestech.services.ProductServices;
 import com.forestech.services.VehicleServices;
 import com.forestech.services.FacturaServices;
+import com.forestech.ui.utils.ColorScheme;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import java.util.Objects;
+import com.forestech.ui.utils.ColorScheme;
 
 /**
  * Checkpoint 9.11: MovementDialogForm - Formulario con 3 Foreign Keys + Validación de Stock
@@ -38,8 +41,23 @@ public class MovementDialogForm extends JDialog {
 
     private boolean guardadoExitoso = false;
 
-    public MovementDialogForm(JFrame parent, boolean modal) {
+    private final MovementServices movementServices;
+    private final ProductServices productServices;
+    private final VehicleServices vehicleServices;
+    private final FacturaServices facturaServices;
+
+    public MovementDialogForm(JFrame parent,
+                              boolean modal,
+                              MovementServices movementServices,
+                              ProductServices productServices,
+                              VehicleServices vehicleServices,
+                              FacturaServices facturaServices) {
         super(parent, "Registrar Movimiento", modal);
+
+        this.movementServices = Objects.requireNonNull(movementServices, "movementServices");
+        this.productServices = Objects.requireNonNull(productServices, "productServices");
+        this.vehicleServices = Objects.requireNonNull(vehicleServices, "vehicleServices");
+        this.facturaServices = Objects.requireNonNull(facturaServices, "facturaServices");
 
         setSize(550, 450);
         setLocationRelativeTo(parent);
@@ -95,7 +113,7 @@ public class MovementDialogForm extends JDialog {
 
     private void cargarProductos() {
         try {
-            List<Product> productos = ProductServices.getInstance().getAllProducts();
+            List<Product> productos = productServices.getAllProducts();
             for (Product p : productos) {
                 cmbProducto.addItem(new ComboItem(p.getId(), p.getName()));
             }
@@ -109,7 +127,7 @@ public class MovementDialogForm extends JDialog {
     private void cargarVehiculos() {
         try {
             cmbVehiculo.addItem(new ComboItem(null, "(Opcional)"));
-            List<Vehicle> vehiculos = VehicleServices.getInstance().getAllVehicles();
+            List<Vehicle> vehiculos = vehicleServices.getAllVehicles();
             for (Vehicle v : vehiculos) {
                 cmbVehiculo.addItem(new ComboItem(v.getId(), v.getName()));
             }
@@ -123,7 +141,7 @@ public class MovementDialogForm extends JDialog {
     private void cargarFacturas() {
         try {
             cmbFactura.addItem(new ComboItem(null, "(Opcional)"));
-            List<Factura> facturas = FacturaServices.getInstance().getAllFacturas();
+            List<Factura> facturas = facturaServices.getAllFacturas();
             for (Factura f : facturas) {
                 cmbFactura.addItem(new ComboItem(f.getNumeroFactura(),
                     "Factura #" + f.getNumeroFactura() + " - " + f.getFechaEmision()));
@@ -149,8 +167,8 @@ public class MovementDialogForm extends JDialog {
             lblFacturaLabel.setText("Factura (recomendada):");
             cmbVehiculo.setEnabled(true);
             cmbFactura.setEnabled(true);
-            cmbVehiculo.setBackground(Color.WHITE);
-            cmbFactura.setBackground(new Color(255, 255, 200)); // Amarillo claro
+            cmbVehiculo.setBackground(ColorScheme.BACKGROUND_LIGHT);
+            cmbFactura.setBackground(ColorScheme.BACKGROUND_LIGHT); // Amarillo claro
 
         } else { // SALIDA
             // SALIDA: vehículo recomendado, factura opcional
@@ -158,8 +176,8 @@ public class MovementDialogForm extends JDialog {
             lblFacturaLabel.setText("Factura (opcional):");
             cmbVehiculo.setEnabled(true);
             cmbFactura.setEnabled(true);
-            cmbVehiculo.setBackground(new Color(255, 255, 200)); // Amarillo claro
-            cmbFactura.setBackground(Color.WHITE);
+            cmbVehiculo.setBackground(ColorScheme.BACKGROUND_LIGHT); // Amarillo claro
+            cmbFactura.setBackground(ColorScheme.BACKGROUND_LIGHT);
         }
     }
 
@@ -167,12 +185,12 @@ public class MovementDialogForm extends JDialog {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
 
         JButton btnGuardar = new JButton("Registrar Movimiento");
-        btnGuardar.setBackground(new Color(100, 200, 100));
+        btnGuardar.setBackground(ColorScheme.BUTTON_SUCCESS_BG);
         btnGuardar.addActionListener(e -> guardarMovimiento());
         panel.add(btnGuardar);
 
         JButton btnCancelar = new JButton("Cancelar");
-        btnCancelar.setBackground(new Color(255, 150, 150));
+        btnCancelar.setBackground(ColorScheme.BUTTON_DANGER_BG);
         btnCancelar.addActionListener(e -> dispose());
         panel.add(btnCancelar);
 
@@ -237,7 +255,7 @@ public class MovementDialogForm extends JDialog {
                 cantidad,
                 0.0
             );
-            MovementServices.getInstance().insertMovement(nuevoMovimiento);
+            movementServices.insertMovement(nuevoMovimiento);
 
             JOptionPane.showMessageDialog(this,
                 String.format("Movimiento registrado exitosamente:\n\n" +

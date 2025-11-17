@@ -30,6 +30,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.time.LocalDate;
+import com.forestech.ui.utils.ColorScheme;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -93,7 +94,7 @@ public class InvoicesPanel extends JPanel {
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
         JButton btnNuevaFactura = new JButton("Nueva Factura");
-        btnNuevaFactura.setBackground(new Color(100, 200, 100));
+        btnNuevaFactura.setBackground(ColorScheme.BUTTON_SUCCESS_BG);
         btnNuevaFactura.addActionListener(e -> mostrarFormularioNuevaFactura());
         panelBotones.add(btnNuevaFactura);
 
@@ -233,7 +234,7 @@ public class InvoicesPanel extends JPanel {
         JButton btnGuardar = new JButton("Guardar");
         JButton btnCancelar = new JButton("Cancelar");
 
-        btnGuardar.setBackground(new Color(100, 200, 100));
+        btnGuardar.setBackground(ColorScheme.BUTTON_SUCCESS_BG);
         btnGuardar.addActionListener(e -> {
             try {
                 String numero = txtNumeroFactura.getText().trim();

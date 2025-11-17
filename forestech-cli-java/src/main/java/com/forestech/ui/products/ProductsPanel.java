@@ -37,6 +37,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import com.forestech.ui.utils.ColorScheme;
 
 /**
  * Panel de gestión de productos.
@@ -374,7 +375,7 @@ public class ProductsPanel extends JPanel {
 
     private void agregarProducto() {
         logger.accept("Productos: abriendo diálogo de alta");
-        ProductDialogForm dialog = new ProductDialogForm(owner, true);
+        ProductDialogForm dialog = new ProductDialogForm(owner, true, productServices);
         if (dialog.isGuardadoExitoso()) {
             requestRefresh("Post Alta Producto");
             refreshDashboard();
@@ -433,7 +434,7 @@ public class ProductsPanel extends JPanel {
                 return;
             }
 
-            ProductDialogForm dialog = new ProductDialogForm(owner, true, producto);
+            ProductDialogForm dialog = new ProductDialogForm(owner, true, producto, productServices);
             if (dialog.isGuardadoExitoso()) {
                 requestRefresh("Post Edición Producto");
                 refreshDashboard();

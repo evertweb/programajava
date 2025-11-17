@@ -2,6 +2,7 @@ package com.forestech.ui.vehicles;
 
 import com.forestech.exceptions.DatabaseException;
 import com.forestech.models.Vehicle;
+import com.forestech.services.ProductServices;
 import com.forestech.services.VehicleServices;
 import com.forestech.ui.VehicleDialogForm;
 import com.forestech.ui.utils.AsyncLoadManager;
@@ -33,6 +34,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import com.forestech.ui.utils.ColorScheme;
 
 /**
  * Panel de gestión de vehículos.
@@ -47,6 +49,7 @@ public class VehiclesPanel extends JPanel {
 
     // Services (Dependency Injection)
     private final VehicleServices vehicleServices;
+    private final ProductServices productServices;
 
     private JTable tablaVehiculos;
     private DefaultTableModel modeloVehiculos;
@@ -57,11 +60,13 @@ public class VehiclesPanel extends JPanel {
     public VehiclesPanel(JFrame owner,
                          Consumer<String> logger,
                          Runnable dashboardRefresh,
-                         VehicleServices vehicleServices) {
+                         VehicleServices vehicleServices,
+                         ProductServices productServices) {
         this.owner = owner;
         this.logger = logger;
         this.dashboardRefresh = dashboardRefresh;
         this.vehicleServices = vehicleServices;
+        this.productServices = productServices;
         this.loadManager = new AsyncLoadManager("Vehículos", logger, this::refreshAsync);
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -149,7 +154,7 @@ public class VehiclesPanel extends JPanel {
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
         JButton btnAgregar = new JButton("Agregar");
-        btnAgregar.setBackground(new Color(100, 200, 100));
+        btnAgregar.setBackground(ColorScheme.BUTTON_SUCCESS_BG);
         btnAgregar.addActionListener(e -> agregarVehiculo());
         panelBotones.add(btnAgregar);
 
@@ -159,7 +164,7 @@ public class VehiclesPanel extends JPanel {
         panelBotones.add(btnEditar);
 
         JButton btnEliminar = new JButton("Eliminar");
-        btnEliminar.setBackground(new Color(255, 150, 150));
+        btnEliminar.setBackground(ColorScheme.BUTTON_DANGER_BG);
         btnEliminar.addActionListener(e -> eliminarVehiculo());
         panelBotones.add(btnEliminar);
 
@@ -334,7 +339,7 @@ public class VehiclesPanel extends JPanel {
 
     private void agregarVehiculo() {
         logger.accept("Vehículos: abriendo diálogo de alta");
-        VehicleDialogForm dialog = new VehicleDialogForm(owner, true);
+        VehicleDialogForm dialog = new VehicleDialogForm(owner, true, vehicleServices, productServices);
         if (dialog.isGuardadoExitoso()) {
             refresh();
             refreshDashboard();
@@ -360,7 +365,7 @@ public class VehiclesPanel extends JPanel {
                 return;
             }
 
-            VehicleDialogForm dialog = new VehicleDialogForm(owner, true, vehiculo);
+            VehicleDialogForm dialog = new VehicleDialogForm(owner, true, vehiculo, vehicleServices, productServices);
             if (dialog.isGuardadoExitoso()) {
                 refresh();
                 refreshDashboard();

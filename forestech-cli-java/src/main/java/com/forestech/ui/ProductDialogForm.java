@@ -4,9 +4,12 @@ import com.forestech.enums.MeasurementUnit;
 import com.forestech.exceptions.DatabaseException;
 import com.forestech.models.Product;
 import com.forestech.services.ProductServices;
+import com.forestech.ui.utils.ColorScheme;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
+import com.forestech.ui.utils.ColorScheme;
 
 /**
  * Checkpoint 9.8: JDialog - Ventanas Modales para Formularios
@@ -46,6 +49,7 @@ public class ProductDialogForm extends JDialog {
     // Estado del diálogo
     private Product productoExistente; // null = AGREGAR, object = EDITAR
     private boolean guardadoExitoso = false;
+    private final ProductServices productServices;
 
     /**
      * Constructor para AGREGAR un nuevo producto.
@@ -53,8 +57,8 @@ public class ProductDialogForm extends JDialog {
      * @param parent Ventana padre
      * @param modal  Si true, bloquea la ventana padre
      */
-    public ProductDialogForm(JFrame parent, boolean modal) {
-        this(parent, modal, null); // Llama al constructor completo con null
+    public ProductDialogForm(JFrame parent, boolean modal, ProductServices productServices) {
+        this(parent, modal, null, productServices); // Llama al constructor completo con null
     }
 
     /**
@@ -64,10 +68,14 @@ public class ProductDialogForm extends JDialog {
      * @param modal             Si true, bloquea la ventana padre
      * @param productoExistente Si es null → AGREGAR, si tiene valor → EDITAR
      */
-    public ProductDialogForm(JFrame parent, boolean modal, Product productoExistente) {
+    public ProductDialogForm(JFrame parent,
+                             boolean modal,
+                             Product productoExistente,
+                             ProductServices productServices) {
         super(parent, productoExistente == null ? "Agregar Producto" : "Editar Producto", modal);
 
         this.productoExistente = productoExistente;
+        this.productServices = Objects.requireNonNull(productServices, "productServices");
 
         setSize(450, 300);
         setLocationRelativeTo(parent); // Centrar respecto a la ventana padre
@@ -121,12 +129,12 @@ public class ProductDialogForm extends JDialog {
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
 
         JButton btnGuardar = new JButton(productoExistente == null ? "Agregar" : "Guardar Cambios");
-        btnGuardar.setBackground(new Color(100, 200, 100));
+        btnGuardar.setBackground(ColorScheme.BUTTON_SUCCESS_BG);
         btnGuardar.addActionListener(e -> guardarProducto());
         panelBotones.add(btnGuardar);
 
         JButton btnCancelar = new JButton("Cancelar");
-        btnCancelar.setBackground(new Color(255, 150, 150));
+        btnCancelar.setBackground(ColorScheme.BUTTON_DANGER_BG);
         btnCancelar.addActionListener(e -> {
             guardadoExitoso = false;
             dispose(); // Cerrar el diálogo
@@ -201,7 +209,7 @@ public class ProductDialogForm extends JDialog {
             if (productoExistente == null) {
                 // MODO AGREGAR: Crear nuevo producto
                 Product nuevoProducto = new Product(nombre, MeasurementUnit.fromCode(unidad), precio);
-                ProductServices.getInstance().insertProduct(nuevoProducto);
+                productServices.insertProduct(nuevoProducto);
 
                 JOptionPane.showMessageDialog(this,
                     "Producto agregado exitosamente:\n\n" +
@@ -219,7 +227,7 @@ public class ProductDialogForm extends JDialog {
                 productoExistente.setUnitPrice(precio);
                 productoExistente.setMeasurementUnitFromCode(unidad);
 
-                ProductServices.getInstance().updateProduct(productoExistente);
+                productServices.updateProduct(productoExistente);
 
                 JOptionPane.showMessageDialog(this,
                     "Producto actualizado exitosamente:\n\n" +
@@ -255,80 +263,4 @@ public class ProductDialogForm extends JDialog {
         return guardadoExitoso;
     }
 
-    /**
-     * Método main para probar el diálogo de forma independiente.
-     *
-     * @param args Argumentos
-     */
-    public static void main(String[] args) {
-        // Aplicar Look and Feel del sistema
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            System.err.println("No se pudo aplicar Look and Feel del sistema");
-        }
-
-        SwingUtilities.invokeLater(() -> {
-            // Crear ventana padre ficticia
-            JFrame framePadre = new JFrame("Ventana Padre - Demo");
-            framePadre.setSize(600, 400);
-            framePadre.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            framePadre.setLocationRelativeTo(null);
-
-            JPanel panel = new JPanel(new BorderLayout());
-            JLabel lblTitulo = new JLabel("Haz clic en un botón para abrir el diálogo", SwingConstants.CENTER);
-            lblTitulo.setFont(new Font("Arial", Font.BOLD, 16));
-            panel.add(lblTitulo, BorderLayout.NORTH);
-
-            JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 50));
-
-            // Botón para AGREGAR
-            JButton btnAgregar = new JButton("Abrir Diálogo AGREGAR (Modal)");
-            btnAgregar.setBackground(new Color(100, 200, 100));
-            btnAgregar.addActionListener(e -> {
-                ProductDialogForm dialogo = new ProductDialogForm(framePadre, true);
-
-                // Al llegar aquí, el diálogo ya se cerró (porque es modal)
-                if (dialogo.isGuardadoExitoso()) {
-                    lblTitulo.setText("✅ Producto agregado correctamente");
-                } else {
-                    lblTitulo.setText("❌ Operación cancelada");
-                }
-            });
-            panelBotones.add(btnAgregar);
-
-            // Botón para EDITAR (simulado)
-            JButton btnEditar = new JButton("Abrir Diálogo EDITAR (Modal)");
-            btnEditar.setBackground(new Color(150, 150, 255));
-            btnEditar.addActionListener(e -> {
-                // Simular un producto existente
-                Product productoSimulado = new Product("Diesel Premium", MeasurementUnit.GALON, 12500.0);
-
-                ProductDialogForm dialogo = new ProductDialogForm(framePadre, true, productoSimulado);
-
-                if (dialogo.isGuardadoExitoso()) {
-                    lblTitulo.setText("✅ Producto editado correctamente");
-                } else {
-                    lblTitulo.setText("❌ Operación cancelada");
-                }
-            });
-            panelBotones.add(btnEditar);
-
-            panel.add(panelBotones, BorderLayout.CENTER);
-            framePadre.add(panel);
-            framePadre.setVisible(true);
-        });
-
-        System.out.println("=".repeat(60));
-        System.out.println("Checkpoint 9.8: ProductDialogForm - Diálogos Modales");
-        System.out.println("=".repeat(60));
-        System.out.println("\nCONCEPTOS DEMOSTRADOS:");
-        System.out.println("1. JDialog modal → Bloquea ventana padre");
-        System.out.println("2. Patrón AGREGAR/EDITAR → Un solo diálogo para ambos");
-        System.out.println("3. Comunicación con padre → isGuardadoExitoso()");
-        System.out.println("4. Validación completa → Antes de INSERT/UPDATE");
-        System.out.println("5. Integración con ProductServices");
-        System.out.println("\nPrueba ambos botones y observa el comportamiento!");
-        System.out.println("=".repeat(60));
-    }
 }

@@ -1,12 +1,14 @@
 package com.forestech.ui;
 
 import com.forestech.services.ServiceFactory;
+import com.forestech.ui.core.ServiceFactoryProvider;
 import com.forestech.ui.dashboard.DashboardPanel;
 import com.forestech.ui.invoices.InvoicesPanel;
 import com.forestech.ui.logs.LogsPanel;
 import com.forestech.ui.movements.MovementsPanel;
 import com.forestech.ui.products.ProductsPanel;
 import com.forestech.ui.suppliers.SuppliersPanel;
+import com.forestech.ui.utils.CatalogCache;
 import com.forestech.ui.vehicles.VehiclesPanel;
 
 import javax.swing.BorderFactory;
@@ -30,6 +32,7 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import com.forestech.ui.utils.ColorScheme;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.time.LocalDateTime;
@@ -70,6 +73,9 @@ public class ForestechProfessionalApp extends JFrame {
     private String vistaActual = "dashboard";
     private final Map<String, Long> ultimaCargaPorVista = new HashMap<>();
 
+    private final ServiceFactory serviceFactory;
+    private final CatalogCache catalogCache;
+
     // Timer para debounce de refreshDashboard (evita múltiples refreshes en cascada)
     private Timer dashboardRefreshTimer;
     private static final int DASHBOARD_DEBOUNCE_MS = 500;
@@ -78,6 +84,15 @@ public class ForestechProfessionalApp extends JFrame {
      * Constructor principal.
      */
     public ForestechProfessionalApp() {
+        this(ServiceFactoryProvider.getFactory());
+    }
+
+    public ForestechProfessionalApp(ServiceFactory serviceFactory) {
+        this.serviceFactory = serviceFactory;
+        this.catalogCache = new CatalogCache(
+            serviceFactory.getProductServices(),
+            serviceFactory.getVehicleServices()
+        );
         // Configuración de la ventana
         setTitle("Forestech Oil Management System - Professional Edition");
         setSize(1200, 700);
@@ -192,9 +207,6 @@ public class ForestechProfessionalApp extends JFrame {
     }
 
     private void inicializarPaneles() {
-        // Obtener ServiceFactory para inyectar dependencias
-        ServiceFactory factory = ServiceFactory.getInstance();
-
         Runnable dashboardReload = this::refrescarDashboard;
 
         // Inicializar Panels con Dependency Injection
@@ -202,21 +214,22 @@ public class ForestechProfessionalApp extends JFrame {
             this,
             this::registrarLog,
             dashboardReload,
-            factory.getProductServices(),
-            factory.getMovementServices()
+            serviceFactory.getProductServices(),
+            serviceFactory.getMovementServices()
         );
 
         vehiclesPanel = new VehiclesPanel(
             this,
             this::registrarLog,
             dashboardReload,
-            factory.getVehicleServices()
+            serviceFactory.getVehicleServices(),
+            serviceFactory.getProductServices()
         );
 
         suppliersPanel = new SuppliersPanel(
             this,
             this::registrarLog,
-            factory.getSupplierServices()
+            serviceFactory.getSupplierServices()
         );
 
         movementsPanel = new MovementsPanel(
@@ -224,17 +237,19 @@ public class ForestechProfessionalApp extends JFrame {
             this::registrarLog,
             dashboardReload,
             origen -> productsPanel.requestRefresh(origen),
-            factory.getMovementServices(),
-            factory.getProductServices(),
-            factory.getVehicleServices()
+            serviceFactory.getMovementServices(),
+            serviceFactory.getProductServices(),
+            serviceFactory.getVehicleServices(),
+            serviceFactory.getFacturaServices(),
+            catalogCache
         );
 
         invoicesPanel = new InvoicesPanel(
             this,
             this::registrarLog,
             dashboardReload,
-            factory.getFacturaServices(),
-            factory.getSupplierServices()
+            serviceFactory.getFacturaServices(),
+            serviceFactory.getSupplierServices()
         );
 
         logsPanel = new LogsPanel();
@@ -242,10 +257,10 @@ public class ForestechProfessionalApp extends JFrame {
         dashboardPanel = new DashboardPanel(
             new DashboardCallbacks(),
             this::registrarLog,
-            factory.getProductServices(),
-            factory.getVehicleServices(),
-            factory.getMovementServices(),
-            factory.getFacturaServices()
+            serviceFactory.getProductServices(),
+            serviceFactory.getVehicleServices(),
+            serviceFactory.getMovementServices(),
+            serviceFactory.getFacturaServices()
         );
     }
 
@@ -255,13 +270,13 @@ public class ForestechProfessionalApp extends JFrame {
     private JPanel crearPanelNavegacion() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(new Color(45, 52, 54));
+        panel.setBackground(ColorScheme.BACKGROUND_DARK);
         panel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
 
         // Título
         JLabel lblTitulo = new JLabel("FORESTECH", JLabel.CENTER);
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 16));
-        lblTitulo.setForeground(Color.WHITE);
+        lblTitulo.setForeground(ColorScheme.FOREGROUND_SECONDARY);
         lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(lblTitulo);
 
@@ -301,8 +316,8 @@ public class ForestechProfessionalApp extends JFrame {
         btn.setFont(new Font("Arial", Font.PLAIN, 14));
         btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setBackground(new Color(45, 52, 54));
-        btn.setForeground(Color.WHITE);
+        btn.setBackground(ColorScheme.BACKGROUND_DARK);
+        btn.setForeground(ColorScheme.FOREGROUND_SECONDARY);
         btn.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
 
         btn.addActionListener(e -> {
@@ -387,23 +402,23 @@ public class ForestechProfessionalApp extends JFrame {
     }
 
     private void marcarBotonActivo(JButton botonActivo) {
-        btnInicio.setBackground(new Color(45, 52, 54));
-        btnProductos.setBackground(new Color(45, 52, 54));
-        btnVehiculos.setBackground(new Color(45, 52, 54));
-        btnProveedores.setBackground(new Color(45, 52, 54));
-        btnMovimientos.setBackground(new Color(45, 52, 54));
-        btnFacturas.setBackground(new Color(45, 52, 54));
-        btnLogs.setBackground(new Color(45, 52, 54));
+        btnInicio.setBackground(ColorScheme.BACKGROUND_DARK);
+        btnProductos.setBackground(ColorScheme.BACKGROUND_DARK);
+        btnVehiculos.setBackground(ColorScheme.BACKGROUND_DARK);
+        btnProveedores.setBackground(ColorScheme.BACKGROUND_DARK);
+        btnMovimientos.setBackground(ColorScheme.BACKGROUND_DARK);
+        btnFacturas.setBackground(ColorScheme.BACKGROUND_DARK);
+        btnLogs.setBackground(ColorScheme.BACKGROUND_DARK);
 
-        botonActivo.setBackground(new Color(52, 152, 219));
+        botonActivo.setBackground(ColorScheme.BUTTON_INFO_BG);
     }
 
     private void cargarDatosIniciales() {
         SwingUtilities.invokeLater(() -> {
-            // LAZY LOADING: Solo cargar Dashboard al inicio
-            // Las demás vistas se cargarán cuando el usuario navegue a ellas
-            dashboardPanel.refreshStats();
-            registrarLog("App: carga inicial completada (lazy loading habilitado)");
+            // VERDADERO LAZY LOADING: No cargar nada al inicio
+            // Dashboard se cargará cuando el usuario haga clic por primera vez
+            registrarLog("App: inicialización completada (lazy loading habilitado)");
+            registrarLog("Dashboard se cargará cuando navegues a él");
         });
     }
 
@@ -524,7 +539,8 @@ public class ForestechProfessionalApp extends JFrame {
             System.err.println("No se pudo aplicar Look and Feel del sistema");
         }
 
-        SwingUtilities.invokeLater(ForestechProfessionalApp::new);
+        ServiceFactory factory = ServiceFactoryProvider.getFactory();
+        SwingUtilities.invokeLater(() -> new ForestechProfessionalApp(factory));
 
         System.out.println("=".repeat(70));
         System.out.println("FORESTECH OIL MANAGEMENT SYSTEM - PROFESSIONAL EDITION");

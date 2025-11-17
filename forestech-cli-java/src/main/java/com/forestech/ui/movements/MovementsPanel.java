@@ -3,11 +3,13 @@ package com.forestech.ui.movements;
 import com.forestech.exceptions.DatabaseException;
 import com.forestech.exceptions.InsufficientStockException;
 import com.forestech.models.Movement;
+import com.forestech.services.FacturaServices;
 import com.forestech.services.MovementServices;
 import com.forestech.services.ProductServices;
 import com.forestech.services.VehicleServices;
 import com.forestech.ui.MovementDialogForm;
 import com.forestech.ui.utils.AsyncLoadManager;
+import com.forestech.ui.utils.CatalogCache;
 import com.forestech.ui.utils.UIUtils;
 
 import javax.swing.BorderFactory;
@@ -30,6 +32,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.time.LocalDate;
+import com.forestech.ui.utils.ColorScheme;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +56,7 @@ public class MovementsPanel extends JPanel {
     private final MovementServices movementServices;
     private final ProductServices productServices;
     private final VehicleServices vehicleServices;
+    private final FacturaServices facturaServices;
 
     // Componentes de UI
     private JTable movementsTable;
@@ -77,7 +81,9 @@ public class MovementsPanel extends JPanel {
                           Consumer<String> productReloadRequest,
                           MovementServices movementServices,
                           ProductServices productServices,
-                          VehicleServices vehicleServices) {
+                          VehicleServices vehicleServices,
+                          FacturaServices facturaServices,
+                          CatalogCache catalogCache) {
         this.owner = owner;
         this.logger = logger;
         this.dashboardRefresh = dashboardRefresh;
@@ -85,8 +91,9 @@ public class MovementsPanel extends JPanel {
         this.movementServices = movementServices;
         this.productServices = productServices;
         this.vehicleServices = vehicleServices;
+        this.facturaServices = facturaServices;
         this.loadManager = new AsyncLoadManager("Movimientos", logger, this::loadMovements);
-        this.dataLoader = new MovementsDataLoader(movementServices);
+        this.dataLoader = new MovementsDataLoader(movementServices, catalogCache);
 
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -206,7 +213,7 @@ public class MovementsPanel extends JPanel {
 
         JButton btnRegister = new JButton("Registrar");
         btnRegister.setBackground(new Color(155, 89, 182));
-        btnRegister.setForeground(Color.WHITE);
+        btnRegister.setForeground(ColorScheme.FOREGROUND_SECONDARY);
         btnRegister.addActionListener(e -> registerMovement());
         buttonsPanel.add(btnRegister);
 
@@ -220,7 +227,7 @@ public class MovementsPanel extends JPanel {
         buttonsPanel.add(btnDetails);
 
         JButton btnDelete = new JButton("Eliminar");
-        btnDelete.setBackground(new Color(255, 150, 150));
+        btnDelete.setBackground(ColorScheme.BUTTON_DANGER_BG);
         btnDelete.addActionListener(e -> deleteMovement());
         buttonsPanel.add(btnDelete);
 
@@ -330,7 +337,14 @@ public class MovementsPanel extends JPanel {
     }
 
     private void registerMovement() {
-        MovementDialogForm dialog = new MovementDialogForm(owner, true);
+        MovementDialogForm dialog = new MovementDialogForm(
+            owner,
+            true,
+            movementServices,
+            productServices,
+            vehicleServices,
+            facturaServices
+        );
         if (dialog.isGuardadoExitoso()) {
             logger.accept("Movimientos: registro exitoso desde formulario");
             requestRefresh("Nuevo movimiento");

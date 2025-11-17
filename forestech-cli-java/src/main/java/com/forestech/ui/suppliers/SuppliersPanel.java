@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import com.forestech.ui.utils.ColorScheme;
 
 /**
  * Panel de gestión de proveedores.
@@ -133,7 +134,7 @@ public class SuppliersPanel extends JPanel {
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
         JButton btnRegistrar = new JButton("Registrar");
-        btnRegistrar.setBackground(new Color(52, 152, 219));
+        btnRegistrar.setBackground(ColorScheme.BUTTON_INFO_BG);
         btnRegistrar.addActionListener(e -> registrarProveedor());
         panelBotones.add(btnRegistrar);
 
@@ -143,7 +144,7 @@ public class SuppliersPanel extends JPanel {
         panelBotones.add(btnEditar);
 
         JButton btnEliminar = new JButton("Eliminar");
-        btnEliminar.setBackground(new Color(255, 150, 150));
+        btnEliminar.setBackground(ColorScheme.BUTTON_DANGER_BG);
         btnEliminar.addActionListener(e -> eliminarProveedor());
         panelBotones.add(btnEliminar);
 
