@@ -17,8 +17,8 @@
         </encoder>
     </appender>
 
-    <logger name="com.forestech.services" level="DEBUG"/>
-    <logger name="com.forestech.dao" level="DEBUG"/>
+    <logger name="com.forestech.business.services" level="DEBUG"/>
+    <logger name="com.forestech.data.dao" level="DEBUG"/>
     <logger name="com.zaxxer.hikari" level="WARN"/>
 
     <root level="INFO">

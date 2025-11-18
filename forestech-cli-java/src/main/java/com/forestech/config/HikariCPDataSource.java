@@ -31,19 +31,31 @@ public class HikariCPDataSource {
     // Bloque estático: se ejecuta UNA VEZ cuando la clase se carga
     static {
         try {
+            System.out.println("[HikariCP] Iniciando configuración del pool de conexiones...");
             HikariConfig config = new HikariConfig();
-            
+
             // ===== CONFIGURACIÓN DE CONEXIÓN (desde application.properties) =====
-            config.setJdbcUrl(ConfigLoader.get("db.url"));
-            config.setUsername(ConfigLoader.get("db.username"));
-            config.setPassword(ConfigLoader.get("db.password"));
-            
+            String dbUrl = ConfigLoader.get("db.url");
+            String dbUser = ConfigLoader.get("db.username");
+            String dbPass = ConfigLoader.get("db.password");
+
+            System.out.println("[HikariCP] URL: " + dbUrl);
+            System.out.println("[HikariCP] Usuario: " + dbUser);
+            System.out.println("[HikariCP] Password: " + (dbPass != null ? "***" : "NULL"));
+
+            config.setJdbcUrl(dbUrl);
+            config.setUsername(dbUser);
+            config.setPassword(dbPass);
+
             // ===== CONFIGURACIÓN DEL POOL (desde application.properties) =====
-            config.setMinimumIdle(ConfigLoader.getInt("hikari.minimum-idle", 5));
-            config.setMaximumPoolSize(ConfigLoader.getInt("hikari.maximum-pool-size", 20));
-            config.setConnectionTimeout(ConfigLoader.getLong("hikari.connection-timeout", 30000L));
-            config.setIdleTimeout(ConfigLoader.getLong("hikari.idle-timeout", 600000L));
-            config.setMaxLifetime(ConfigLoader.getLong("hikari.max-lifetime", 1800000L));
+            config.setMinimumIdle(ConfigLoader.getInt("hikari.minimum-idle", 2));
+            config.setMaximumPoolSize(ConfigLoader.getInt("hikari.maximum-pool-size", 10));
+            config.setConnectionTimeout(ConfigLoader.getLong("hikari.connection-timeout", 5000L));
+            config.setIdleTimeout(ConfigLoader.getLong("hikari.idle-timeout", 300000L));
+            config.setMaxLifetime(ConfigLoader.getLong("hikari.max-lifetime", 600000L));
+            config.setValidationTimeout(ConfigLoader.getLong("hikari.validation-timeout", 3000L));
+
+            System.out.println("[HikariCP] Pool configurado - Timeout: 5000ms, Max pool size: 10");
             
             // ===== OPTIMIZACIONES MYSQL =====
             config.addDataSourceProperty("cachePrepStmts", "true");
@@ -59,15 +71,32 @@ public class HikariCPDataSource {
             
             // Nombre del pool para logs
             config.setPoolName("ForestechHikariPool");
-            
+
+            // Validación de conexión al inicio
+            config.setConnectionTestQuery("SELECT 1");
+
             // Crear el DataSource
+            System.out.println("[HikariCP] Creando HikariDataSource...");
             dataSource = new HikariDataSource(config);
-            
-            System.out.println("✅ HikariCP inicializado correctamente");
-            
+            System.out.println("[HikariCP] DataSource creado");
+
+            // Verificar que la conexión funciona
+            System.out.println("[HikariCP] Probando conexión inicial...");
+            try (Connection conn = dataSource.getConnection()) {
+                System.out.println("✅ HikariCP inicializado correctamente");
+                System.out.println("✅ Conexión a BD verificada: " + conn.getCatalog());
+            } catch (Exception connEx) {
+                System.err.println("⚠️ HikariCP inicializado pero la BD no responde");
+                System.err.println("⚠️ Error: " + connEx.getClass().getName() + ": " + connEx.getMessage());
+                connEx.printStackTrace();
+            }
+
         } catch (Exception e) {
-            System.err.println("❌ Error al inicializar HikariCP: " + e.getMessage());
+            System.err.println("❌ Error CRÍTICO al inicializar HikariCP");
+            System.err.println("❌ Tipo: " + e.getClass().getName());
+            System.err.println("❌ Mensaje: " + e.getMessage());
             e.printStackTrace();
+            System.err.println("⚠️ La aplicación se iniciará pero las operaciones de BD fallarán");
         }
     }
     

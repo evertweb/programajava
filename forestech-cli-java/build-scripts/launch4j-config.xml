@@ -5,7 +5,7 @@
   <jar>forestech-app.jar</jar>
   <outfile>ForestechApp.exe</outfile>
   <errTitle>Forestech App</errTitle>
-  <cmdLine/>
+  <cmdLine>--gui</cmdLine>
   <chdir>.</chdir>
   <priority>normal</priority>
   <downloadUrl>https://www.oracle.com/java/technologies/downloads/</downloadUrl>

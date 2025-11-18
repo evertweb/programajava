@@ -1,9 +1,10 @@
 package com.forestech.services;
 
-import com.forestech.dao.ProductDAO;
-import com.forestech.enums.MeasurementUnit;
-import com.forestech.exceptions.DatabaseException;
-import com.forestech.models.Product;
+import com.forestech.business.services.ProductServices;
+import com.forestech.data.dao.ProductDAO;
+import com.forestech.shared.enums.MeasurementUnit;
+import com.forestech.shared.exceptions.DatabaseException;
+import com.forestech.data.models.Product;
 import org.junit.jupiter.api.*;
 import org.mockito.*;
 

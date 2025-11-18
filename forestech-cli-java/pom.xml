@@ -32,6 +32,7 @@
         <!-- Versiones de dependencias -->
         <mysql.connector.version>8.0.33</mysql.connector.version>
         <junit.version>5.10.0</junit.version>
+        <mockito.version>5.8.0</mockito.version>
         <hikari.version>5.1.0</hikari.version>
         <slf4j.version>2.0.9</slf4j.version>
         <logback.version>1.4.11</logback.version>
@@ -63,7 +64,7 @@
         </dependency>
         
         <!-- ===================================== -->
-        <!-- JUnit 5 (Testing)                     -->
+        <!-- JUnit 5 (Testing) - FUTURO            -->
         <!-- ===================================== -->
         <!-- Para escribir tests unitarios -->
         <dependency>
@@ -72,25 +73,18 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- ===================================== -->
-        <!-- Mockito (Mocking Framework)           -->
-        <!-- ===================================== -->
-        <!-- Para crear mocks en tests unitarios -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.5.0</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.5.0</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
@@ -158,7 +152,7 @@
                             <transformers>
                                 <!-- Especificar la clase principal -->
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.forestech.ui.ForestechProfessionalApp</mainClass>
+                                    <mainClass>com.forestech.core.Main</mainClass>
                                 </transformer>
                             </transformers>
                             <!-- Nombre del archivo JAR final -->
@@ -179,8 +173,8 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <!-- ACTUALIZADO: Ahora ejecuta ForestechProfessionalApp por defecto -->
-                    <mainClass>com.forestech.ui.ForestechProfessionalApp</mainClass>
+                    <!-- ACTUALIZADO: ahora delega al orquestador central -->
+                    <mainClass>com.forestech.core.Main</mainClass>
                 </configuration>
             </plugin>
             

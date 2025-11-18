@@ -1,8 +1,9 @@
 package com.forestech.services;
 
-import com.forestech.dao.SupplierDAO;
-import com.forestech.exceptions.DatabaseException;
-import com.forestech.models.Supplier;
+import com.forestech.business.services.SupplierServices;
+import com.forestech.data.dao.SupplierDAO;
+import com.forestech.shared.exceptions.DatabaseException;
+import com.forestech.data.models.Supplier;
 import org.junit.jupiter.api.*;
 import org.mockito.*;
 

@@ -74,3 +74,15 @@ echo ""
 JAR_SIZE=$(du -h ../target/forestech-app.jar | cut -f1)
 echo "💾 Tamaño del JAR: $JAR_SIZE"
 echo ""
+
+# ============================================================================
+# VALIDACIÓN: Configuración Launch4j
+# ============================================================================
+echo "🔍 Validando configuración Launch4j..."
+if grep -q "<cmdLine>--gui</cmdLine>" launch4j-config.xml; then
+    echo "   ✅ Parámetro --gui configurado correctamente"
+else
+    echo "   ⚠️  ADVERTENCIA: Parámetro --gui NO encontrado"
+    echo "   ⚠️  La GUI podría no iniciar. Revisa launch4j-config.xml"
+fi
+echo ""

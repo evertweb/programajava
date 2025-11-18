@@ -1,9 +1,11 @@
 package com.forestech.services;
 
-import com.forestech.exceptions.DatabaseException;
-import com.forestech.exceptions.TransactionFailedException;
-import com.forestech.models.Factura;
-import com.forestech.models.DetalleFactura;
+import com.forestech.business.services.FacturaServices;
+import com.forestech.business.services.SupplierServices;
+import com.forestech.shared.exceptions.DatabaseException;
+import com.forestech.shared.exceptions.TransactionFailedException;
+import com.forestech.data.models.Factura;
+import com.forestech.data.models.DetalleFactura;
 import org.junit.jupiter.api.*;
 import org.mockito.*;
 

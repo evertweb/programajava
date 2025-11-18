@@ -1,9 +1,11 @@
 package com.forestech.services;
 
-import com.forestech.dao.VehicleDAO;
-import com.forestech.enums.VehicleCategory;
-import com.forestech.exceptions.DatabaseException;
-import com.forestech.models.Vehicle;
+import com.forestech.business.services.ProductServices;
+import com.forestech.business.services.VehicleServices;
+import com.forestech.data.dao.VehicleDAO;
+import com.forestech.shared.enums.VehicleCategory;
+import com.forestech.shared.exceptions.DatabaseException;
+import com.forestech.data.models.Vehicle;
 import org.junit.jupiter.api.*;
 import org.mockito.*;
 

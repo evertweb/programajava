@@ -1,12 +1,16 @@
 package com.forestech.services;
 
-import com.forestech.dao.MovementDAO;
-import com.forestech.enums.MeasurementUnit;
-import com.forestech.enums.MovementType;
-import com.forestech.exceptions.DatabaseException;
-import com.forestech.exceptions.InsufficientStockException;
-import com.forestech.exceptions.ValidationException;
-import com.forestech.models.Movement;
+import com.forestech.business.services.FacturaServices;
+import com.forestech.business.services.MovementServices;
+import com.forestech.business.services.ProductServices;
+import com.forestech.business.services.VehicleServices;
+import com.forestech.data.dao.MovementDAO;
+import com.forestech.shared.enums.MeasurementUnit;
+import com.forestech.shared.enums.MovementType;
+import com.forestech.shared.exceptions.DatabaseException;
+import com.forestech.shared.exceptions.InsufficientStockException;
+import com.forestech.shared.exceptions.ValidationException;
+import com.forestech.data.models.Movement;
 import org.junit.jupiter.api.*;
 import org.mockito.*;
 
