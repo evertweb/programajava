@@ -1,9 +1,8 @@
 package com.forestech.presentation.ui.movements;
 
 import com.forestech.shared.enums.MovementType;
-import com.forestech.shared.exceptions.DatabaseException;
-import com.forestech.data.models.Movement;
-import com.forestech.business.services.MovementServices;
+import com.forestech.modules.inventory.models.Movement;
+import com.forestech.presentation.clients.MovementServiceClient;
 import com.forestech.presentation.ui.utils.CatalogCache;
 
 import java.time.LocalDate;
@@ -17,11 +16,11 @@ import java.util.stream.Collectors;
  */
 public class MovementsDataLoader {
 
-    private final MovementServices movementServices;
+    private final MovementServiceClient movementClient;
     private final CatalogCache catalogCache;
 
-    public MovementsDataLoader(MovementServices movementServices, CatalogCache catalogCache) {
-        this.movementServices = movementServices;
+    public MovementsDataLoader(MovementServiceClient movementClient, CatalogCache catalogCache) {
+        this.movementClient = movementClient;
         this.catalogCache = catalogCache;
     }
 
@@ -37,9 +36,9 @@ public class MovementsDataLoader {
     public MovementsLoadResult loadMovements(String searchTerm,
                                              String selectedType,
                                              LocalDate startDate,
-                                             LocalDate endDate) throws DatabaseException {
+                                             LocalDate endDate) throws Exception {
         // Cargar todos los movimientos
-        List<Movement> allMovements = movementServices.getAllMovements();
+        List<Movement> allMovements = movementClient.findAll();
 
         // Obtener nombres desde el cache
         Map<String, String> productNames = catalogCache.getProductNames();

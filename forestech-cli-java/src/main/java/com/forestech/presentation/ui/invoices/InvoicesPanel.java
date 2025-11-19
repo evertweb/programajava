@@ -1,11 +1,10 @@
 package com.forestech.presentation.ui.invoices;
 
-import com.forestech.shared.exceptions.DatabaseException;
-import com.forestech.data.models.DetalleFactura;
-import com.forestech.data.models.Factura;
-import com.forestech.data.models.Supplier;
-import com.forestech.business.services.FacturaServices;
-import com.forestech.business.services.SupplierServices;
+import com.forestech.modules.invoicing.models.Invoice;
+import com.forestech.modules.invoicing.models.InvoiceDetail;
+import com.forestech.modules.partners.models.Supplier;
+import com.forestech.presentation.clients.InvoiceServiceClient;
+import com.forestech.presentation.clients.SupplierServiceClient;
 import com.forestech.presentation.ui.utils.AsyncLoadManager;
 import com.forestech.presentation.ui.utils.UIUtils;
 
@@ -24,13 +23,17 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import com.forestech.presentation.ui.utils.BackgroundTaskExecutor;
 import com.forestech.presentation.ui.utils.FontScheme;
+import com.forestech.presentation.ui.utils.IconManager;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import com.forestech.presentation.ui.utils.ColorScheme;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -46,9 +49,9 @@ public class InvoicesPanel extends JPanel {
     private final Runnable dashboardRefresh;
     private final AsyncLoadManager loadManager;
 
-    // Services (Dependency Injection)
-    private final FacturaServices facturaServices;
-    private final SupplierServices supplierServices;
+    // Clients (Microservices)
+    private final InvoiceServiceClient invoiceClient;
+    private final SupplierServiceClient supplierClient;
 
     private JTable tablaFacturas;
     private DefaultTableModel modeloFacturas;
@@ -56,13 +59,13 @@ public class InvoicesPanel extends JPanel {
     public InvoicesPanel(JFrame owner,
             Consumer<String> logger,
             Runnable dashboardRefresh,
-            FacturaServices facturaServices,
-            SupplierServices supplierServices) {
+            InvoiceServiceClient invoiceClient,
+            SupplierServiceClient supplierClient) {
         this.owner = owner;
         this.logger = logger;
         this.dashboardRefresh = dashboardRefresh;
-        this.facturaServices = facturaServices;
-        this.supplierServices = supplierServices;
+        this.invoiceClient = invoiceClient;
+        this.supplierClient = supplierClient;
         this.loadManager = new AsyncLoadManager("Facturas", logger, this::refreshAsync);
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -94,17 +97,19 @@ public class InvoicesPanel extends JPanel {
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
         JButton btnNuevaFactura = new JButton("Nueva Factura");
-        styleFilledButton(btnNuevaFactura, ColorScheme.BUTTON_PRIMARY_BG);
+        btnNuevaFactura.setIcon(IconManager.getIcon("plus"));
+        btnNuevaFactura.setBackground(ColorScheme.BUTTON_PRIMARY_BG);
+        btnNuevaFactura.setForeground(ColorScheme.TEXT_ON_PRIMARY);
         btnNuevaFactura.addActionListener(e -> mostrarFormularioNuevaFactura());
         panelBotones.add(btnNuevaFactura);
 
         JButton btnVerDetalles = new JButton("Ver Detalles");
-        styleSecondaryButton(btnVerDetalles);
+        btnVerDetalles.setIcon(IconManager.getIcon("eye"));
         btnVerDetalles.addActionListener(e -> verDetallesFactura());
         panelBotones.add(btnVerDetalles);
 
         JButton btnRefrescar = new JButton("Refrescar");
-        styleSecondaryButton(btnRefrescar);
+        btnRefrescar.setIcon(IconManager.getIcon("refresh"));
         btnRefrescar.addActionListener(e -> refresh());
         panelBotones.add(btnRefrescar);
 
@@ -127,32 +132,35 @@ public class InvoicesPanel extends JPanel {
         final long inicio = System.currentTimeMillis();
         setBusyCursor(true);
 
-        SwingWorker<List<Factura>, Void> worker = new SwingWorker<>() {
+        SwingWorker<List<Invoice>, Void> worker = new SwingWorker<>() {
             @Override
-            protected List<Factura> doInBackground() throws Exception {
-                return facturaServices.getAllFacturas();
+            protected List<Invoice> doInBackground() throws Exception {
+                return invoiceClient.findAll();
             }
 
             @Override
             protected void done() {
                 try {
-                    List<Factura> facturas = get();
+                    List<Invoice> invoices = get();
                     modeloFacturas.setRowCount(0);
 
-                    for (Factura f : facturas) {
+                    for (Invoice f : invoices) {
                         modeloFacturas.addRow(new Object[] {
-                                f.getNumeroFactura(),
-                                f.getFechaEmision(),
+                                f.getId(),
+                                f.getIssueDate() != null
+                                        ? f.getIssueDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                                        : "N/A",
                                 f.getSupplierId() != null ? f.getSupplierId() : "N/A",
-                                UIUtils.formatCurrency(f.getSubtotal()),
-                                UIUtils.formatCurrency(f.getIva()),
-                                UIUtils.formatCurrency(f.getTotal())
+                                "N/A", // Subtotal no disponible en modelo simple
+                                "N/A", // IVA no disponible en modelo simple
+                                f.getTotalAmount() != null ? UIUtils.formatCurrency(f.getTotalAmount().doubleValue())
+                                        : "0.00"
                         });
                     }
 
                     logger.accept(String.format(
                             "Facturas: cargadas %d entradas en %d ms",
-                            facturas.size(),
+                            invoices.size(),
                             System.currentTimeMillis() - inicio));
                 } catch (ExecutionException ex) {
                     Throwable causa = ex.getCause();
@@ -173,7 +181,7 @@ public class InvoicesPanel extends JPanel {
 
         // Registrar worker para cancelación antes de ejecutar
         loadManager.registerWorker(worker);
-        worker.execute();
+        BackgroundTaskExecutor.submit(worker);
     }
 
     private void setBusyCursor(boolean busy) {
@@ -198,12 +206,12 @@ public class InvoicesPanel extends JPanel {
 
         JComboBox<String> cmbProveedor = new JComboBox<>();
         try {
-            List<Supplier> proveedores = supplierServices.getAllSuppliers();
+            List<Supplier> proveedores = supplierClient.findAll();
             cmbProveedor.addItem("--- Sin proveedor ---");
             for (Supplier s : proveedores) {
                 cmbProveedor.addItem(s.getId() + " - " + s.getName());
             }
-        } catch (DatabaseException e) {
+        } catch (Exception e) {
             logger.accept("Facturas: error cargando proveedores para el formulario");
         }
 
@@ -254,19 +262,15 @@ public class InvoicesPanel extends JPanel {
                     proveedorId = seleccion.split(" - ")[0];
                 }
 
-                Factura factura = new Factura(
-                        numero,
-                        LocalDate.parse(txtFechaEmision.getText().trim()),
-                        LocalDate.parse(txtFechaVencimiento.getText().trim()),
-                        proveedorId,
-                        subtotal,
-                        ivaValor,
-                        total,
-                        txtObservaciones.getText().trim(),
-                        txtFormaPago.getText().trim(),
-                        null);
+                Invoice invoice = new Invoice();
+                invoice.setId(numero);
+                invoice.setIssueDate(LocalDate.parse(txtFechaEmision.getText().trim()).atStartOfDay());
+                invoice.setSupplierId(proveedorId);
+                invoice.setTotalAmount(BigDecimal.valueOf(total));
+                invoice.setStatus("PENDING");
+                invoice.setDetalles(new ArrayList<>());
 
-                facturaServices.createFacturaWithDetails(factura, new ArrayList<>());
+                invoiceClient.create(invoice);
 
                 JOptionPane.showMessageDialog(dialog,
                         "Factura creada correctamente\nTotal: " + UIUtils.formatCurrency(total),
@@ -307,9 +311,10 @@ public class InvoicesPanel extends JPanel {
         String numeroFactura = (String) modeloFacturas.getValueAt(fila, 0);
 
         try {
-            List<DetalleFactura> detalles = facturaServices.getDetallesByFactura(numeroFactura);
+            Invoice invoice = invoiceClient.findById(numeroFactura);
+            List<InvoiceDetail> detalles = invoice.getDetalles();
 
-            if (detalles.isEmpty()) {
+            if (detalles == null || detalles.isEmpty()) {
                 JOptionPane.showMessageDialog(owner,
                         "Esta factura no tiene detalles registrados",
                         "Información", JOptionPane.INFORMATION_MESSAGE);
@@ -319,14 +324,19 @@ public class InvoicesPanel extends JPanel {
             String[] columnas = { "ID", "Producto", "Cantidad", "Precio Unit.", "Subtotal" };
             DefaultTableModel modeloDetalles = new DefaultTableModel(columnas, 0);
 
-            for (DetalleFactura d : detalles) {
-                double subtotal = d.getCantidad() * d.getPrecioUnitario();
+            for (InvoiceDetail d : detalles) {
+                BigDecimal subtotal = d.getSubtotal();
+                if (subtotal == null && d.getCantidad() != null && d.getPrecioUnitario() != null) {
+                    subtotal = d.getCantidad().multiply(d.getPrecioUnitario());
+                }
+
                 modeloDetalles.addRow(new Object[] {
-                        d.getIdDetalle(),
-                        d.getProducto(),
+                        "N/A",
+                        d.getProductId(),
                         d.getCantidad(),
-                        UIUtils.formatCurrency(d.getPrecioUnitario()),
-                        UIUtils.formatCurrency(subtotal)
+                        d.getPrecioUnitario() != null ? UIUtils.formatCurrency(d.getPrecioUnitario().doubleValue())
+                                : "0.00",
+                        subtotal != null ? UIUtils.formatCurrency(subtotal.doubleValue()) : "0.00"
                 });
             }
 
@@ -338,7 +348,7 @@ public class InvoicesPanel extends JPanel {
             JOptionPane.showMessageDialog(owner, scroll,
                     "Detalles de Factura " + numeroFactura,
                     JOptionPane.INFORMATION_MESSAGE);
-        } catch (DatabaseException e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(owner,
                     "Error al cargar detalles: " + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
@@ -355,21 +365,4 @@ public class InvoicesPanel extends JPanel {
         }
     }
 
-    private void styleFilledButton(JButton button, Color background) {
-        button.setBackground(background);
-        button.setForeground(ColorScheme.TEXT_ON_COLOR);
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(background.darker(), 1),
-                BorderFactory.createEmptyBorder(5, 15, 5, 15)));
-    }
-
-    private void styleSecondaryButton(JButton button) {
-        button.setBackground(ColorScheme.BUTTON_SECONDARY_BG);
-        button.setForeground(ColorScheme.BUTTON_SECONDARY_FG);
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(ColorScheme.BORDER_SUBTLE, 1),
-                BorderFactory.createEmptyBorder(5, 15, 5, 15)));
-    }
 }

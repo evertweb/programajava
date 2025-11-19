@@ -1,47 +1,26 @@
 package com.forestech.presentation.ui.suppliers;
 
-import com.forestech.shared.exceptions.DatabaseException;
-import com.forestech.data.models.Supplier;
-import com.forestech.business.services.SupplierServices;
-import com.forestech.presentation.ui.utils.AsyncLoadManager;
+import com.forestech.modules.partners.models.Supplier;
+import com.forestech.presentation.clients.SupplierServiceClient;
 import com.forestech.presentation.ui.utils.UIUtils;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingWorker;
-import javax.swing.table.DefaultTableModel;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import com.forestech.presentation.ui.utils.FontScheme;
-import java.awt.GridLayout;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import com.forestech.presentation.ui.utils.ColorScheme;
+import com.forestech.presentation.ui.utils.FontScheme;
+import com.forestech.presentation.ui.utils.IconManager;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Panel de gestión de proveedores.
+ * Implementación MVP (Vista).
  */
-public class SuppliersPanel extends JPanel {
+public class SuppliersPanel extends JPanel implements SuppliersContract.View {
 
     private final JFrame owner;
-    private final Consumer<String> logger;
-    private final AsyncLoadManager loadManager;
-
-    // Services (Dependency Injection)
-    private final SupplierServices supplierServices;
+    private final SuppliersContract.Presenter presenter;
 
     private JTable tablaProveedores;
     private DefaultTableModel modeloProveedores;
@@ -49,11 +28,10 @@ public class SuppliersPanel extends JPanel {
     private JComboBox<String> cmbFiltroContacto;
     private JLabel lblResumenProveedores;
 
-    public SuppliersPanel(JFrame owner, Consumer<String> logger, SupplierServices supplierServices) {
+    public SuppliersPanel(JFrame owner, Consumer<String> logger, SupplierServiceClient supplierClient) {
         this.owner = owner;
-        this.logger = logger;
-        this.supplierServices = supplierServices;
-        this.loadManager = new AsyncLoadManager("Proveedores", logger, this::cargarProveedores);
+        this.presenter = new SuppliersPresenter(this, supplierClient, logger);
+
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setBackground(ColorScheme.BACKGROUND_LIGHT);
@@ -118,10 +96,10 @@ public class SuppliersPanel extends JPanel {
 
         txtBuscarProveedor = new JTextField(18);
         txtBuscarProveedor.setToolTipText("ID, NIT o nombre");
-        txtBuscarProveedor.addActionListener(e -> requestRefresh("Enter búsqueda proveedores"));
+        txtBuscarProveedor.addActionListener(e -> presenter.loadSuppliers("Enter búsqueda"));
 
         JButton btnBuscar = new JButton("Buscar");
-        btnBuscar.addActionListener(e -> requestRefresh("Botón Buscar Proveedores"));
+        btnBuscar.addActionListener(e -> presenter.loadSuppliers("Botón Buscar"));
 
         cmbFiltroContacto = new JComboBox<>(new String[] {
                 "Cualquier estado",
@@ -131,13 +109,13 @@ public class SuppliersPanel extends JPanel {
                 "Sin teléfono"
         });
         cmbFiltroContacto.setPreferredSize(new Dimension(150, 28));
-        cmbFiltroContacto.addActionListener(e -> requestRefresh("Filtro contacto"));
+        cmbFiltroContacto.addActionListener(e -> presenter.loadSuppliers("Filtro contacto"));
 
         JButton btnLimpiar = new JButton("Limpiar filtros");
         btnLimpiar.addActionListener(e -> {
             txtBuscarProveedor.setText("");
             cmbFiltroContacto.setSelectedIndex(0);
-            requestRefresh("Limpiar filtros proveedores");
+            presenter.loadSuppliers("Limpiar filtros");
         });
 
         JLabel lblFiltroTitulo = new JLabel("ID/NIT/Nombre:");
@@ -166,113 +144,45 @@ public class SuppliersPanel extends JPanel {
         panelBotones.setBackground(ColorScheme.BACKGROUND_PANEL);
 
         JButton btnRegistrar = new JButton("Registrar");
-        styleFilledButton(btnRegistrar, ColorScheme.BUTTON_PRIMARY_BG);
-        btnRegistrar.addActionListener(e -> registrarProveedor());
+        btnRegistrar.setIcon(IconManager.getIcon("plus"));
+        btnRegistrar.setBackground(ColorScheme.BUTTON_PRIMARY_BG);
+        btnRegistrar.setForeground(ColorScheme.TEXT_ON_PRIMARY);
+        btnRegistrar.addActionListener(e -> presenter.registerSupplier());
         panelBotones.add(btnRegistrar);
 
         JButton btnEditar = new JButton("Editar");
-        styleFilledButton(btnEditar, ColorScheme.BUTTON_WARNING_BG);
-        btnEditar.addActionListener(e -> editarProveedor());
+        btnEditar.setIcon(IconManager.getIcon("edit"));
+        btnEditar.setBackground(ColorScheme.BUTTON_WARNING_BG);
+        btnEditar.setForeground(ColorScheme.TEXT_PRIMARY);
+        btnEditar.addActionListener(e -> presenter.editSupplier(getSelectedSupplierId()));
         panelBotones.add(btnEditar);
 
         JButton btnEliminar = new JButton("Eliminar");
-        styleFilledButton(btnEliminar, ColorScheme.BUTTON_DANGER_BG);
-        btnEliminar.addActionListener(e -> eliminarProveedor());
+        btnEliminar.setIcon(IconManager.getIcon("trash"));
+        btnEliminar.setBackground(ColorScheme.BUTTON_DANGER_BG);
+        btnEliminar.setForeground(ColorScheme.TEXT_ON_PRIMARY);
+        btnEliminar.addActionListener(e -> presenter.deleteSupplier(getSelectedSupplierId()));
         panelBotones.add(btnEliminar);
 
         JButton btnDetalles = new JButton("Ver Detalles");
-        styleSecondaryButton(btnDetalles);
-        btnDetalles.addActionListener(e -> mostrarDetallesProveedor());
+        btnDetalles.setIcon(IconManager.getIcon("eye"));
+        btnDetalles.addActionListener(e -> presenter.showDetails(getSelectedSupplierId()));
         panelBotones.add(btnDetalles);
 
         JButton btnRefrescar = new JButton("Refrescar");
-        styleSecondaryButton(btnRefrescar);
-        btnRefrescar.addActionListener(e -> requestRefresh("Botón Refrescar Proveedores"));
+        btnRefrescar.setIcon(IconManager.getIcon("refresh"));
+        btnRefrescar.addActionListener(e -> presenter.loadSuppliers("Botón Refrescar"));
         panelBotones.add(btnRefrescar);
 
         return panelBotones;
     }
 
-    public void requestRefresh(String origin) {
-        loadManager.requestLoad(origin);
-    }
+    // --- View Implementation ---
 
-    public void cancelCurrentLoad() {
-        loadManager.cancelCurrentLoad();
-    }
-
-    private void cargarProveedores(String origin) {
-        long inicio = System.currentTimeMillis();
-        logger.accept("Proveedores: iniciando carga (origen: " + origin + ")");
-        setBusyCursor(true);
-
-        final String criterio = txtBuscarProveedor != null
-                ? txtBuscarProveedor.getText().trim().toLowerCase()
-                : "";
-        final String filtroContacto = (cmbFiltroContacto != null
-                && cmbFiltroContacto.getSelectedItem() != null)
-                        ? cmbFiltroContacto.getSelectedItem().toString()
-                        : "Cualquier estado";
-
-        SwingWorker<List<Supplier>, Void> worker = new SwingWorker<>() {
-            @Override
-            protected List<Supplier> doInBackground() throws Exception {
-                List<Supplier> proveedores = supplierServices.getAllSuppliers();
-
-                if (!criterio.isBlank()) {
-                    proveedores = proveedores.stream()
-                            .filter(p -> coincideProveedorConTexto(p, criterio))
-                            .collect(Collectors.toList());
-                }
-
-                if (!"Cualquier estado".equalsIgnoreCase(filtroContacto)) {
-                    final String filtro = filtroContacto;
-                    proveedores = proveedores.stream()
-                            .filter(p -> coincideProveedorConContacto(p, filtro))
-                            .collect(Collectors.toList());
-                }
-
-                return proveedores;
-            }
-
-            @Override
-            protected void done() {
-                try {
-                    List<Supplier> proveedores = get();
-                    actualizarTablaProveedores(proveedores);
-                    actualizarResumenProveedores(proveedores);
-                    logger.accept("Proveedores: cargados " + proveedores.size() + " registros");
-                } catch (ExecutionException ex) {
-                    String mensaje = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
-                    JOptionPane.showMessageDialog(owner,
-                            "Error al cargar proveedores: " + mensaje,
-                            "Error", JOptionPane.ERROR_MESSAGE);
-                    logger.accept("Proveedores: error al cargar → " + mensaje);
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                    logger.accept("Proveedores: carga interrumpida");
-                } finally {
-                    finalizarCarga(inicio);
-                }
-            }
-        };
-
-        // Registrar worker para cancelación antes de ejecutar
-        loadManager.registerWorker(worker);
-        worker.execute();
-    }
-
-    private void finalizarCarga(long inicio) {
-        setBusyCursor(false);
-        loadManager.finish(inicio);
-    }
-
-    private void actualizarTablaProveedores(List<Supplier> proveedores) {
-        if (modeloProveedores == null) {
-            return;
-        }
+    @Override
+    public void showSuppliers(List<Supplier> suppliers) {
         modeloProveedores.setRowCount(0);
-        for (Supplier proveedor : proveedores) {
+        for (Supplier proveedor : suppliers) {
             modeloProveedores.addRow(new Object[] {
                     proveedor.getId(),
                     proveedor.getName(),
@@ -284,210 +194,92 @@ public class SuppliersPanel extends JPanel {
         }
     }
 
-    private void actualizarResumenProveedores(List<Supplier> proveedores) {
-        if (lblResumenProveedores == null) {
-            return;
+    @Override
+    public void showLoading(boolean isLoading) {
+        Cursor cursor = isLoading ? Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR) : Cursor.getDefaultCursor();
+        if (owner != null) {
+            owner.setCursor(cursor);
         }
+        setCursor(cursor);
+    }
 
-        long conEmail = proveedores.stream().filter(this::tieneEmail).count();
-        long conTelefono = proveedores.stream().filter(this::tieneTelefono).count();
+    @Override
+    public void showError(String message) {
+        JOptionPane.showMessageDialog(owner, message, "Error", JOptionPane.ERROR_MESSAGE);
+    }
 
+    @Override
+    public void showSuccess(String message) {
+        JOptionPane.showMessageDialog(owner, message, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    @Override
+    public void showWarning(String message) {
+        JOptionPane.showMessageDialog(owner, message, "Advertencia", JOptionPane.WARNING_MESSAGE);
+    }
+
+    @Override
+    public boolean showConfirmation(String message) {
+        return JOptionPane.showConfirmDialog(owner, message, "Confirmar",
+                JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+    }
+
+    @Override
+    public void showSupplierDetails(Supplier proveedor) {
+        String detalle = """
+                ID: %s
+                Nombre: %s
+                NIT: %s
+                Teléfono: %s
+                Email: %s
+                Dirección: %s
+                """.formatted(
+                proveedor.getId(),
+                proveedor.getName(),
+                proveedor.getNit(),
+                UIUtils.optionalValue(proveedor.getTelephone()),
+                UIUtils.optionalValue(proveedor.getEmail()),
+                UIUtils.optionalValue(proveedor.getAddress()));
+
+        JTextArea area = new JTextArea(detalle);
+        area.setEditable(false);
+        area.setFont(FontScheme.MONOSPACED);
+        area.setLineWrap(true);
+        area.setWrapStyleWord(true);
+
+        JOptionPane.showMessageDialog(owner, new JScrollPane(area),
+                "Detalle del proveedor", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    @Override
+    public void updateSummary(int total, long withEmail, long withPhone) {
         lblResumenProveedores.setText(String.format(
                 "Mostrando %d proveedores | Con email: %d | Con teléfono: %d",
-                proveedores.size(),
-                conEmail,
-                conTelefono));
-        lblResumenProveedores.setForeground(proveedores.isEmpty()
+                total, withEmail, withPhone));
+        lblResumenProveedores.setForeground(total == 0
                 ? ColorScheme.DANGER_500
                 : ColorScheme.FOREGROUND_SECONDARY);
     }
 
-    private boolean coincideProveedorConContacto(Supplier proveedor, String filtro) {
-        return switch (filtro) {
-            case "Con email" -> tieneEmail(proveedor);
-            case "Sin email" -> !tieneEmail(proveedor);
-            case "Con teléfono" -> tieneTelefono(proveedor);
-            case "Sin teléfono" -> !tieneTelefono(proveedor);
-            default -> true;
-        };
+    @Override
+    public String getSearchTerm() {
+        return txtBuscarProveedor.getText().trim();
     }
 
-    private boolean coincideProveedorConTexto(Supplier proveedor, String termino) {
-        if (termino == null || termino.isBlank()) {
-            return true;
-        }
-        return UIUtils.containsIgnoreCase(proveedor.getId(), termino)
-                || UIUtils.containsIgnoreCase(proveedor.getName(), termino)
-                || UIUtils.containsIgnoreCase(proveedor.getNit(), termino)
-                || UIUtils.containsIgnoreCase(proveedor.getTelephone(), termino)
-                || UIUtils.containsIgnoreCase(proveedor.getEmail(), termino)
-                || UIUtils.containsIgnoreCase(proveedor.getAddress(), termino);
+    @Override
+    public String getContactFilter() {
+        return (String) cmbFiltroContacto.getSelectedItem();
     }
 
-    private boolean tieneEmail(Supplier proveedor) {
-        return proveedor.getEmail() != null && !proveedor.getEmail().isBlank();
-    }
-
-    private boolean tieneTelefono(Supplier proveedor) {
-        return proveedor.getTelephone() != null && !proveedor.getTelephone().isBlank();
-    }
-
-    private void registrarProveedor() {
-        Supplier nuevo = mostrarDialogoProveedor("Registrar proveedor", null);
-        if (nuevo == null) {
-            logger.accept("Proveedores: alta cancelada por el usuario");
-            return;
-        }
-
-        try {
-            supplierServices.insertSupplier(nuevo);
-            JOptionPane.showMessageDialog(owner,
-                    "Proveedor creado correctamente",
-                    "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            logger.accept("Proveedores: creado " + nuevo.getId());
-            requestRefresh("Post alta proveedor");
-        } catch (DatabaseException e) {
-            JOptionPane.showMessageDialog(owner,
-                    "Error al crear proveedor: " + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-            logger.accept("Proveedores: error al crear → " + e.getMessage());
-        }
-    }
-
-    private void editarProveedor() {
-        String proveedorId = obtenerProveedorSeleccionado();
-        if (proveedorId == null) {
-            return;
-        }
-
-        try {
-            Supplier existente = supplierServices.getSupplierById(proveedorId);
-            if (existente == null) {
-                JOptionPane.showMessageDialog(owner,
-                        "El proveedor ya no existe",
-                        "Información", JOptionPane.INFORMATION_MESSAGE);
-                requestRefresh("Proveedor desaparecido");
-                return;
-            }
-
-            Supplier actualizado = mostrarDialogoProveedor("Editar proveedor " + proveedorId, existente);
-            if (actualizado == null) {
-                logger.accept("Proveedores: edición cancelada " + proveedorId);
-                return;
-            }
-
-            if (supplierServices.updateSupplier(actualizado)) {
-                JOptionPane.showMessageDialog(owner,
-                        "Proveedor actualizado",
-                        "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                logger.accept("Proveedores: actualizado " + proveedorId);
-                requestRefresh("Post edición proveedor");
-            }
-        } catch (DatabaseException e) {
-            JOptionPane.showMessageDialog(owner,
-                    "Error al actualizar: " + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-            logger.accept("Proveedores: error al actualizar → " + e.getMessage());
-        }
-    }
-
-    private void eliminarProveedor() {
-        String proveedorId = obtenerProveedorSeleccionado();
-        if (proveedorId == null) {
-            return;
-        }
-
-        int confirmacion = JOptionPane.showConfirmDialog(owner,
-                "¿Eliminar proveedor " + proveedorId + "?",
-                "Confirmar", JOptionPane.YES_NO_OPTION);
-
-        if (confirmacion != JOptionPane.YES_OPTION) {
-            return;
-        }
-
-        try {
-            if (supplierServices.deleteSupplier(proveedorId)) {
-                JOptionPane.showMessageDialog(owner,
-                        "Proveedor eliminado",
-                        "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                logger.accept("Proveedores: eliminado " + proveedorId);
-                requestRefresh("Post eliminación proveedor");
-            }
-        } catch (DatabaseException e) {
-            JOptionPane.showMessageDialog(owner,
-                    "No se pudo eliminar: " + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-            logger.accept("Proveedores: error al eliminar → " + e.getMessage());
-        }
-    }
-
-    private void mostrarDetallesProveedor() {
-        String proveedorId = obtenerProveedorSeleccionado();
-        if (proveedorId == null) {
-            return;
-        }
-
-        try {
-            Supplier proveedor = supplierServices.getSupplierById(proveedorId);
-            if (proveedor == null) {
-                JOptionPane.showMessageDialog(owner,
-                        "El proveedor ya no existe",
-                        "Advertencia", JOptionPane.WARNING_MESSAGE);
-                requestRefresh("Proveedor inexistente");
-                return;
-            }
-
-            String detalle = """
-                    ID: %s
-                    Nombre: %s
-                    NIT: %s
-                    Teléfono: %s
-                    Email: %s
-                    Dirección: %s
-                    """.formatted(
-                    proveedor.getId(),
-                    proveedor.getName(),
-                    proveedor.getNit(),
-                    UIUtils.optionalValue(proveedor.getTelephone()),
-                    UIUtils.optionalValue(proveedor.getEmail()),
-                    UIUtils.optionalValue(proveedor.getAddress()));
-
-            javax.swing.JTextArea area = new javax.swing.JTextArea(detalle);
-            area.setEditable(false);
-            area.setFont(FontScheme.MONOSPACED);
-            area.setLineWrap(true);
-            area.setWrapStyleWord(true);
-
-            JOptionPane.showMessageDialog(owner, new javax.swing.JScrollPane(area),
-                    "Detalle del proveedor", JOptionPane.INFORMATION_MESSAGE);
-        } catch (DatabaseException e) {
-            JOptionPane.showMessageDialog(owner,
-                    "Error al consultar proveedor: " + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private String obtenerProveedorSeleccionado() {
-        if (tablaProveedores == null || tablaProveedores.getSelectedRow() == -1) {
-            JOptionPane.showMessageDialog(owner,
-                    "Selecciona un proveedor primero",
-                    "Advertencia", JOptionPane.WARNING_MESSAGE);
-            return null;
-        }
-
-        int filaVista = tablaProveedores.getSelectedRow();
-        int filaModelo = tablaProveedores.convertRowIndexToModel(filaVista);
-        return (String) modeloProveedores.getValueAt(filaModelo, 0);
-    }
-
-    private Supplier mostrarDialogoProveedor(String titulo, Supplier existente) {
-        JTextField txtNombre = new JTextField(existente != null ? existente.getName() : "");
-        JTextField txtNit = new JTextField(existente != null ? existente.getNit() : "");
+    @Override
+    public Supplier showSupplierForm(String title, Supplier existing) {
+        JTextField txtNombre = new JTextField(existing != null ? existing.getName() : "");
+        JTextField txtNit = new JTextField(existing != null ? existing.getNit() : "");
         JTextField txtTelefono = new JTextField(
-                existente != null ? UIUtils.editableValue(existente.getTelephone()) : "");
-        JTextField txtEmail = new JTextField(existente != null ? UIUtils.editableValue(existente.getEmail()) : "");
+                existing != null ? UIUtils.editableValue(existing.getTelephone()) : "");
+        JTextField txtEmail = new JTextField(existing != null ? UIUtils.editableValue(existing.getEmail()) : "");
         JTextField txtDireccion = new JTextField(
-                existente != null ? UIUtils.editableValue(existente.getAddress()) : "");
+                existing != null ? UIUtils.editableValue(existing.getAddress()) : "");
 
         JPanel panel = new JPanel(new GridLayout(5, 2, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -503,7 +295,7 @@ public class SuppliersPanel extends JPanel {
         panel.add(txtDireccion);
 
         int opcion = JOptionPane.showConfirmDialog(owner, panel,
-                titulo, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
         if (opcion != JOptionPane.OK_OPTION) {
             return null;
@@ -512,17 +304,13 @@ public class SuppliersPanel extends JPanel {
         String nombre = txtNombre.getText().trim();
         String nit = txtNit.getText().trim();
         if (nombre.isEmpty() || nit.isEmpty()) {
-            JOptionPane.showMessageDialog(owner,
-                    "Nombre y NIT son obligatorios",
-                    "Validación", JOptionPane.WARNING_MESSAGE);
+            showWarning("Nombre y NIT son obligatorios");
             return null;
         }
 
         String email = txtEmail.getText().trim();
         if (!email.isEmpty() && !email.contains("@")) {
-            JOptionPane.showMessageDialog(owner,
-                    "Ingresa un email válido",
-                    "Validación", JOptionPane.WARNING_MESSAGE);
+            showWarning("Ingresa un email válido");
             return null;
         }
 
@@ -530,39 +318,34 @@ public class SuppliersPanel extends JPanel {
         String direccion = UIUtils.nullIfBlank(txtDireccion.getText().trim());
         email = UIUtils.nullIfBlank(email);
 
-        if (existente == null) {
+        if (existing == null) {
             return new Supplier(nombre, nit, telefono, email, direccion);
         }
-        return new Supplier(existente.getId(), nombre, nit, telefono, email, direccion);
+        return new Supplier(existing.getId(), nombre, nit, telefono, email, direccion);
     }
 
-    private void setBusyCursor(boolean busy) {
-        Cursor cursor = busy ? Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR) : Cursor.getDefaultCursor();
-        if (owner != null) {
-            owner.setCursor(cursor);
-        }
-        setCursor(cursor);
+    // --- Public Methods for external access ---
+
+    public void requestRefresh(String origin) {
+        presenter.loadSuppliers(origin);
+    }
+
+    public void cancelCurrentLoad() {
+        presenter.cancelCurrentOperation();
     }
 
     public void requestCreationShortcut() {
-        registrarProveedor();
+        presenter.registerSupplier();
     }
 
-    private void styleFilledButton(JButton button, Color background) {
-        button.setBackground(background);
-        button.setForeground(ColorScheme.TEXT_ON_COLOR);
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(background.darker(), 1),
-                BorderFactory.createEmptyBorder(5, 15, 5, 15)));
-    }
+    // --- Helper ---
 
-    private void styleSecondaryButton(JButton button) {
-        button.setBackground(ColorScheme.BUTTON_SECONDARY_BG);
-        button.setForeground(ColorScheme.BUTTON_SECONDARY_FG);
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(ColorScheme.BORDER_SUBTLE, 1),
-                BorderFactory.createEmptyBorder(5, 15, 5, 15)));
+    private String getSelectedSupplierId() {
+        if (tablaProveedores == null || tablaProveedores.getSelectedRow() == -1) {
+            return null;
+        }
+        int filaVista = tablaProveedores.getSelectedRow();
+        int filaModelo = tablaProveedores.convertRowIndexToModel(filaVista);
+        return (String) modeloProveedores.getValueAt(filaModelo, 0);
     }
 }

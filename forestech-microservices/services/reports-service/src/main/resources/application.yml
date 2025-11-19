@@ -1,0 +1,44 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: reports-service
+  cloud:
+    consul:
+      host: consul
+      port: 8500
+      discovery:
+        instance-id: ${spring.application.name}:${random.value}
+  
+  # Redis Configuration
+  redis:
+    host: redis
+    port: 6379
+  cache:
+    type: redis
+    redis:
+      time-to-live: 300000  # 5 minutos
+
+# Datasource Configuration (Multi-datasource simulation pointing to same DB for now)
+datasource:
+  catalog:
+    jdbc-url: jdbc:mysql://mysql-forestech:3306/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: ${MYSQL_ROOT_PASSWORD:hp}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  fleet:
+    jdbc-url: jdbc:mysql://mysql-forestech:3306/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: ${MYSQL_ROOT_PASSWORD:hp}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  inventory:
+    jdbc-url: jdbc:mysql://mysql-forestech:3306/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: ${MYSQL_ROOT_PASSWORD:hp}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+logging:
+  level:
+    com.forestech.reports: DEBUG
+    org.springframework.jdbc.core: DEBUG

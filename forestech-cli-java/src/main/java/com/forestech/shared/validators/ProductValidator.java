@@ -1,7 +1,7 @@
 package com.forestech.shared.validators;
 
 import com.forestech.shared.exceptions.ValidationException;
-import com.forestech.data.models.Product;
+import com.forestech.modules.catalog.models.Product;
 
 /**
  * Validador centralizado para productos.

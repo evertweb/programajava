@@ -1,9 +1,8 @@
 package com.forestech.presentation.ui.vehicles;
 
-import com.forestech.shared.exceptions.DatabaseException;
-import com.forestech.data.models.Vehicle;
-import com.forestech.business.services.ProductServices;
-import com.forestech.business.services.VehicleServices;
+import com.forestech.modules.fleet.models.Vehicle;
+import com.forestech.presentation.clients.VehicleServiceClient;
+import com.forestech.presentation.clients.ProductServiceClient;
 import com.forestech.presentation.ui.utils.AsyncLoadManager;
 import com.forestech.presentation.ui.utils.UIUtils;
 
@@ -25,8 +24,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import com.forestech.presentation.ui.utils.FontScheme;
+import com.forestech.presentation.ui.utils.IconManager;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import com.forestech.presentation.ui.utils.BackgroundTaskExecutor;
 import java.util.concurrent.ExecutionException;
 import java.util.List;
 import java.util.Set;
@@ -46,9 +47,9 @@ public class VehiclesPanel extends JPanel {
     private final AsyncLoadManager loadManager;
     private boolean suppressFilterEvents;
 
-    // Services (Dependency Injection)
-    private final VehicleServices vehicleServices;
-    private final ProductServices productServices;
+    // Clients
+    private final VehicleServiceClient vehicleClient;
+    private final ProductServiceClient productClient;
 
     private JTable tablaVehiculos;
     private DefaultTableModel modeloVehiculos;
@@ -59,13 +60,13 @@ public class VehiclesPanel extends JPanel {
     public VehiclesPanel(JFrame owner,
             Consumer<String> logger,
             Runnable dashboardRefresh,
-            VehicleServices vehicleServices,
-            ProductServices productServices) {
+            VehicleServiceClient vehicleClient,
+            ProductServiceClient productClient) {
         this.owner = owner;
         this.logger = logger;
         this.dashboardRefresh = dashboardRefresh;
-        this.vehicleServices = vehicleServices;
-        this.productServices = productServices;
+        this.vehicleClient = vehicleClient != null ? vehicleClient : new VehicleServiceClient();
+        this.productClient = productClient != null ? productClient : new ProductServiceClient();
         this.loadManager = new AsyncLoadManager("Vehículos", logger, this::refreshAsync);
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -181,27 +182,33 @@ public class VehiclesPanel extends JPanel {
         panelBotones.setBackground(ColorScheme.BACKGROUND_PANEL);
 
         JButton btnAgregar = new JButton("Agregar");
-        styleFilledButton(btnAgregar, ColorScheme.BUTTON_PRIMARY_BG);
+        btnAgregar.setIcon(IconManager.getIcon("plus"));
+        btnAgregar.setBackground(ColorScheme.BUTTON_PRIMARY_BG);
+        btnAgregar.setForeground(ColorScheme.TEXT_ON_PRIMARY);
         btnAgregar.addActionListener(e -> agregarVehiculo());
         panelBotones.add(btnAgregar);
 
         JButton btnEditar = new JButton("Editar");
-        styleFilledButton(btnEditar, ColorScheme.BUTTON_WARNING_BG);
+        btnEditar.setIcon(IconManager.getIcon("edit"));
+        btnEditar.setBackground(ColorScheme.BUTTON_WARNING_BG);
+        btnEditar.setForeground(ColorScheme.TEXT_PRIMARY);
         btnEditar.addActionListener(e -> editarVehiculo());
         panelBotones.add(btnEditar);
 
         JButton btnEliminar = new JButton("Eliminar");
-        styleFilledButton(btnEliminar, ColorScheme.BUTTON_DANGER_BG);
+        btnEliminar.setIcon(IconManager.getIcon("trash"));
+        btnEliminar.setBackground(ColorScheme.BUTTON_DANGER_BG);
+        btnEliminar.setForeground(ColorScheme.TEXT_ON_PRIMARY);
         btnEliminar.addActionListener(e -> eliminarVehiculo());
         panelBotones.add(btnEliminar);
 
         JButton btnDetalles = new JButton("Ver Detalles");
-        styleSecondaryButton(btnDetalles);
+        btnDetalles.setIcon(IconManager.getIcon("eye"));
         btnDetalles.addActionListener(e -> mostrarDetallesVehiculo());
         panelBotones.add(btnDetalles);
 
         JButton btnRefrescar = new JButton("Refrescar");
-        styleSecondaryButton(btnRefrescar);
+        btnRefrescar.setIcon(IconManager.getIcon("refresh"));
         btnRefrescar.addActionListener(e -> refresh());
         panelBotones.add(btnRefrescar);
 
@@ -233,7 +240,7 @@ public class VehiclesPanel extends JPanel {
         SwingWorker<VehiclesPayload, Void> worker = new SwingWorker<>() {
             @Override
             protected VehiclesPayload doInBackground() throws Exception {
-                List<Vehicle> vehiculos = vehicleServices.getAllVehicles();
+                List<Vehicle> vehiculos = vehicleClient.findAll();
                 List<Vehicle> filtrados = aplicarFiltros(vehiculos, criterio, categoriaSeleccionada);
                 return new VehiclesPayload(vehiculos, filtrados, criterio, categoriaSeleccionada);
             }
@@ -261,7 +268,7 @@ public class VehiclesPanel extends JPanel {
 
         // Registrar worker para cancelación antes de ejecutar
         loadManager.registerWorker(worker);
-        worker.execute();
+        BackgroundTaskExecutor.submit(worker);
     }
 
     private List<Vehicle> aplicarFiltros(List<Vehicle> vehiculos,
@@ -301,14 +308,11 @@ public class VehiclesPanel extends JPanel {
     }
 
     private void handleRefreshError(Throwable throwable) {
-        Throwable cause = throwable instanceof DatabaseException ? throwable
-                : new DatabaseException(
-                        throwable != null ? throwable.getMessage() : "Error desconocido");
         JOptionPane.showMessageDialog(owner,
-                "Error al cargar vehículos: " + cause.getMessage(),
+                "Error al cargar vehículos: " + throwable.getMessage(),
                 "Error",
                 JOptionPane.ERROR_MESSAGE);
-        logger.accept("Vehículos: error en carga → " + cause.getMessage());
+        logger.accept("Vehículos: error en carga → " + throwable.getMessage());
     }
 
     private void actualizarCategoriasVehiculos(List<Vehicle> vehiculos) {
@@ -372,7 +376,7 @@ public class VehiclesPanel extends JPanel {
 
     private void agregarVehiculo() {
         logger.accept("Vehículos: abriendo diálogo de alta");
-        VehicleDialogForm dialog = new VehicleDialogForm(owner, true, vehicleServices, productServices);
+        VehicleDialogForm dialog = new VehicleDialogForm(owner, true, vehicleClient, productClient);
         if (dialog.isGuardadoExitoso()) {
             refresh();
             refreshDashboard();
@@ -390,7 +394,7 @@ public class VehiclesPanel extends JPanel {
 
         String id = (String) modeloVehiculos.getValueAt(fila, 0);
         try {
-            Vehicle vehiculo = vehicleServices.getVehicleById(id);
+            Vehicle vehiculo = vehicleClient.findById(id);
             if (vehiculo == null) {
                 JOptionPane.showMessageDialog(owner, "El vehículo ya no existe",
                         "Error", JOptionPane.ERROR_MESSAGE);
@@ -398,13 +402,13 @@ public class VehiclesPanel extends JPanel {
                 return;
             }
 
-            VehicleDialogForm dialog = new VehicleDialogForm(owner, true, vehiculo, vehicleServices, productServices);
+            VehicleDialogForm dialog = new VehicleDialogForm(owner, true, vehiculo, vehicleClient, productClient);
             if (dialog.isGuardadoExitoso()) {
                 refresh();
                 refreshDashboard();
                 logger.accept("Vehículos: edición exitosa " + id);
             }
-        } catch (DatabaseException e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(owner,
                     "Error: " + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
@@ -427,13 +431,13 @@ public class VehiclesPanel extends JPanel {
 
         if (confirmacion == JOptionPane.YES_OPTION) {
             try {
-                vehicleServices.deleteVehicle(id);
+                vehicleClient.delete(id);
                 JOptionPane.showMessageDialog(owner, "Vehículo eliminado",
                         "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 refresh();
                 refreshDashboard();
                 logger.accept("Vehículos: eliminado " + id);
-            } catch (DatabaseException e) {
+            } catch (Exception e) {
                 JOptionPane.showMessageDialog(owner,
                         "Error al eliminar: " + e.getMessage(),
                         "Error", JOptionPane.ERROR_MESSAGE);
@@ -452,7 +456,7 @@ public class VehiclesPanel extends JPanel {
 
         String id = (String) modeloVehiculos.getValueAt(fila, 0);
         try {
-            Vehicle vehiculo = vehicleServices.getVehicleById(id);
+            Vehicle vehiculo = vehicleClient.findById(id);
             if (vehiculo == null) {
                 JOptionPane.showMessageDialog(owner, "No se encontró el vehículo",
                         "Error", JOptionPane.ERROR_MESSAGE);
@@ -472,7 +476,7 @@ public class VehiclesPanel extends JPanel {
             JOptionPane.showMessageDialog(owner, detalle.toString(),
                     "Detalle de vehículo", JOptionPane.INFORMATION_MESSAGE);
             logger.accept("Vehículos: detalles mostrados para " + id);
-        } catch (DatabaseException e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(owner,
                     "Error: " + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
@@ -496,21 +500,4 @@ public class VehiclesPanel extends JPanel {
             String categoria) {
     }
 
-    private void styleFilledButton(JButton button, Color background) {
-        button.setBackground(background);
-        button.setForeground(ColorScheme.TEXT_ON_COLOR);
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(background.darker(), 1),
-                BorderFactory.createEmptyBorder(5, 15, 5, 15)));
-    }
-
-    private void styleSecondaryButton(JButton button) {
-        button.setBackground(ColorScheme.BUTTON_SECONDARY_BG);
-        button.setForeground(ColorScheme.BUTTON_SECONDARY_FG);
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(ColorScheme.BORDER_SUBTLE, 1),
-                BorderFactory.createEmptyBorder(5, 15, 5, 15)));
-    }
 }

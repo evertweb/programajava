@@ -1,12 +1,12 @@
 package com.forestech.presentation.ui.vehicles;
 
 import com.forestech.shared.enums.VehicleCategory;
-import com.forestech.shared.exceptions.DatabaseException;
-import com.forestech.data.models.Product;
-import com.forestech.data.models.Vehicle;
-import com.forestech.business.services.ProductServices;
-import com.forestech.business.services.VehicleServices;
+import com.forestech.modules.catalog.models.Product;
+import com.forestech.modules.fleet.models.Vehicle;
+import com.forestech.presentation.clients.ProductServiceClient;
+import com.forestech.presentation.clients.VehicleServiceClient;
 import com.forestech.presentation.ui.utils.ColorScheme;
+import com.forestech.shared.enums.VehicleCategory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,25 +29,25 @@ public class VehicleDialogForm extends JDialog {
 
     private Vehicle vehiculoExistente;
     private boolean guardadoExitoso = false;
-    private final VehicleServices vehicleServices;
-    private final ProductServices productServices;
+    private final VehicleServiceClient vehicleClient;
+    private final ProductServiceClient productClient;
 
     public VehicleDialogForm(JFrame parent,
                              boolean modal,
-                             VehicleServices vehicleServices,
-                             ProductServices productServices) {
-        this(parent, modal, null, vehicleServices, productServices);
+                             VehicleServiceClient vehicleClient,
+                             ProductServiceClient productClient) {
+        this(parent, modal, null, vehicleClient, productClient);
     }
 
     public VehicleDialogForm(JFrame parent,
                              boolean modal,
                              Vehicle vehiculoExistente,
-                             VehicleServices vehicleServices,
-                             ProductServices productServices) {
+                             VehicleServiceClient vehicleClient,
+                             ProductServiceClient productClient) {
         super(parent, vehiculoExistente == null ? "Agregar Vehículo" : "Editar Vehículo", modal);
         this.vehiculoExistente = vehiculoExistente;
-        this.vehicleServices = Objects.requireNonNull(vehicleServices, "vehicleServices");
-        this.productServices = Objects.requireNonNull(productServices, "productServices");
+        this.vehicleClient = Objects.requireNonNull(vehicleClient, "vehicleClient");
+        this.productClient = Objects.requireNonNull(productClient, "productClient");
 
         setSize(500, 400);
         setLocationRelativeTo(parent);
@@ -94,12 +94,12 @@ public class VehicleDialogForm extends JDialog {
 
     private void cargarProductosCombustible() {
         try {
-            List<Product> productos = productServices.getAllProducts();
+            List<Product> productos = productClient.findAll();
             cmbCombustible.addItem(new ComboItem(null, "(Sin asignar)"));
             for (Product p : productos) {
                 cmbCombustible.addItem(new ComboItem(p.getId(), p.getName()));
             }
-        } catch (DatabaseException e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                 "Error al cargar productos: " + e.getMessage(),
                 "Error", JOptionPane.ERROR_MESSAGE);
@@ -173,7 +173,7 @@ public class VehicleDialogForm extends JDialog {
             VehicleCategory vehicleCategory = VehicleCategory.fromCode(categoria);
             if (vehiculoExistente == null) {
                 Vehicle nuevoVehiculo = new Vehicle(nombre, vehicleCategory, capacidad, fuelProductId, tieneHorometro);
-                vehicleServices.insertVehicle(nuevoVehiculo);
+                vehicleClient.create(nuevoVehiculo);
                 JOptionPane.showMessageDialog(this, "Vehículo agregado exitosamente",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
             } else {
@@ -182,7 +182,7 @@ public class VehicleDialogForm extends JDialog {
                 vehiculoExistente.setCapacity(capacidad);
                 vehiculoExistente.setFuelProductId(fuelProductId);
                 vehiculoExistente.setHasHorometer(tieneHorometro);
-                vehicleServices.updateVehicle(vehiculoExistente);
+                vehicleClient.update(vehiculoExistente);
                 JOptionPane.showMessageDialog(this, "Vehículo actualizado exitosamente",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -190,7 +190,7 @@ public class VehicleDialogForm extends JDialog {
             guardadoExitoso = true;
             dispose();
 
-        } catch (DatabaseException e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                 "Error al guardar: " + e.getMessage(),
                 "Error", JOptionPane.ERROR_MESSAGE);

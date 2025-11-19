@@ -26,7 +26,7 @@ public final class UIUtils {
         table.getTableHeader().setBackground(ColorScheme.TABLE_HEADER_BG);
         table.getTableHeader().setForeground(ColorScheme.TABLE_HEADER_FG);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        
+
         // Garantizar que las filas de la tabla usen el color primario en fondo claro
         table.setForeground(ColorScheme.FOREGROUND_PRIMARY);
         table.setBackground(ColorScheme.TABLE_ROW_PRIMARY);
@@ -73,5 +73,9 @@ public final class UIUtils {
     public static String formatMovementDate(String raw) {
         LocalDate date = extractMovementDate(raw);
         return date != null ? date.toString() : "—";
+    }
+
+    public static LocalDate parseDate(String dateStr) {
+        return extractMovementDate(dateStr);
     }
 }

@@ -3,8 +3,8 @@ package com.forestech.business.services.interfaces;
 import com.forestech.shared.exceptions.DatabaseException;
 import com.forestech.shared.exceptions.TransactionFailedException;
 import com.forestech.shared.exceptions.ValidationException;
-import com.forestech.data.models.DetalleFactura;
-import com.forestech.data.models.Factura;
+import com.forestech.modules.inventory.models.DetalleFactura;
+import com.forestech.modules.inventory.models.Factura;
 
 import java.util.List;
 

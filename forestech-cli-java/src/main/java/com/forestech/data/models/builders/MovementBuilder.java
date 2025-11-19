@@ -2,7 +2,7 @@ package com.forestech.data.models.builders;
 
 import com.forestech.shared.enums.MeasurementUnit;
 import com.forestech.shared.enums.MovementType;
-import com.forestech.data.models.Movement;
+import com.forestech.modules.inventory.models.Movement;
 import com.forestech.shared.utils.IdGenerator;
 
 import java.time.LocalDateTime;

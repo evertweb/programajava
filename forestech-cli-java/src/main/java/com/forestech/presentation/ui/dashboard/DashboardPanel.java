@@ -1,14 +1,13 @@
 package com.forestech.presentation.ui.dashboard;
 
-import com.forestech.shared.exceptions.DatabaseException;
-import com.forestech.data.models.Factura;
-import com.forestech.data.models.Movement;
-import com.forestech.data.models.Product;
-import com.forestech.data.models.Vehicle;
-import com.forestech.business.services.FacturaServices;
-import com.forestech.business.services.MovementServices;
-import com.forestech.business.services.ProductServices;
-import com.forestech.business.services.VehicleServices;
+import com.forestech.modules.inventory.models.Movement;
+import com.forestech.modules.catalog.models.Product;
+import com.forestech.modules.fleet.models.Vehicle;
+import com.forestech.modules.invoicing.models.Invoice;
+import com.forestech.presentation.clients.MovementServiceClient;
+import com.forestech.presentation.clients.ProductServiceClient;
+import com.forestech.presentation.clients.VehicleServiceClient;
+import com.forestech.presentation.clients.InvoiceServiceClient;
 import com.forestech.presentation.ui.utils.AsyncLoadManager;
 
 import javax.swing.BorderFactory;
@@ -22,14 +21,14 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import com.forestech.presentation.ui.utils.FontScheme;
+import com.forestech.presentation.ui.utils.IconManager;
 import java.awt.GridLayout;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import com.forestech.presentation.ui.utils.ColorScheme;
-
-import com.forestech.presentation.ui.utils.UIUtils;
+import com.forestech.presentation.ui.utils.BackgroundTaskExecutor;
 
 /**
  * Panel principal de estadísticas.
@@ -40,11 +39,11 @@ public class DashboardPanel extends JPanel {
     private final Consumer<String> logger;
     private final AsyncLoadManager loadManager;
 
-    // Services (Dependency Injection)
-    private final ProductServices productServices;
-    private final VehicleServices vehicleServices;
-    private final MovementServices movementServices;
-    private final FacturaServices facturaServices;
+    // Clients (Microservices)
+    private final ProductServiceClient productClient;
+    private final VehicleServiceClient vehicleClient;
+    private final MovementServiceClient movementClient;
+    private final InvoiceServiceClient invoiceClient;
 
     private JLabel lblTotalProductos;
     private JLabel lblTotalVehiculos;
@@ -53,16 +52,16 @@ public class DashboardPanel extends JPanel {
 
     public DashboardPanel(DashboardActions actions,
             Consumer<String> logger,
-            ProductServices productServices,
-            VehicleServices vehicleServices,
-            MovementServices movementServices,
-            FacturaServices facturaServices) {
+            ProductServiceClient productClient,
+            VehicleServiceClient vehicleClient,
+            MovementServiceClient movementClient,
+            InvoiceServiceClient invoiceClient) {
         this.actions = actions;
         this.logger = logger;
-        this.productServices = productServices;
-        this.vehicleServices = vehicleServices;
-        this.movementServices = movementServices;
-        this.facturaServices = facturaServices;
+        this.productClient = productClient;
+        this.vehicleClient = vehicleClient;
+        this.movementClient = movementClient;
+        this.invoiceClient = invoiceClient;
         this.loadManager = new AsyncLoadManager("Dashboard", logger, this::refreshStatsAsync);
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -120,28 +119,28 @@ public class DashboardPanel extends JPanel {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
         panel.setBackground(ColorScheme.BACKGROUND_LIGHT);
 
-        panel.add(createActionButton("Nuevo Producto", "productos", ColorScheme.BUTTON_PRIMARY_BG,
+        panel.add(createActionButton("Nuevo Producto", "productos", "plus", ColorScheme.BUTTON_PRIMARY_BG,
                 actions::requestProductCreation));
-        panel.add(createActionButton("Nuevo Vehículo", "vehiculos", ColorScheme.SUCCESS,
+        panel.add(createActionButton("Nuevo Vehículo", "vehiculos", "truck", ColorScheme.SUCCESS,
                 actions::requestVehicleCreation));
-        panel.add(createActionButton("Nuevo Proveedor", "proveedores", ColorScheme.BUTTON_INFO_BG,
+        panel.add(createActionButton("Nuevo Proveedor", "proveedores", "users", ColorScheme.BUTTON_INFO_BG,
                 actions::requestSupplierCreation));
-        panel.add(createActionButton("Registrar Movimiento", "movimientos", ColorScheme.SECONDARY,
+        panel.add(createActionButton("Registrar Movimiento", "movimientos", "exchange", ColorScheme.SECONDARY,
                 actions::requestMovementCreation));
         panel.add(
-                createActionButton("Nueva Factura", "facturas", ColorScheme.WARNING, actions::requestInvoiceCreation));
+                createActionButton("Nueva Factura", "facturas", "file-text", ColorScheme.WARNING,
+                        actions::requestInvoiceCreation));
 
         return panel;
     }
 
-    private JButton createActionButton(String text, String targetCard, Color color, Runnable action) {
+    private JButton createActionButton(String text, String targetCard, String iconName, Color color, Runnable action) {
         JButton button = new JButton(text);
+        button.setIcon(IconManager.getIcon(iconName));
         button.setBackground(color);
         button.setForeground(ColorScheme.TEXT_ON_COLOR);
         button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(color.darker(), 1),
-                BorderFactory.createEmptyBorder(10, 20, 10, 20)));
+
         button.addActionListener(e -> {
             actions.navigateTo(targetCard);
             if (action != null) {
@@ -177,10 +176,10 @@ public class DashboardPanel extends JPanel {
         SwingWorker<DashboardMetrics, Void> worker = new SwingWorker<>() {
             @Override
             protected DashboardMetrics doInBackground() throws Exception {
-                List<Product> productos = productServices.getAllProducts();
-                List<Vehicle> vehiculos = vehicleServices.getAllVehicles();
-                List<Movement> movimientos = movementServices.getAllMovements();
-                List<Factura> facturas = facturaServices.getAllFacturas();
+                List<Product> productos = productClient.findAll();
+                List<Vehicle> vehiculos = vehicleClient.findAll();
+                List<Movement> movimientos = movementClient.findAll();
+                List<Invoice> facturas = invoiceClient.findAll();
                 return new DashboardMetrics(
                         productos.size(),
                         vehiculos.size(),
@@ -215,15 +214,13 @@ public class DashboardPanel extends JPanel {
             }
         };
 
-        // Registrar worker para cancelación antes de ejecutar
+        // Registrar worker para cancelación y ejecutar en pool centralizado
         loadManager.registerWorker(worker);
-        worker.execute();
+        BackgroundTaskExecutor.submit(worker);
     }
 
     private void handleError(Throwable error) {
-        String mensaje = error instanceof DatabaseException
-                ? error.getMessage()
-                : "Error inesperado en dashboard: " + error.getMessage();
+        String mensaje = "Error inesperado en dashboard: " + error.getMessage();
 
         // Log detallado del error
         logger.accept("❌ Error al cargar dashboard: " + mensaje);
@@ -235,11 +232,10 @@ public class DashboardPanel extends JPanel {
                 "No se pudieron cargar las estadísticas del Dashboard.\n\n" +
                         "Detalles: " + mensaje + "\n\n" +
                         "Posibles causas:\n" +
-                        "• MySQL no está corriendo\n" +
-                        "• Credenciales incorrectas\n" +
-                        "• Base de datos FORESTECHOIL no existe\n\n" +
+                        "• Microservicios no están corriendo\n" +
+                        "• API Gateway no accesible\n\n" +
                         "¿Deseas reintentar?",
-                "Error de Conexión a Base de Datos",
+                "Error de Conexión",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.ERROR_MESSAGE,
                 null,

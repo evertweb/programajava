@@ -16,15 +16,10 @@ public class Main {
     /**
      * Método principal de la aplicación.
      *
-     * @param args Argumentos de línea de comandos ("--gui" lanza la interfaz gráfica)
+     * @param args Argumentos de línea de comandos (ignorados, siempre lanza GUI)
      */
     public static void main(String[] args) {
-        boolean guiRequested = args.length > 0 && "--gui".equalsIgnoreCase(args[0]);
-
-        if (guiRequested) {
-            AppOrchestrator.startGUI();
-        } else {
-            AppOrchestrator.startCLI();
-        }
+        // Siempre iniciar la GUI Professional
+        AppOrchestrator.startGUI();
     }
 }

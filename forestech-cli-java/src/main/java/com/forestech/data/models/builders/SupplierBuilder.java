@@ -1,6 +1,6 @@
 package com.forestech.data.models.builders;
 
-import com.forestech.data.models.Supplier;
+import com.forestech.modules.partners.models.Supplier;
 import com.forestech.shared.utils.IdGenerator;
 
 /**

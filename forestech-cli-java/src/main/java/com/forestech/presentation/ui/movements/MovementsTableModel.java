@@ -1,7 +1,7 @@
 package com.forestech.presentation.ui.movements;
 
 import com.forestech.shared.enums.MovementType;
-import com.forestech.data.models.Movement;
+import com.forestech.modules.inventory.models.Movement;
 import com.forestech.presentation.ui.utils.UIUtils;
 
 import javax.swing.table.DefaultTableModel;
@@ -15,12 +15,12 @@ import java.util.Map;
 public class MovementsTableModel extends DefaultTableModel {
 
     private static final String[] COLUMN_NAMES = {
-        "ID", "Tipo", "Producto", "Vehículo", "Cantidad (L)",
-        "Unidad", "Factura", "Precio Unitario", "Subtotal", "Fecha"
+            "ID", "Tipo", "Producto", "Vehículo", "Cantidad (L)",
+            "Unidad", "Factura", "Precio Unitario", "Subtotal", "Fecha"
     };
 
-    private final Map<String, String> productNamesCache;
-    private final Map<String, String> vehicleNamesCache;
+    private Map<String, String> productNamesCache;
+    private Map<String, String> vehicleNamesCache;
 
     /**
      * Constructor del modelo de tabla.
@@ -29,10 +29,16 @@ public class MovementsTableModel extends DefaultTableModel {
      * @param vehicleNamesCache Cache de nombres de vehículos (ID -> Nombre)
      */
     public MovementsTableModel(Map<String, String> productNamesCache,
-                               Map<String, String> vehicleNamesCache) {
+            Map<String, String> vehicleNamesCache) {
         super(COLUMN_NAMES, 0);
         this.productNamesCache = productNamesCache;
         this.vehicleNamesCache = vehicleNamesCache;
+    }
+
+    public void setData(List<Movement> movements, Map<String, String> productNames, Map<String, String> vehicleNames) {
+        this.productNamesCache = productNames;
+        this.vehicleNamesCache = vehicleNames;
+        loadMovements(movements);
     }
 
     /**
@@ -63,34 +69,34 @@ public class MovementsTableModel extends DefaultTableModel {
      */
     private void addMovementRow(Movement movement) {
         String typeLabel = movement.getMovementType() != null
-            ? movement.getMovementType().getCode()
-            : "—";
+                ? movement.getMovementType().getCode()
+                : "—";
 
         String measurementUnit = movement.getMeasurementUnitCode() != null
-            ? movement.getMeasurementUnitCode()
-            : "—";
+                ? movement.getMeasurementUnitCode()
+                : "—";
 
         String invoiceLabel = movement.getInvoiceNumber() != null
-            ? movement.getInvoiceNumber()
-            : "—";
+                ? movement.getInvoiceNumber()
+                : "—";
 
         String createdAtRaw = movement.getCreatedAt() != null
-            ? movement.getCreatedAt().toString()
-            : null;
+                ? movement.getCreatedAt().toString()
+                : null;
 
         double subtotal = movement.getQuantity() * movement.getUnitPrice();
 
-        addRow(new Object[]{
-            movement.getId(),
-            typeLabel,
-            buildProductLabel(movement.getProductId()),
-            buildVehicleLabel(movement.getVehicleId()),
-            String.format("%,.2f", movement.getQuantity()),
-            measurementUnit,
-            invoiceLabel,
-            UIUtils.formatCurrency(movement.getUnitPrice()),
-            UIUtils.formatCurrency(subtotal),
-            UIUtils.formatMovementDate(createdAtRaw)
+        addRow(new Object[] {
+                movement.getId(),
+                typeLabel,
+                buildProductLabel(movement.getProductId()),
+                buildVehicleLabel(movement.getVehicleId()),
+                String.format("%,.2f", movement.getQuantity()),
+                measurementUnit,
+                invoiceLabel,
+                UIUtils.formatCurrency(movement.getUnitPrice()),
+                UIUtils.formatCurrency(subtotal),
+                UIUtils.formatMovementDate(createdAtRaw)
         });
     }
 

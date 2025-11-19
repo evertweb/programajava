@@ -1,7 +1,7 @@
 package com.forestech.data.models.builders;
 
 import com.forestech.shared.enums.VehicleCategory;
-import com.forestech.data.models.Vehicle;
+import com.forestech.modules.fleet.models.Vehicle;
 import com.forestech.shared.utils.IdGenerator;
 
 /**

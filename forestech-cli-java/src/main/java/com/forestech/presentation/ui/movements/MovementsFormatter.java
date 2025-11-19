@@ -1,6 +1,6 @@
 package com.forestech.presentation.ui.movements;
 
-import com.forestech.data.models.Movement;
+import com.forestech.modules.inventory.models.Movement;
 import com.forestech.presentation.ui.utils.UIUtils;
 
 import java.time.LocalDate;

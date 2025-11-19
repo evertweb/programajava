@@ -22,6 +22,11 @@
     <maxVersion/>
     <jdkPreference>preferJre</jdkPreference>
     <runtimeBits>64/32</runtimeBits>
+    <opt>--enable-native-access=ALL-UNNAMED</opt>
+    <opt>-Xms256m</opt>
+    <opt>-Xmx1024m</opt>
+    <opt>-XX:+UseG1GC</opt>
+    <opt>-XX:MaxGCPauseMillis=200</opt>
   </jre>
   <versionInfo>
     <fileVersion>1.0.0.0</fileVersion>

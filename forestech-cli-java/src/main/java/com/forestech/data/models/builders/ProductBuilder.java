@@ -1,7 +1,7 @@
 package com.forestech.data.models.builders;
 
 import com.forestech.shared.enums.MeasurementUnit;
-import com.forestech.data.models.Product;
+import com.forestech.modules.catalog.models.Product;
 import com.forestech.shared.utils.IdGenerator;
 
 /**

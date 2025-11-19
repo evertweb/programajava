@@ -1,9 +1,9 @@
 package com.forestech.presentation.ui.utils;
 
-import com.forestech.data.models.Product;
-import com.forestech.data.models.Vehicle;
-import com.forestech.business.services.ProductServices;
-import com.forestech.business.services.VehicleServices;
+import com.forestech.modules.catalog.models.Product;
+import com.forestech.modules.fleet.models.Vehicle;
+import com.forestech.presentation.clients.ProductServiceClient;
+import com.forestech.presentation.clients.VehicleServiceClient;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
  */
 public class CatalogCache {
 
-    private final ProductServices productServices;
-    private final VehicleServices vehicleServices;
+    private final ProductServiceClient productClient;
+    private final VehicleServiceClient vehicleClient;
 
     private Map<String, String> productNames;
     private Map<String, String> vehicleNames;
@@ -26,9 +26,9 @@ public class CatalogCache {
     // Tiempo de validez del caché: 5 segundos
     private static final long CACHE_VALIDITY_MS = 5000;
 
-    public CatalogCache(ProductServices productServices, VehicleServices vehicleServices) {
-        this.productServices = productServices;
-        this.vehicleServices = vehicleServices;
+    public CatalogCache(ProductServiceClient productClient, VehicleServiceClient vehicleClient) {
+        this.productClient = productClient;
+        this.vehicleClient = vehicleClient;
         this.productNames = new HashMap<>();
         this.vehicleNames = new HashMap<>();
     }
@@ -88,7 +88,7 @@ public class CatalogCache {
      */
     private void refreshProducts() {
         try {
-            productNames = productServices.getAllProducts().stream()
+            productNames = productClient.findAll().stream()
                 .collect(Collectors.toMap(Product::getId, Product::getName));
             lastProductsUpdate = System.currentTimeMillis();
         } catch (Exception e) {
@@ -103,7 +103,7 @@ public class CatalogCache {
      */
     private void refreshVehicles() {
         try {
-            vehicleNames = vehicleServices.getAllVehicles().stream()
+            vehicleNames = vehicleClient.findAll().stream()
                 .collect(Collectors.toMap(Vehicle::getId, Vehicle::getName));
             lastVehiclesUpdate = System.currentTimeMillis();
         } catch (Exception e) {

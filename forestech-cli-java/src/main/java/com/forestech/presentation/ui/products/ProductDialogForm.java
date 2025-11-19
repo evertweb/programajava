@@ -1,9 +1,8 @@
 package com.forestech.presentation.ui.products;
 
 import com.forestech.shared.enums.MeasurementUnit;
-import com.forestech.shared.exceptions.DatabaseException;
-import com.forestech.data.models.Product;
-import com.forestech.business.services.ProductServices;
+import com.forestech.modules.catalog.models.Product;
+import com.forestech.presentation.clients.ProductServiceClient;
 import com.forestech.presentation.ui.utils.ColorScheme;
 
 import javax.swing.*;
@@ -48,7 +47,7 @@ public class ProductDialogForm extends JDialog {
     // Estado del diálogo
     private Product productoExistente; // null = AGREGAR, object = EDITAR
     private boolean guardadoExitoso = false;
-    private final ProductServices productServices;
+    private final ProductServiceClient productClient;
 
     /**
      * Constructor para AGREGAR un nuevo producto.
@@ -56,8 +55,8 @@ public class ProductDialogForm extends JDialog {
      * @param parent Ventana padre
      * @param modal  Si true, bloquea la ventana padre
      */
-    public ProductDialogForm(JFrame parent, boolean modal, ProductServices productServices) {
-        this(parent, modal, null, productServices); // Llama al constructor completo con null
+    public ProductDialogForm(JFrame parent, boolean modal, ProductServiceClient productClient) {
+        this(parent, modal, null, productClient); // Llama al constructor completo con null
     }
 
     /**
@@ -70,11 +69,11 @@ public class ProductDialogForm extends JDialog {
     public ProductDialogForm(JFrame parent,
                              boolean modal,
                              Product productoExistente,
-                             ProductServices productServices) {
+                             ProductServiceClient productClient) {
         super(parent, productoExistente == null ? "Agregar Producto" : "Editar Producto", modal);
 
         this.productoExistente = productoExistente;
-        this.productServices = Objects.requireNonNull(productServices, "productServices");
+        this.productClient = Objects.requireNonNull(productClient, "productClient");
 
         setSize(450, 300);
         setLocationRelativeTo(parent); // Centrar respecto a la ventana padre
@@ -208,17 +207,17 @@ public class ProductDialogForm extends JDialog {
             if (productoExistente == null) {
                 // MODO AGREGAR: Crear nuevo producto
                 Product nuevoProducto = new Product(nombre, MeasurementUnit.fromCode(unidad), precio);
-                productServices.insertProduct(nuevoProducto);
+                Product created = productClient.create(nuevoProducto);
 
                 JOptionPane.showMessageDialog(this,
                     "Producto agregado exitosamente:\n\n" +
-                    "ID: " + nuevoProducto.getId() + "\n" +
-                    "Nombre: " + nuevoProducto.getName() + "\n" +
-                    "Precio: $" + String.format("%,.2f", nuevoProducto.getUnitPrice()),
+                    "ID: " + created.getId() + "\n" +
+                    "Nombre: " + created.getName() + "\n" +
+                    "Precio: $" + String.format("%,.2f", created.getUnitPrice()),
                     "Éxito",
                     JOptionPane.INFORMATION_MESSAGE);
 
-                System.out.println("✅ Producto agregado: " + nuevoProducto.getId());
+                System.out.println("✅ Producto agregado: " + created.getId());
 
             } else {
                 // MODO EDITAR: Actualizar producto existente
@@ -226,7 +225,7 @@ public class ProductDialogForm extends JDialog {
                 productoExistente.setUnitPrice(precio);
                 productoExistente.setMeasurementUnitFromCode(unidad);
 
-                productServices.updateProduct(productoExistente);
+                productClient.update(productoExistente);
 
                 JOptionPane.showMessageDialog(this,
                     "Producto actualizado exitosamente:\n\n" +
@@ -243,7 +242,7 @@ public class ProductDialogForm extends JDialog {
             guardadoExitoso = true;
             dispose();
 
-        } catch (DatabaseException e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                 "Error al guardar en la base de datos:\n\n" + e.getMessage(),
                 "Error de Base de Datos",

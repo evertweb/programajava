@@ -1,15 +1,15 @@
 package com.forestech.business.controllers;
 
 import com.forestech.shared.enums.MeasurementUnit;
-import com.forestech.shared.exceptions.DatabaseException;
 import com.forestech.business.helpers.InputHelper;
-import com.forestech.data.models.Product;
-import com.forestech.business.services.ProductServices;
+import com.forestech.modules.catalog.models.Product;
+import com.forestech.presentation.clients.ProductServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 /**
  * Controlador especializado para gestión de productos.
@@ -18,11 +18,11 @@ public class ProductController {
 
     private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
     private Scanner scanner;
-    private final ProductServices productServices;
+    private final ProductServiceClient productClient;
 
-    public ProductController(Scanner scanner, ProductServices productServices) {
+    public ProductController(Scanner scanner, ProductServiceClient productClient) {
         this.scanner = scanner;
-        this.productServices = productServices;
+        this.productClient = productClient;
     }
     
     public void gestionarProductos() {
@@ -88,22 +88,19 @@ public class ProductController {
             double precio = InputHelper.readDouble("💰 Precio por unidad: ");
 
             Product producto = new Product(nombre, MeasurementUnit.fromCode(measurementUnitCode), precio);
-            productServices.insertProduct(producto);
+            Product created = productClient.create(producto);
 
-            logger.info("Producto creado exitosamente - ID: {}, Nombre: {}", producto.getId(), producto.getName());
+            logger.info("Producto creado exitosamente - ID: {}, Nombre: {}", created.getId(), created.getName());
 
             System.out.println("\n✅ Producto creado exitosamente!");
-            System.out.println("   ID: " + producto.getId());
-            System.out.println("   Nombre: " + producto.getName());
-            System.out.println("   Unidad: " + producto.getMeasurementUnitCode());
-            System.out.println("   Precio: $" + producto.getUnitPrice());
+            System.out.println("   ID: " + created.getId());
+            System.out.println("   Nombre: " + created.getName());
+            System.out.println("   Unidad: " + created.getMeasurementUnitCode());
+            System.out.println("   Precio: $" + created.getUnitPrice());
 
-        } catch (DatabaseException e) {
+        } catch (Exception e) {
             logger.error("Error al crear producto: {}", e.getMessage(), e);
             System.out.println("❌ Error: " + e.getMessage());
-        } catch (Exception e) {
-            logger.error("Error inesperado al crear producto", e);
-            System.out.println("❌ Error inesperado: " + e.getMessage());
         }
     }
     
@@ -113,7 +110,7 @@ public class ProductController {
         System.out.println("═══════════════════════════════════════\n");
 
         try {
-            List<Product> productos = productServices.getAllProducts();
+            List<Product> productos = productClient.findAll();
 
             if (productos.isEmpty()) {
                 System.out.println("⚠️  No hay productos registrados.");
@@ -124,7 +121,7 @@ public class ProductController {
                 }
             }
 
-        } catch (DatabaseException e) {
+        } catch (Exception e) {
             logger.error("Error al listar productos: {}", e.getMessage(), e);
             System.out.println("❌ Error al listar productos: " + e.getMessage());
         }
@@ -138,19 +135,22 @@ public class ProductController {
         String nombreBusqueda = InputHelper.readString("📝 Ingrese el nombre o parte del nombre: ");
 
         try {
-            List<Product> productos = productServices.searchProductsByName(nombreBusqueda);
+            List<Product> productos = productClient.findAll();
+            List<Product> filtrados = productos.stream()
+                .filter(p -> p.getName().toLowerCase().contains(nombreBusqueda.toLowerCase()))
+                .collect(Collectors.toList());
 
-            if (productos.isEmpty()) {
+            if (filtrados.isEmpty()) {
                 System.out.println("⚠️  No se encontraron productos con el nombre: " + nombreBusqueda);
             } else {
                 System.out.println("\n✅ Resultados de búsqueda:\n");
-                for (Product p : productos) {
+                for (Product p : filtrados) {
                     System.out.println(p.toString());
                     System.out.println();
                 }
             }
 
-        } catch (DatabaseException e) {
+        } catch (Exception e) {
             logger.error("Error al buscar productos por nombre '{}': {}", nombreBusqueda, e.getMessage(), e);
             System.out.println("❌ Error: " + e.getMessage());
         }
@@ -164,18 +164,21 @@ public class ProductController {
         String unidad = InputHelper.readString("📏 Ingrese la unidad de medida: ");
 
         try {
-            List<Product> productos = productServices.getProductsByMeasurementUnit(unidad);
+            List<Product> productos = productClient.findAll();
+            List<Product> filtrados = productos.stream()
+                .filter(p -> p.getMeasurementUnitCode().equalsIgnoreCase(unidad))
+                .collect(Collectors.toList());
 
-            if (productos.isEmpty()) {
+            if (filtrados.isEmpty()) {
                 System.out.println("⚠️  No se encontraron productos con la unidad: " + unidad);
             } else {
-                for (Product p : productos) {
+                for (Product p : filtrados) {
                     System.out.println(p.toString());
                     System.out.println();
                 }
             }
 
-        } catch (DatabaseException e) {
+        } catch (Exception e) {
             logger.error("Error al buscar productos por unidad '{}': {}", unidad, e.getMessage(), e);
             System.out.println("❌ Error: " + e.getMessage());
         }
@@ -193,16 +196,12 @@ public class ProductController {
 
         try {
             Product producto = new Product(id, nuevoNombre, MeasurementUnit.fromCode(nuevaUnidad), nuevoPrecio);
-            boolean actualizado = productServices.updateProduct(producto);
+            productClient.update(producto);
 
-            if (actualizado) {
-                logger.info("Producto actualizado exitosamente - ID: {}", id);
-                System.out.println("\n✅ Producto actualizado exitosamente!");
-            } else {
-                System.out.println("\n⚠️  No se encontró el producto.");
-            }
+            logger.info("Producto actualizado exitosamente - ID: {}", id);
+            System.out.println("\n✅ Producto actualizado exitosamente!");
 
-        } catch (DatabaseException e) {
+        } catch (Exception e) {
             logger.error("Error al actualizar producto {}: {}", id, e.getMessage(), e);
             System.out.println("❌ Error: " + e.getMessage());
         }
@@ -222,16 +221,12 @@ public class ProductController {
         }
 
         try {
-            boolean eliminado = productServices.deleteProduct(id);
+            productClient.delete(id);
 
-            if (eliminado) {
-                logger.info("Producto eliminado exitosamente - ID: {}", id);
-                System.out.println("\n✅ Producto eliminado!");
-            } else {
-                System.out.println("\n⚠️  No se encontró el producto.");
-            }
+            logger.info("Producto eliminado exitosamente - ID: {}", id);
+            System.out.println("\n✅ Producto eliminado!");
 
-        } catch (DatabaseException e) {
+        } catch (Exception e) {
             logger.error("Error al eliminar producto {}: {}", id, e.getMessage(), e);
             System.out.println("❌ Error: " + e.getMessage());
         }

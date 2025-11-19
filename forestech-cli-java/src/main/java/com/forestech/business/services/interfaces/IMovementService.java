@@ -4,7 +4,7 @@ import com.forestech.shared.enums.MovementType;
 import com.forestech.shared.exceptions.DatabaseException;
 import com.forestech.shared.exceptions.InsufficientStockException;
 import com.forestech.shared.exceptions.ValidationException;
-import com.forestech.data.models.Movement;
+import com.forestech.modules.inventory.models.Movement;
 
 import java.util.List;
 import java.util.Map;

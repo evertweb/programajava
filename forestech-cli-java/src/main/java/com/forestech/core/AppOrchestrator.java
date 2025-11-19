@@ -1,6 +1,7 @@
 package com.forestech.core;
 
 import javax.swing.SwingUtilities;
+import com.formdev.flatlaf.FlatLightLaf;
 
 import com.forestech.presentation.ui.ForestechProfessionalApp;
 
@@ -15,11 +16,7 @@ public final class AppOrchestrator {
 
     /** Lanza la interfaz gráfica en el hilo de eventos de Swing. */
     public static void startGUI() {
+        FlatLightLaf.setup();
         SwingUtilities.invokeLater(() -> new ForestechProfessionalApp().setVisible(true));
-    }
-
-    /** Lanza la experiencia de consola clásica. */
-    public static void startCLI() {
-        new AppController().iniciar();
     }
 }

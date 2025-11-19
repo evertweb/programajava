@@ -2,7 +2,7 @@ package com.forestech.shared.validators;
 
 import com.forestech.shared.enums.MovementType;
 import com.forestech.shared.exceptions.ValidationException;
-import com.forestech.data.models.Movement;
+import com.forestech.modules.inventory.models.Movement;
 
 /**
  * Validador centralizado para movimientos de combustible.

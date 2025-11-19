@@ -1,6 +1,6 @@
 package com.forestech.business.helpers;
 
-import com.forestech.data.models.Movement;
+import com.forestech.modules.inventory.models.Movement;
 import com.forestech.shared.enums.MovementType;
 
 /**

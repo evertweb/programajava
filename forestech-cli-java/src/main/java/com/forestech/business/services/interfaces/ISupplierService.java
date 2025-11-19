@@ -2,7 +2,7 @@ package com.forestech.business.services.interfaces;
 
 import com.forestech.shared.exceptions.DatabaseException;
 import com.forestech.shared.exceptions.ValidationException;
-import com.forestech.data.models.Supplier;
+import com.forestech.modules.partners.models.Supplier;
 
 import java.util.List;
 

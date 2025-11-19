@@ -1,0 +1,326 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # SERVICE REGISTRY - Consul
+  # ============================================
+  consul:
+    image: consul:1.15
+    container_name: consul
+    hostname: consul
+    ports:
+      - "${CONSUL_PORT:-8500}:8500"
+    environment:
+      - CONSUL_BIND_INTERFACE=eth0
+      - CONSUL_CLIENT_INTERFACE=eth0
+    command: agent -server -ui -bootstrap-expect=1 -client=0.0.0.0
+    healthcheck:
+      test: [ "CMD", "consul", "members" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - forestech-network
+    volumes:
+      - consul-data:/consul/data
+
+  # ============================================
+  # CONFIG SERVER
+  # ============================================
+  config-server:
+    build:
+      context: ./infrastructure/config-server
+      dockerfile: Dockerfile
+    container_name: config-server
+    hostname: config-server
+    ports:
+      - "${CONFIG_SERVER_PORT:-8888}:8888"
+    depends_on:
+      - consul
+    environment:
+      SPRING_PROFILES_ACTIVE: native
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8888/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - forestech-network
+
+  # ============================================
+  # SHARED DATABASE - MySQL
+  # ============================================
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-forestech
+    hostname: mysql-forestech
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hp}
+      MYSQL_DATABASE: FORESTECHOIL
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./infrastructure/databases/shared/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-hp}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - forestech-network
+
+  # ============================================
+  # CATALOG SERVICE
+  # ============================================
+  catalog-service:
+    build:
+      context: ./services/catalog-service
+      dockerfile: Dockerfile
+    container_name: catalog-service
+    hostname: catalog-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql
+      - consul
+      - config-server
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-forestech:3306/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hp}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - forestech-network
+
+  # ============================================
+  # FLEET SERVICE
+  # ============================================
+  fleet-service:
+    build:
+      context: ./services/fleet-service
+      dockerfile: Dockerfile
+    container_name: fleet-service
+    hostname: fleet-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - mysql
+      - consul
+      - config-server
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-forestech:3306/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hp}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8082/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - forestech-network
+
+  # ============================================
+  # INVENTORY SERVICE
+  # ============================================
+  inventory-service:
+    build:
+      context: ./services/inventory-service
+      dockerfile: Dockerfile
+    container_name: inventory-service
+    hostname: inventory-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - mysql
+      - consul
+      - config-server
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-forestech:3306/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hp}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8083/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - forestech-network
+
+  # ============================================
+  # PARTNERS SERVICE
+  # ============================================
+  partners-service:
+    build:
+      context: ./services/partners-service
+      dockerfile: Dockerfile
+    container_name: partners-service
+    hostname: partners-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - mysql
+      - consul
+      - config-server
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-forestech:3306/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hp}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8084/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - forestech-network
+
+  # ============================================
+  # INVOICING SERVICE
+  # ============================================
+  invoicing-service:
+    build:
+      context: ./services/invoicing-service
+      dockerfile: Dockerfile
+    container_name: invoicing-service
+    hostname: invoicing-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      - mysql
+      - consul
+      - config-server
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-forestech:3306/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hp}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8085/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - forestech-network
+
+  # ============================================
+  # REDIS
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - forestech-network
+
+  # ============================================
+  # API GATEWAY
+  # ============================================
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    hostname: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - consul
+      - config-server
+      - redis
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_REDIS_HOST: redis
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - forestech-network
+
+  # ============================================
+  # REPORTS SERVICE
+  # ============================================
+  reports-service:
+    build:
+      context: ./services/reports-service
+      dockerfile: Dockerfile
+    container_name: reports-service
+    hostname: reports-service
+    ports:
+      - "8086:8086"
+    depends_on:
+      - mysql
+      - consul
+      - config-server
+      - redis
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_REDIS_HOST: redis
+      # Custom Datasources
+      DATASOURCE_CATALOG_JDBC_URL: jdbc:mysql://mysql-forestech:3306/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DATASOURCE_CATALOG_USERNAME: root
+      DATASOURCE_CATALOG_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hp}
+      DATASOURCE_FLEET_JDBC_URL: jdbc:mysql://mysql-forestech:3306/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DATASOURCE_FLEET_USERNAME: root
+      DATASOURCE_FLEET_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hp}
+      DATASOURCE_INVENTORY_JDBC_URL: jdbc:mysql://mysql-forestech:3306/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DATASOURCE_INVENTORY_USERNAME: root
+      DATASOURCE_INVENTORY_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hp}
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8086/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - forestech-network
+
+# ============================================
+# NETWORKS
+# ============================================
+networks:
+  forestech-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${NETWORK_SUBNET:-172.20.0.0/16}
+
+# ============================================
+# VOLUMES
+# ============================================
+volumes:
+  consul-data:
+  mysql-data:
+  invoicing-data:
+  redis-data:
