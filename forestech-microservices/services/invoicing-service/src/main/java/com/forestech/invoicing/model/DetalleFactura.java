@@ -41,4 +41,7 @@ public class DetalleFactura implements Serializable {
 
     @Column(name = "precio_unitario", nullable = false, precision = 12, scale = 2)
     private BigDecimal precioUnitario;
+
+    @Column(name = "movement_id", length = 255)
+    private String movementId;
 }

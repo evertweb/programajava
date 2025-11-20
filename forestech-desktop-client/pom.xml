@@ -180,7 +180,7 @@
                             <transformers>
                                 <!-- Especificar la clase principal -->
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.forestech.core.Main</mainClass>
+                                    <mainClass>com.forestech.simpleui.SimpleMain</mainClass>
                                 </transformer>
                             </transformers>
                             <!-- Nombre del archivo JAR final -->
@@ -201,8 +201,8 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <!-- ACTUALIZADO: ahora delega al orquestador central -->
-                    <mainClass>com.forestech.core.Main</mainClass>
+                    <!-- ACTUALIZADO: Usando la UI simple para rediseño -->
+                    <mainClass>com.forestech.simpleui.SimpleMain</mainClass>
                 </configuration>
             </plugin>
             

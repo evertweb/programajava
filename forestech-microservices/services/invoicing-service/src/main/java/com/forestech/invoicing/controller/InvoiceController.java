@@ -34,4 +34,16 @@ public class InvoiceController {
     public ResponseEntity<List<Factura>> getAllFacturas() {
         return ResponseEntity.ok(invoiceService.findAll());
     }
+
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<Void> cancelFactura(@PathVariable String id) {
+        invoiceService.cancelInvoice(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Factura> updateFactura(@PathVariable String id, @RequestBody FacturaRequest request) {
+        Factura factura = invoiceService.updateInvoice(id, request);
+        return ResponseEntity.ok(factura);
+    }
 }

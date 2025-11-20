@@ -8,4 +8,6 @@ import java.math.BigDecimal;
 public class FacturaRequest {
     private String supplierId;
     private List<DetalleRequest> detalles;
+    private String observaciones;
+    private String formaPago;
 }

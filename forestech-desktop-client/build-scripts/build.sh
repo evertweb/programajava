@@ -2,6 +2,7 @@
 # 🚀 SCRIPT MAESTRO - TODO EN UNO
 # Ejecuta SOLO este script después de escribir código
 
+
 set -e
 
 clear

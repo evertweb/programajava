@@ -93,6 +93,7 @@ public class InvoiceService {
 
                 MovementDTO movement = inventoryClient.registrarEntrada(movRequest);
                 movimientosCreados.add(movement.getId());
+                detalle.setMovementId(movement.getId());
             }
 
             return factura;
@@ -119,6 +120,52 @@ public class InvoiceService {
 
     public List<Factura> findAll() {
         return facturaRepository.findAll();
+    }
+
+    @Transactional
+    public void cancelInvoice(String id) {
+        Factura factura = findById(id);
+
+        if (factura.getEstado() == Factura.EstadoFactura.ANULADA) {
+            throw new RuntimeException("La factura ya está anulada");
+        }
+
+        // Revertir movimientos de stock
+        for (DetalleFactura detalle : factura.getDetalles()) {
+            if (detalle.getMovementId() != null) {
+                try {
+                    inventoryClient.deleteMovement(detalle.getMovementId());
+                } catch (Exception e) {
+                    log.error("Error revirtiendo movimiento " + detalle.getMovementId(), e);
+                    // Continuamos con los demás para intentar revertir lo posible
+                }
+            }
+        }
+
+        factura.setEstado(Factura.EstadoFactura.ANULADA);
+        factura.setObservaciones(factura.getObservaciones() + " [ANULADA: " + LocalDateTime.now() + "]");
+        facturaRepository.save(factura);
+    }
+
+    @Transactional
+    public Factura updateInvoice(String id, FacturaRequest request) {
+        Factura factura = findById(id);
+
+        if (factura.getEstado() == Factura.EstadoFactura.ANULADA) {
+            throw new RuntimeException("No se puede editar una factura anulada");
+        }
+
+        // Solo permitimos editar metadatos no críticos
+        if (request.getObservaciones() != null) {
+            factura.setObservaciones(request.getObservaciones());
+        }
+        if (request.getFormaPago() != null) {
+            factura.setFormaPago(request.getFormaPago());
+        }
+        // Fecha vencimiento podría ser editable
+        // factura.setFechaVencimiento(...);
+
+        return facturaRepository.save(factura);
     }
 
     private String generarNumeroFactura() {
