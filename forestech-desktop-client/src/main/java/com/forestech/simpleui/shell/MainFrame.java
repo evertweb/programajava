@@ -56,7 +56,9 @@ public class MainFrame extends JFrame {
         com.forestech.simpleui.features.FleetPanel fleetPanel = new com.forestech.simpleui.features.FleetPanel();
         contentPanel.add(fleetPanel, "FLEET");
 
-        contentPanel.add(createPlaceholderView("Gestión de Socios"), "PARTNERS");
+        // Real Supplier Panel
+        com.forestech.simpleui.features.SupplierPanel supplierPanel = new com.forestech.simpleui.features.SupplierPanel();
+        contentPanel.add(supplierPanel, "PARTNERS");
 
         // Real Invoice Panel
         com.forestech.simpleui.features.InvoicePanel invoicePanel = new com.forestech.simpleui.features.InvoicePanel();
@@ -101,6 +103,8 @@ public class MainFrame extends JFrame {
                     ((com.forestech.simpleui.features.InvoicePanel) comp).onShow();
                 } else if (comp instanceof com.forestech.simpleui.features.FleetPanel) {
                     ((com.forestech.simpleui.features.FleetPanel) comp).onShow();
+                } else if (comp instanceof com.forestech.simpleui.features.SupplierPanel) {
+                    ((com.forestech.simpleui.features.SupplierPanel) comp).onShow();
                 }
             }
         }

@@ -14,7 +14,7 @@ public class InvoicingServiceAdapter {
     private static final String BASE_URL = "http://localhost:8080";
 
     public InvoicingServiceAdapter() {
-        this.client = new ServiceClient(BASE_URL);
+        this.client = new ServiceClient(BASE_URL, "Facturación");
         this.mapper = new ObjectMapper();
         this.mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }

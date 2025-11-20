@@ -1,8 +1,8 @@
 package com.forestech.simpleui.features;
 
 import com.forestech.simpleui.design.*;
-import com.forestech.simpleui.model.Vehicle;
-import com.forestech.simpleui.service.FleetServiceAdapter;
+import com.forestech.simpleui.model.Supplier;
+import com.forestech.simpleui.service.SupplierServiceAdapter;
 import com.forestech.simpleui.util.AsyncServiceTask;
 import com.forestech.simpleui.util.NotificationManager;
 
@@ -10,29 +10,25 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-/**
- * FleetPanel
- * Displays a list of vehicles.
- */
-public class FleetPanel extends JPanel {
+public class SupplierPanel extends JPanel {
 
     private final FTable table;
-    private final FleetServiceAdapter service;
+    private final SupplierServiceAdapter service;
     private boolean loaded = false;
-    private List<Vehicle> currentVehicles;
+    private List<Supplier> currentSuppliers;
 
-    public FleetPanel() {
+    public SupplierPanel() {
         setLayout(new BorderLayout());
         setBackground(ThemeConstants.BACKGROUND_COLOR);
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        service = new FleetServiceAdapter();
+        service = new SupplierServiceAdapter();
 
         // Header
         JPanel header = new JPanel(new BorderLayout());
         header.setOpaque(false);
 
-        JLabel title = new JLabel("Gestión de Flota");
+        JLabel title = new JLabel("Gestión de Proveedores");
         title.setFont(ThemeConstants.FONT_H2);
         header.add(title, BorderLayout.WEST);
 
@@ -46,7 +42,7 @@ public class FleetPanel extends JPanel {
         editBtn.addActionListener(e -> openEditDialog());
 
         FButton deleteBtn = new FButton("Eliminar", FButton.Variant.DANGER);
-        deleteBtn.addActionListener(e -> deleteVehicle());
+        deleteBtn.addActionListener(e -> deleteSupplier());
 
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         actions.setOpaque(false);
@@ -79,21 +75,21 @@ public class FleetPanel extends JPanel {
     }
 
     private void loadData() {
-        NotificationManager.show((JFrame) SwingUtilities.getWindowAncestor(this), "Cargando flota...",
+        NotificationManager.show((JFrame) SwingUtilities.getWindowAncestor(this), "Cargando proveedores...",
                 NotificationManager.Type.INFO);
 
         AsyncServiceTask.execute(
                 () -> {
                     try {
-                        return service.getAllVehicles();
+                        return service.getAllSuppliers();
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 },
-                (vehicles) -> {
-                    updateTable(vehicles);
+                (suppliers) -> {
+                    updateTable(suppliers);
                     loaded = true;
-                    NotificationManager.show((JFrame) SwingUtilities.getWindowAncestor(this), "Flota cargada",
+                    NotificationManager.show((JFrame) SwingUtilities.getWindowAncestor(this), "Proveedores cargados",
                             NotificationManager.Type.SUCCESS);
                 },
                 (error) -> {
@@ -106,49 +102,49 @@ public class FleetPanel extends JPanel {
     private void openCreateDialog() {
         Window window = SwingUtilities.getWindowAncestor(this);
         if (window instanceof Frame) {
-            VehicleFormDialog dialog = new VehicleFormDialog((Frame) window, service, this::loadData);
+            SupplierFormDialog dialog = new SupplierFormDialog((Frame) window, service, this::loadData);
             dialog.setVisible(true);
         }
     }
 
     private void openEditDialog() {
-        Vehicle selected = getSelectedVehicle();
+        Supplier selected = getSelectedSupplier();
         if (selected == null) {
             NotificationManager.show((JFrame) SwingUtilities.getWindowAncestor(this),
-                    "Seleccione un vehículo para editar", NotificationManager.Type.WARNING);
+                    "Seleccione un proveedor para editar", NotificationManager.Type.WARNING);
             return;
         }
         Window window = SwingUtilities.getWindowAncestor(this);
         if (window instanceof Frame) {
-            VehicleFormDialog dialog = new VehicleFormDialog((Frame) window, service, selected, this::loadData);
+            SupplierFormDialog dialog = new SupplierFormDialog((Frame) window, service, selected, this::loadData);
             dialog.setVisible(true);
         }
     }
 
-    private void deleteVehicle() {
-        Vehicle selected = getSelectedVehicle();
+    private void deleteSupplier() {
+        Supplier selected = getSelectedSupplier();
         if (selected == null) {
             NotificationManager.show((JFrame) SwingUtilities.getWindowAncestor(this),
-                    "Seleccione un vehículo para eliminar", NotificationManager.Type.WARNING);
+                    "Seleccione un proveedor para eliminar", NotificationManager.Type.WARNING);
             return;
         }
 
         int confirm = JOptionPane.showConfirmDialog(this,
-                "¿Está seguro de eliminar el vehículo " + selected.getPlaca() + "?",
+                "¿Está seguro de eliminar al proveedor " + selected.getName() + "?",
                 "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
             AsyncServiceTask.execute(
                     () -> {
                         try {
-                            service.deleteVehicle(selected.getId());
+                            service.deleteSupplier(selected.getId());
                             return null;
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
                     },
                     (result) -> {
-                        NotificationManager.show((JFrame) SwingUtilities.getWindowAncestor(this), "Vehículo eliminado",
+                        NotificationManager.show((JFrame) SwingUtilities.getWindowAncestor(this), "Proveedor eliminado",
                                 NotificationManager.Type.SUCCESS);
                         loadData();
                     },
@@ -159,26 +155,25 @@ public class FleetPanel extends JPanel {
         }
     }
 
-    private Vehicle getSelectedVehicle() {
+    private Supplier getSelectedSupplier() {
         int row = table.getSelectedRow();
-        if (row == -1 || currentVehicles == null || row >= currentVehicles.size())
+        if (row == -1 || currentSuppliers == null || row >= currentSuppliers.size())
             return null;
-        return currentVehicles.get(row);
+        return currentSuppliers.get(row);
     }
 
-    private void updateTable(List<Vehicle> vehicles) {
-        this.currentVehicles = vehicles;
-        String[] columns = { "Placa", "Marca", "Modelo", "Año", "Categoría", "Activo" };
-        Object[][] data = new Object[vehicles.size()][6];
+    private void updateTable(List<Supplier> suppliers) {
+        this.currentSuppliers = suppliers;
+        String[] columns = { "Nombre", "NIT", "Teléfono", "Email", "Dirección" };
+        Object[][] data = new Object[suppliers.size()][5];
 
-        for (int i = 0; i < vehicles.size(); i++) {
-            Vehicle v = vehicles.get(i);
-            data[i][0] = v.getPlaca();
-            data[i][1] = v.getMarca();
-            data[i][2] = v.getModelo();
-            data[i][3] = v.getAnio();
-            data[i][4] = v.getCategory();
-            data[i][5] = (v.getIsActive() != null && v.getIsActive()) ? "Sí" : "No";
+        for (int i = 0; i < suppliers.size(); i++) {
+            Supplier s = suppliers.get(i);
+            data[i][0] = s.getName();
+            data[i][1] = s.getNit();
+            data[i][2] = s.getTelephone();
+            data[i][3] = s.getEmail();
+            data[i][4] = s.getAddress();
         }
 
         table.setModel(data, columns);

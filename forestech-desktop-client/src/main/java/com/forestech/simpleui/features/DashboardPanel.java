@@ -10,7 +10,6 @@ import com.forestech.simpleui.service.FleetServiceAdapter;
 import com.forestech.simpleui.service.InventoryServiceAdapter;
 import com.forestech.simpleui.service.InvoicingServiceAdapter;
 import com.forestech.simpleui.util.AsyncServiceTask;
-import com.forestech.simpleui.util.NotificationManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -149,42 +148,88 @@ public class DashboardPanel extends JPanel {
     }
 
     private void loadData() {
+        // Load each service independently for graceful degradation
+        loadProducts();
+        loadVehicles();
+        loadMovements();
+        loadInvoices();
+    }
+
+    private void loadProducts() {
         AsyncServiceTask.execute(
                 () -> {
                     try {
                         List<Product> products = catalogService.getAllProducts();
-                        List<Vehicle> vehicles = fleetService.getAllVehicles();
-                        List<Movement> movements = inventoryService.getAllMovements();
-                        List<Factura> invoices = invoicingService.getAllInvoices();
-                        return new DashboardData(products.size(), vehicles.size(), movements.size(), invoices.size());
+                        return products.size();
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 },
-                (data) -> {
-                    totalProductsLabel.setText(String.valueOf(data.productCount));
-                    totalVehiclesLabel.setText(String.valueOf(data.vehicleCount));
-                    totalMovementsLabel.setText(String.valueOf(data.movementCount));
-                    totalInvoicesLabel.setText(String.valueOf(data.invoiceCount));
-                    loaded = true;
+                (count) -> {
+                    totalProductsLabel.setText(String.valueOf(count));
                 },
                 (error) -> {
-                    NotificationManager.show((JFrame) SwingUtilities.getWindowAncestor(this),
-                            "Error cargando dashboard: " + error.getMessage(), NotificationManager.Type.ERROR);
+                    totalProductsLabel.setText("N/A");
+                    System.err.println("[Dashboard] Error al cargar productos: " + error.getMessage());
                 });
     }
 
-    private static class DashboardData {
-        int productCount;
-        int vehicleCount;
-        int movementCount;
-        int invoiceCount;
+    private void loadVehicles() {
+        AsyncServiceTask.execute(
+                () -> {
+                    try {
+                        List<Vehicle> vehicles = fleetService.getAllVehicles();
+                        return vehicles.size();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                (count) -> {
+                    totalVehiclesLabel.setText(String.valueOf(count));
+                },
+                (error) -> {
+                    totalVehiclesLabel.setText("N/A");
+                    System.err.println("[Dashboard] Error al cargar vehículos: " + error.getMessage());
+                });
+    }
 
-        DashboardData(int p, int v, int m, int i) {
-            this.productCount = p;
-            this.vehicleCount = v;
-            this.movementCount = m;
-            this.invoiceCount = i;
-        }
+    private void loadMovements() {
+        AsyncServiceTask.execute(
+                () -> {
+                    try {
+                        List<Movement> movements = inventoryService.getAllMovements();
+                        return movements.size();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                (count) -> {
+                    totalMovementsLabel.setText(String.valueOf(count));
+                },
+                (error) -> {
+                    totalMovementsLabel.setText("N/A");
+                    System.err.println("[Dashboard] Error al cargar movimientos: " + error.getMessage());
+                });
+    }
+
+    private void loadInvoices() {
+        AsyncServiceTask.execute(
+                () -> {
+                    try {
+                        List<Factura> invoices = invoicingService.getAllInvoices();
+                        return invoices.size();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                (count) -> {
+                    totalInvoicesLabel.setText(String.valueOf(count));
+                    loaded = true; // Mark as loaded after the last service
+                },
+                (error) -> {
+                    totalInvoicesLabel.setText("N/A");
+                    System.err.println("[Dashboard] Error al cargar facturas: " + error.getMessage());
+                    loaded = true; // Mark as loaded even on error
+                });
     }
 }

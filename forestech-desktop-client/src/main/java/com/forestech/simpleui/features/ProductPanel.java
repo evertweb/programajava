@@ -20,6 +20,7 @@ public class ProductPanel extends JPanel {
     private final FTable table;
     private final CatalogServiceAdapter service;
     private boolean loaded = false;
+    private List<Product> currentProducts;
 
     public ProductPanel() {
         setLayout(new BorderLayout());
@@ -39,13 +40,21 @@ public class ProductPanel extends JPanel {
         FButton refreshBtn = new FButton("Refrescar", FButton.Variant.SECONDARY);
         refreshBtn.addActionListener(e -> loadData());
 
-        FButton createBtn = new FButton("Nuevo Producto", FButton.Variant.PRIMARY);
+        FButton createBtn = new FButton("Nuevo", FButton.Variant.PRIMARY);
         createBtn.addActionListener(e -> openCreateDialog());
+
+        FButton editBtn = new FButton("Editar", FButton.Variant.SECONDARY);
+        editBtn.addActionListener(e -> openEditDialog());
+
+        FButton deleteBtn = new FButton("Eliminar", FButton.Variant.DANGER);
+        deleteBtn.addActionListener(e -> deleteProduct());
 
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         actions.setOpaque(false);
         actions.add(refreshBtn);
         actions.add(createBtn);
+        actions.add(editBtn);
+        actions.add(deleteBtn);
 
         header.add(actions, BorderLayout.EAST);
 
@@ -103,7 +112,63 @@ public class ProductPanel extends JPanel {
         }
     }
 
+    private void openEditDialog() {
+        Product selected = getSelectedProduct();
+        if (selected == null) {
+            NotificationManager.show((JFrame) SwingUtilities.getWindowAncestor(this),
+                    "Seleccione un producto para editar", NotificationManager.Type.WARNING);
+            return;
+        }
+        Window window = SwingUtilities.getWindowAncestor(this);
+        if (window instanceof Frame) {
+            ProductFormDialog dialog = new ProductFormDialog((Frame) window, service, selected, this::loadData);
+            dialog.setVisible(true);
+        }
+    }
+
+    private void deleteProduct() {
+        Product selected = getSelectedProduct();
+        if (selected == null) {
+            NotificationManager.show((JFrame) SwingUtilities.getWindowAncestor(this),
+                    "Seleccione un producto para eliminar", NotificationManager.Type.WARNING);
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "¿Está seguro de eliminar el producto " + selected.getName() + "?",
+                "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            AsyncServiceTask.execute(
+                    () -> {
+                        try {
+                            service.deleteProduct(selected.getId());
+                            return null;
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    },
+                    (result) -> {
+                        NotificationManager.show((JFrame) SwingUtilities.getWindowAncestor(this), "Producto eliminado",
+                                NotificationManager.Type.SUCCESS);
+                        loadData();
+                    },
+                    (error) -> {
+                        NotificationManager.show((JFrame) SwingUtilities.getWindowAncestor(this),
+                                "Error al eliminar: " + error.getMessage(), NotificationManager.Type.ERROR);
+                    });
+        }
+    }
+
+    private Product getSelectedProduct() {
+        int row = table.getSelectedRow();
+        if (row == -1 || currentProducts == null || row >= currentProducts.size())
+            return null;
+        return currentProducts.get(row);
+    }
+
     private void updateTable(List<Product> products) {
+        this.currentProducts = products;
         String[] columns = { "ID", "Nombre", "Precio", "Unidad", "Activo" };
         Object[][] data = new Object[products.size()][5];
 

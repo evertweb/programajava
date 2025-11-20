@@ -28,11 +28,17 @@ public class ProductFormDialog extends JDialog {
 
     private final CatalogServiceAdapter service;
     private final Runnable onSuccess;
+    private final Product productToEdit;
 
     public ProductFormDialog(Frame owner, CatalogServiceAdapter service, Runnable onSuccess) {
-        super(owner, "Nuevo Producto", true);
+        this(owner, service, null, onSuccess);
+    }
+
+    public ProductFormDialog(Frame owner, CatalogServiceAdapter service, Product productToEdit, Runnable onSuccess) {
+        super(owner, productToEdit == null ? "Nuevo Producto" : "Editar Producto", true);
         this.service = service;
         this.onSuccess = onSuccess;
+        this.productToEdit = productToEdit;
 
         setLayout(new BorderLayout());
         setSize(450, 500);
@@ -47,7 +53,7 @@ public class ProductFormDialog extends JDialog {
         content.setBackground(Color.WHITE);
 
         // Title
-        JLabel title = new JLabel("Crear Producto");
+        JLabel title = new JLabel(productToEdit == null ? "Crear Producto" : "Editar Producto");
         title.setFont(ThemeConstants.FONT_H2);
         title.setAlignmentX(Component.LEFT_ALIGNMENT);
         content.add(title);
@@ -80,7 +86,7 @@ public class ProductFormDialog extends JDialog {
         cancelButton = new FButton("Cancelar", FButton.Variant.SECONDARY);
         cancelButton.addActionListener(e -> dispose());
 
-        saveButton = new FButton("Guardar Producto", FButton.Variant.PRIMARY);
+        saveButton = new FButton("Guardar", FButton.Variant.PRIMARY);
         saveButton.setEnabled(false); // Disabled by default
         saveButton.addActionListener(e -> saveProduct());
 
@@ -106,6 +112,18 @@ public class ProductFormDialog extends JDialog {
         nameField.addDocumentListener(validationListener);
         priceField.addDocumentListener(validationListener);
         unitField.addDocumentListener(validationListener);
+
+        if (productToEdit != null) {
+            fillForm();
+        }
+    }
+
+    private void fillForm() {
+        nameField.setText(productToEdit.getName());
+        priceField.setText(productToEdit.getUnitPrice().toString());
+        unitField.setText(productToEdit.getMeasurementUnit());
+        descField.setText(productToEdit.getDescription());
+        validateForm();
     }
 
     private void validateForm() {
@@ -150,7 +168,7 @@ public class ProductFormDialog extends JDialog {
         setInputsEnabled(false);
         saveButton.setText("Guardando...");
 
-        Product product = new Product();
+        Product product = productToEdit != null ? productToEdit : new Product();
         product.setName(nameField.getText().trim());
         product.setUnitPrice(new BigDecimal(priceField.getText().trim()));
         product.setMeasurementUnit(unitField.getText().trim());
@@ -160,22 +178,27 @@ public class ProductFormDialog extends JDialog {
         AsyncServiceTask.execute(
                 () -> {
                     try {
-                        service.createProduct(product);
+                        if (productToEdit != null) {
+                            service.updateProduct(product.getId(), product);
+                        } else {
+                            service.createProduct(product);
+                        }
                         return null;
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 },
                 (result) -> {
-                    NotificationManager.show((JFrame) getOwner(), "Producto creado exitosamente",
-                            NotificationManager.Type.SUCCESS);
+                    NotificationManager.show((JFrame) getOwner(), 
+                        productToEdit != null ? "Producto actualizado" : "Producto creado",
+                        NotificationManager.Type.SUCCESS);
                     dispose();
                     if (onSuccess != null)
                         onSuccess.run();
                 },
                 (error) -> {
                     setInputsEnabled(true);
-                    saveButton.setText("Guardar Producto");
+                    saveButton.setText("Guardar");
                     NotificationManager.show((JFrame) getOwner(), "Error al guardar: " + error.getMessage(),
                             NotificationManager.Type.ERROR);
                 });

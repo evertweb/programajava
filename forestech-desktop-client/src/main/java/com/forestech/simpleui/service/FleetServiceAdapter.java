@@ -20,7 +20,7 @@ public class FleetServiceAdapter {
     private static final String BASE_URL = "http://localhost:8080";
 
     public FleetServiceAdapter() {
-        this.client = new ServiceClient(BASE_URL);
+        this.client = new ServiceClient(BASE_URL, "Flota");
         this.mapper = new ObjectMapper();
         this.mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
@@ -35,5 +35,14 @@ public class FleetServiceAdapter {
     public void createVehicle(Vehicle vehicle) throws Exception {
         String json = mapper.writeValueAsString(vehicle);
         client.post("/api/vehicles", json);
+    }
+
+    public void updateVehicle(String id, Vehicle vehicle) throws Exception {
+        String json = mapper.writeValueAsString(vehicle);
+        client.put("/api/vehicles/" + id, json);
+    }
+
+    public void deleteVehicle(String id) throws Exception {
+        client.delete("/api/vehicles/" + id);
     }
 }

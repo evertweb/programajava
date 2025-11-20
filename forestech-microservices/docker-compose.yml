@@ -100,9 +100,10 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081/actuator/health" ]
-      interval: 30s
+      interval: 15s
       timeout: 10s
       retries: 5
+    stop_grace_period: 30s
     networks:
       - forestech-network
 
@@ -133,9 +134,10 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8082/actuator/health" ]
-      interval: 30s
+      interval: 15s
       timeout: 10s
       retries: 5
+    stop_grace_period: 30s
     networks:
       - forestech-network
 
@@ -166,9 +168,10 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8083/actuator/health" ]
-      interval: 30s
+      interval: 15s
       timeout: 10s
       retries: 5
+    stop_grace_period: 30s
     networks:
       - forestech-network
 
@@ -199,9 +202,10 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8084/actuator/health" ]
-      interval: 30s
+      interval: 15s
       timeout: 10s
       retries: 5
+    stop_grace_period: 30s
     networks:
       - forestech-network
 
@@ -232,9 +236,10 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8085/actuator/health" ]
-      interval: 30s
+      interval: 15s
       timeout: 10s
       retries: 5
+    stop_grace_period: 30s
     networks:
       - forestech-network
 
@@ -250,7 +255,7 @@ services:
     volumes:
       - redis-data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -274,6 +279,16 @@ services:
       config-server:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      catalog-service:
+        condition: service_healthy
+      fleet-service:
+        condition: service_healthy
+      inventory-service:
+        condition: service_healthy
+      partners-service:
+        condition: service_healthy
+      invoicing-service:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker

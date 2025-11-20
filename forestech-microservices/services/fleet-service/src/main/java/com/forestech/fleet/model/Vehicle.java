@@ -47,9 +47,8 @@ public class Vehicle {
     private Integer anio;
 
     @NotNull(message = "La categoría es obligatoria")
-    @Enumerated(EnumType.STRING)
-    @Column(name = "category", nullable = false)
-    private VehicleCategory category;
+    @Column(name = "category", nullable = false, length = 50)
+    private String category;
 
     @Column(columnDefinition = "TEXT")
     private String descripcion;
@@ -65,8 +64,4 @@ public class Vehicle {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    public enum VehicleCategory {
-        CAMION, TANQUERO, CAMIONETA, AUTOMOVIL
-    }
 }

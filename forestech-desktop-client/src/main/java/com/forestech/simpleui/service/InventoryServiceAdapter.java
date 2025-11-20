@@ -20,7 +20,7 @@ public class InventoryServiceAdapter {
     private static final String BASE_URL = "http://localhost:8080";
 
     public InventoryServiceAdapter() {
-        this.client = new ServiceClient(BASE_URL);
+        this.client = new ServiceClient(BASE_URL, "Inventario");
         this.mapper = new ObjectMapper();
         this.mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }

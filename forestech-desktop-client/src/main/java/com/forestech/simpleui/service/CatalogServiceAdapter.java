@@ -21,7 +21,7 @@ public class CatalogServiceAdapter {
     private static final String BASE_URL = "http://localhost:8080";
 
     public CatalogServiceAdapter() {
-        this.client = new ServiceClient(BASE_URL);
+        this.client = new ServiceClient(BASE_URL, "Catálogo");
         this.mapper = new ObjectMapper();
         this.mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
@@ -36,5 +36,14 @@ public class CatalogServiceAdapter {
     public void createProduct(Product product) throws Exception {
         String json = mapper.writeValueAsString(product);
         client.post("/api/products", json);
+    }
+
+    public void updateProduct(String id, Product product) throws Exception {
+        String json = mapper.writeValueAsString(product);
+        client.put("/api/products/" + id, json);
+    }
+
+    public void deleteProduct(String id) throws Exception {
+        client.delete("/api/products/" + id);
     }
 }

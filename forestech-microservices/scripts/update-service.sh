@@ -42,16 +42,10 @@ else
     echo "$CHANGES"
 fi
 
-echo "🛠️  Compilando $SERVICE_NAME..."
-cd "$SERVICE_DIR"
-
-# Ejecutar Maven
-# Usamos mvnw si existe, si no mvn del sistema
-if [ -f "../../mvnw" ]; then
-    ../../mvnw clean package -DskipTests
-else
-    mvn clean package -DskipTests
-fi
+echo "🛠️  Compilando $SERVICE_NAME (usando Docker)..."
+# Usamos un contenedor temporal de Maven para asegurar que el entorno de compilación
+# sea idéntico al de producción y evitar problemas con versiones de Java locales.
+docker run --rm -v "$SERVICE_DIR":/app -w /app maven:3.9-eclipse-temurin-21 mvn clean package -DskipTests
 
 BUILD_STATUS=$?
 

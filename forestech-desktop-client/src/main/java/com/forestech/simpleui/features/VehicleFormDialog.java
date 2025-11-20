@@ -28,11 +28,17 @@ public class VehicleFormDialog extends JDialog {
 
     private final FleetServiceAdapter service;
     private final Runnable onSuccess;
+    private final Vehicle vehicleToEdit;
 
     public VehicleFormDialog(Frame owner, FleetServiceAdapter service, Runnable onSuccess) {
-        super(owner, "Nuevo Vehículo", true);
+        this(owner, service, null, onSuccess);
+    }
+
+    public VehicleFormDialog(Frame owner, FleetServiceAdapter service, Vehicle vehicleToEdit, Runnable onSuccess) {
+        super(owner, vehicleToEdit == null ? "Nuevo Vehículo" : "Editar Vehículo", true);
         this.service = service;
         this.onSuccess = onSuccess;
+        this.vehicleToEdit = vehicleToEdit;
 
         setLayout(new BorderLayout());
         setSize(450, 600);
@@ -47,7 +53,7 @@ public class VehicleFormDialog extends JDialog {
         content.setBackground(Color.WHITE);
 
         // Title
-        JLabel title = new JLabel("Registrar Vehículo");
+        JLabel title = new JLabel(vehicleToEdit == null ? "Registrar Vehículo" : "Editar Vehículo");
         title.setFont(ThemeConstants.FONT_H2);
         title.setAlignmentX(Component.LEFT_ALIGNMENT);
         content.add(title);
@@ -78,8 +84,9 @@ public class VehicleFormDialog extends JDialog {
         content.add(catLabel);
         content.add(Box.createVerticalStrut(5));
 
-        String[] categories = { "CAMION", "TANQUERO", "CAMIONETA", "AUTOMOVIL" };
+        String[] categories = { "CAMION", "TANQUERO", "CAMIONETA", "AUTOMOVIL", "MOTO", "MAQUINARIA" };
         categoryCombo = new JComboBox<>(categories);
+        categoryCombo.setEditable(true); // Allow custom categories
         categoryCombo.setFont(ThemeConstants.FONT_REGULAR);
         categoryCombo.setBackground(Color.WHITE);
         categoryCombo.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -97,7 +104,7 @@ public class VehicleFormDialog extends JDialog {
         cancelButton = new FButton("Cancelar", FButton.Variant.SECONDARY);
         cancelButton.addActionListener(e -> dispose());
 
-        saveButton = new FButton("Guardar Vehículo", FButton.Variant.PRIMARY);
+        saveButton = new FButton("Guardar", FButton.Variant.PRIMARY);
         saveButton.setEnabled(false);
         saveButton.addActionListener(e -> saveVehicle());
 
@@ -124,6 +131,19 @@ public class VehicleFormDialog extends JDialog {
         marcaField.addDocumentListener(validationListener);
         modeloField.addDocumentListener(validationListener);
         anioField.addDocumentListener(validationListener);
+
+        if (vehicleToEdit != null) {
+            fillForm();
+        }
+    }
+
+    private void fillForm() {
+        placaField.setText(vehicleToEdit.getPlaca());
+        marcaField.setText(vehicleToEdit.getMarca());
+        modeloField.setText(vehicleToEdit.getModelo());
+        anioField.setText(String.valueOf(vehicleToEdit.getAnio()));
+        categoryCombo.setSelectedItem(vehicleToEdit.getCategory());
+        validateForm();
     }
 
     private void validateForm() {
@@ -165,7 +185,7 @@ public class VehicleFormDialog extends JDialog {
         setInputsEnabled(false);
         saveButton.setText("Guardando...");
 
-        Vehicle vehicle = new Vehicle();
+        Vehicle vehicle = vehicleToEdit != null ? vehicleToEdit : new Vehicle();
         vehicle.setPlaca(placaField.getText().trim().toUpperCase());
         vehicle.setMarca(marcaField.getText().trim());
         vehicle.setModelo(modeloField.getText().trim());
@@ -176,22 +196,27 @@ public class VehicleFormDialog extends JDialog {
         AsyncServiceTask.execute(
                 () -> {
                     try {
-                        service.createVehicle(vehicle);
+                        if (vehicleToEdit != null) {
+                            service.updateVehicle(vehicle.getId(), vehicle);
+                        } else {
+                            service.createVehicle(vehicle);
+                        }
                         return null;
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 },
                 (result) -> {
-                    NotificationManager.show((JFrame) getOwner(), "Vehículo registrado exitosamente",
-                            NotificationManager.Type.SUCCESS);
+                    NotificationManager.show((JFrame) getOwner(), 
+                        vehicleToEdit != null ? "Vehículo actualizado" : "Vehículo registrado",
+                        NotificationManager.Type.SUCCESS);
                     dispose();
                     if (onSuccess != null)
                         onSuccess.run();
                 },
                 (error) -> {
                     setInputsEnabled(true);
-                    saveButton.setText("Guardar Vehículo");
+                    saveButton.setText("Guardar");
                     NotificationManager.show((JFrame) getOwner(), "Error al guardar: " + error.getMessage(),
                             NotificationManager.Type.ERROR);
                 });

@@ -91,6 +91,7 @@ public class InvoiceService {
                 movRequest.setUnitPrice(detalle.getPrecioUnitario());
                 movRequest.setDescription("Factura: " + factura.getNumeroFactura());
 
+                log.info("Creating movement for product: " + detalle.getProductId());
                 MovementDTO movement = inventoryClient.registrarEntrada(movRequest);
                 movimientosCreados.add(movement.getId());
                 detalle.setMovementId(movement.getId());
