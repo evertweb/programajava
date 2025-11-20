@@ -35,8 +35,9 @@ test_api() {
 # Tests de Catalog Service
 echo -e "\n📦 CATALOG SERVICE"
 test_api "Listar productos" "GET" "/api/products"
+TIMESTAMP=$(date +%s)
 test_api "Crear producto" "POST" "/api/products" \
-    '{"name":"Test Product","measurementUnit":"GALONES","unitPrice":1000}'
+    "{\"name\":\"Test Product $TIMESTAMP\",\"measurementUnit\":\"GALONES\",\"unitPrice\":1000}"
 
 # Tests de Fleet Service
 echo -e "\n🚗 FLEET SERVICE"
@@ -58,9 +59,11 @@ test_api "Reporte de stock" "GET" "/api/reports/stock"
 echo -e "\n🔄 TEST E2E COMPLETO (Flujo de Factura)"
 
 # 1. Crear proveedor
+NIT_SUFFIX=$(date +%s)
 SUPPLIER_RESPONSE=$(curl -s -X POST "$API_URL/api/suppliers" \
     -H "Content-Type: application/json" \
-    -d '{"name":"Test Supplier","nit":"900000000-1","phone":"3001234567"}')
+    -d "{\"name\":\"Test Supplier E2E $NIT_SUFFIX\",\"nit\":\"900000000-$NIT_SUFFIX\",\"phone\":\"3001234567\"}")
+# echo "DEBUG: Supplier Response: $SUPPLIER_RESPONSE"
 SUPPLIER_ID=$(echo $SUPPLIER_RESPONSE | jq -r '.id')
 
 echo "1. Proveedor creado: $SUPPLIER_ID ✅"
@@ -75,11 +78,12 @@ INVOICE_RESPONSE=$(curl -s -X POST "$API_URL/api/invoices" \
     -H "Content-Type: application/json" \
     -d "{\"supplierId\":\"$SUPPLIER_ID\",\"detalles\":[{\"productId\":\"$PRODUCT_ID\",\"cantidad\":100,\"precioUnitario\":8500}]}")
 
+# echo "DEBUG: Invoice Response: $INVOICE_RESPONSE"
 INVOICE_ID=$(echo $INVOICE_RESPONSE | jq -r '.id')
 echo "3. Factura creada: $INVOICE_ID ✅"
 
 # 4. Verificar stock actualizado
-STOCK=$(curl -s "$API_URL/api/stock/$PRODUCT_ID" | jq -r '.stock')
+STOCK=$(curl -s "$API_URL/api/movements/stock/$PRODUCT_ID" | jq -r '.stock')
 echo "4. Stock actualizado: $STOCK ✅"
 
 echo ""

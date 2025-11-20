@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -22,6 +23,11 @@ public class MovementService {
     private final MovementRepository movementRepository;
     private final CatalogClient catalogClient;
     private final FleetClient fleetClient;
+
+    @Transactional(readOnly = true)
+    public List<Movement> getAllMovements() {
+        return movementRepository.findAll();
+    }
 
     @Transactional
     public Movement createMovement(Movement movement) {

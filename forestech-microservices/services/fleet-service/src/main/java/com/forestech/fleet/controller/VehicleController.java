@@ -2,7 +2,7 @@ package com.forestech.fleet.controller;
 
 import com.forestech.fleet.model.Vehicle;
 import com.forestech.fleet.service.VehicleService;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

@@ -47,11 +47,18 @@ check_http_service "Config Server" "http://localhost:8888/actuator/health"
 # Verificar Bases de Datos
 echo ""
 echo -e "${YELLOW}Bases de Datos MySQL:${NC}"
-check_tcp_port "Catalog DB" 3307
-check_tcp_port "Fleet DB" 3308
-check_tcp_port "Inventory DB" 3309
-check_tcp_port "Partners DB" 3310
-check_tcp_port "Invoicing DB" 3311
+check_tcp_port "MySQL Shared" 3307
+
+# Verificar Microservicios
+echo ""
+echo -e "${YELLOW}Microservicios:${NC}"
+check_http_service "API Gateway" "http://localhost:8080/actuator/health"
+check_http_service "Catalog Service" "http://localhost:8081/actuator/health"
+check_http_service "Fleet Service" "http://localhost:8082/actuator/health"
+check_http_service "Inventory Service" "http://localhost:8083/actuator/health"
+check_http_service "Partners Service" "http://localhost:8084/actuator/health"
+check_http_service "Invoicing Service" "http://localhost:8085/actuator/health"
+check_http_service "Reports Service" "http://localhost:8086/actuator/health"
 
 echo ""
 echo "=========================================="

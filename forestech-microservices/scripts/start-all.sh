@@ -18,22 +18,26 @@ echo "⚙️  Levantando Config Server..."
 docker compose up -d config-server
 sleep 15
 
-# 3. Levantar bases de datos
-echo "📊 Levantando bases de datos MySQL..."
-docker compose up -d mysql-catalog mysql-fleet mysql-inventory mysql-partners mysql-invoicing
-sleep 20
+# 3. Levantar Base de Datos Compartida
+echo "📊 Levantando base de datos MySQL Compartida..."
+docker compose up -d mysql
+sleep 10
+
+# 4. Levantar Redis
+echo "🔴 Levantando Redis..."
+docker compose up -d redis
+sleep 5
+
+# 5. Levantar Microservicios
+echo "🚀 Levantando Microservicios..."
+docker compose up -d catalog-service fleet-service inventory-service partners-service invoicing-service reports-service api-gateway
 
 echo ""
-echo "✅ Infraestructura base iniciada!"
+echo "✅ Infraestructura iniciada!"
 echo "=========================================="
 echo "🔍 Consul UI:        http://localhost:8500"
 echo "⚙️  Config Server:    http://localhost:8888/actuator/health"
-echo ""
-echo "📊 Bases de datos MySQL:"
-echo "  - Catalog DB:   localhost:3307 (catalog_db)"
-echo "  - Fleet DB:     localhost:3308 (fleet_db)"
-echo "  - Inventory DB: localhost:3309 (inventory_db)"
-echo "  - Partners DB:  localhost:3310 (partners_db)"
-echo "  - Invoicing DB: localhost:3311 (invoicing_db)"
+echo "📊 MySQL:            localhost:3307"
+echo "🌐 API Gateway:      http://localhost:8080"
 echo ""
 echo "📋 Ejecuta './scripts/health-check.sh' para verificar estado"

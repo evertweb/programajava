@@ -1,7 +1,9 @@
 package com.forestech.modules.invoicing.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.math.BigDecimal;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class InvoiceDetail {
     private String productId;
     private BigDecimal cantidad;

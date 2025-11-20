@@ -1,14 +1,20 @@
 package com.forestech.modules.inventory.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Modelo que representa el detalle de una factura (línea de productos).
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DetalleFactura {
     private int idDetalle; // Autoincremental
     private String numeroFactura; // FK → facturas.numero_factura
     private String producto; // Nombre del producto (copia, no FK)
     private double cantidad;
     private double precioUnitario;
+
+    public DetalleFactura() {
+    }
 
     // Constructor para CREAR (sin idDetalle, se genera automáticamente en BD)
     public DetalleFactura(String numeroFactura, String producto, double cantidad, double precioUnitario) {

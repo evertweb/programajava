@@ -1,5 +1,6 @@
 package com.forestech.modules.inventory.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.forestech.core.AppConfig;
 import com.forestech.shared.enums.MeasurementUnit;
 import com.forestech.shared.enums.MovementType;
@@ -8,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Movement {
 
     private String id;

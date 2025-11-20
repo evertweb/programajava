@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/invoices")
@@ -27,5 +28,10 @@ public class InvoiceController {
     public ResponseEntity<Factura> getFactura(@PathVariable String id) {
         Factura factura = invoiceService.findById(id);
         return ResponseEntity.ok(factura);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Factura>> getAllFacturas() {
+        return ResponseEntity.ok(invoiceService.findAll());
     }
 }

@@ -1,12 +1,14 @@
 package com.forestech.modules.inventory.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDate;
 
 /**
  * Modelo que representa una factura de compra de combustible.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Factura {
-    private final String numeroFactura;
+    private String numeroFactura;
     private LocalDate fechaEmision;
     private LocalDate fechaVencimiento;
     private String supplierId; // FK → suppliers.id
@@ -16,6 +18,10 @@ public class Factura {
     private String observaciones;
     private String formaPago;
     private String cuentaBancaria;
+
+    public Factura() {
+        this.numeroFactura = null;
+    }
 
     // Constructor para CREAR (sin supplier, se calcula en el servicio)
     public Factura(String numeroFactura, LocalDate fechaEmision, LocalDate fechaVencimiento,

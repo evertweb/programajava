@@ -1,9 +1,11 @@
 package com.forestech.modules.invoicing.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Invoice {
     private String id;
     private String supplierId;

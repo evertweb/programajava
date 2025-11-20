@@ -1,10 +1,12 @@
 package com.forestech.modules.fleet.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.forestech.shared.enums.VehicleCategory;
 import com.forestech.shared.utils.IdGenerator;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Vehicle {
-    private final String id;
+    private String id;
     private String name;
     private VehicleCategory category;
     private double capacity;
@@ -14,6 +16,10 @@ public class Vehicle {
     // ============================================================================
     // CONSTRUCTORES
     // ============================================================================
+
+    public Vehicle() {
+        this.id = null;
+    }
 
     /**
      * Constructor para CREAR nuevos vehículos (genera ID automático).

@@ -36,7 +36,8 @@ services:
     ports:
       - "${CONFIG_SERVER_PORT:-8888}:8888"
     depends_on:
-      - consul
+      consul:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: native
     healthcheck:
@@ -84,9 +85,12 @@ services:
     ports:
       - "8081:8081"
     depends_on:
-      - mysql
-      - consul
-      - config-server
+      mysql:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_CLOUD_CONSUL_HOST: consul
@@ -114,9 +118,12 @@ services:
     ports:
       - "8082:8082"
     depends_on:
-      - mysql
-      - consul
-      - config-server
+      mysql:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_CLOUD_CONSUL_HOST: consul
@@ -144,9 +151,12 @@ services:
     ports:
       - "8083:8083"
     depends_on:
-      - mysql
-      - consul
-      - config-server
+      mysql:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_CLOUD_CONSUL_HOST: consul
@@ -174,9 +184,12 @@ services:
     ports:
       - "8084:8084"
     depends_on:
-      - mysql
-      - consul
-      - config-server
+      mysql:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_CLOUD_CONSUL_HOST: consul
@@ -204,9 +217,12 @@ services:
     ports:
       - "8085:8085"
     depends_on:
-      - mysql
-      - consul
-      - config-server
+      mysql:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_CLOUD_CONSUL_HOST: consul
@@ -253,9 +269,12 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - consul
-      - config-server
-      - redis
+      consul:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_CLOUD_CONSUL_HOST: consul
@@ -280,10 +299,14 @@ services:
     ports:
       - "8086:8086"
     depends_on:
-      - mysql
-      - consul
-      - config-server
-      - redis
+      mysql:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_CLOUD_CONSUL_HOST: consul

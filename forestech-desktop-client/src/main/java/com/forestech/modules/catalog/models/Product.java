@@ -1,13 +1,20 @@
 package com.forestech.modules.catalog.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.forestech.shared.enums.MeasurementUnit;
 import com.forestech.shared.utils.IdGenerator;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Product {
-    private final String id;
+    private String id;
     private String name;
     private MeasurementUnit measurementUnit;
     private double unitPrice;
+
+    // Constructor vacío requerido por Jackson para deserialización
+    public Product() {
+        this.id = null;
+    }
 
     public Product(String name, MeasurementUnit measurementUnit, double unitPrice) {
         this.id = IdGenerator.generateFuelId();

@@ -1,5 +1,6 @@
 package com.forestech.modules.partners.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.forestech.shared.utils.IdGenerator;
 
 /**
@@ -9,11 +10,12 @@ import com.forestech.shared.utils.IdGenerator;
  * @version 2.0 (con CRUD completo)
  * @since Fase 4
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Supplier {
     // ============================================================================
     // ATRIBUTOS
     // ============================================================================
-    private final String id; // ID es final porque nunca cambia
+    private String id; // ID es final porque nunca cambia
     private String name;
     private String nit;
     private String telephone;
@@ -23,6 +25,10 @@ public class Supplier {
     // ============================================================================
     // CONSTRUCTORES
     // ============================================================================
+
+    public Supplier() {
+        this.id = null;
+    }
 
     /**
      * Constructor para CREAR nuevos proveedores (genera ID automático).

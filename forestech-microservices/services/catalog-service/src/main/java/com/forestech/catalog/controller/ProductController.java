@@ -2,7 +2,7 @@ package com.forestech.catalog.controller;
 
 import com.forestech.catalog.model.Product;
 import com.forestech.catalog.service.ProductService;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

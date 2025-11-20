@@ -117,6 +117,10 @@ public class InvoiceService {
         return facturaRepository.findById(id).orElseThrow(() -> new RuntimeException("Factura no encontrada"));
     }
 
+    public List<Factura> findAll() {
+        return facturaRepository.findAll();
+    }
+
     private String generarNumeroFactura() {
         return "F-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
                 + "-" + String.format("%04d", facturaRepository.count() + 1);

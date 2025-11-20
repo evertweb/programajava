@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/movements")
@@ -19,6 +20,11 @@ import java.net.URI;
 public class MovementController {
 
     private final MovementService movementService;
+
+    @GetMapping
+    public ResponseEntity<List<Movement>> getAllMovements() {
+        return ResponseEntity.ok(movementService.getAllMovements());
+    }
 
     @PostMapping("/entrada")
     public ResponseEntity<Movement> registrarEntrada(@RequestBody MovementRequest request) {

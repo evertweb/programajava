@@ -10,12 +10,12 @@
     <!-- INFORMACIÓN DEL PROYECTO                  -->
     <!-- ========================================= -->
     <groupId>com.forestech</groupId>
-    <artifactId>forestech-cli-java</artifactId>
+    <artifactId>forestech-desktop-client</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
     
-    <name>Forestech CLI</name>
-    <description>Sistema CLI de gestión de combustibles para Forestech</description>
+    <name>Forestech Desktop Client</name>
+    <description>Cliente de escritorio para el sistema de gestión de combustibles Forestech</description>
     
     <!-- ========================================= -->
     <!-- PROPIEDADES DEL PROYECTO                  -->
