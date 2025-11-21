@@ -43,9 +43,32 @@ public class InvoiceService {
             // PASO 2: Validar y calcular totales
             BigDecimal subtotal = BigDecimal.ZERO;
             for (DetalleRequest detalle : request.getDetalles()) {
-                ProductDTO product = catalogClient.getProductById(detalle.getProductId());
+                ProductDTO product = null;
+                
+                // Intentar buscar producto existente
+                if (detalle.getProductId() != null && !detalle.getProductId().isEmpty()) {
+                    try {
+                        product = catalogClient.getProductById(detalle.getProductId());
+                    } catch (Exception e) {
+                        log.warn("Producto no encontrado por ID: " + detalle.getProductId());
+                    }
+                }
+
+                // Si no existe, intentar crearlo si hay nombre
+                if (product == null && detalle.getProductName() != null && !detalle.getProductName().isEmpty()) {
+                    log.info("Creando nuevo producto automáticamente: " + detalle.getProductName());
+                    ProductDTO newProduct = new ProductDTO();
+                    newProduct.setName(detalle.getProductName());
+                    newProduct.setUnitPrice(detalle.getPrecioUnitario());
+                    newProduct.setMeasurementUnit("UNIDAD"); // Default
+                    product = catalogClient.createProduct(newProduct);
+                    
+                    // Actualizar el ID en el request para referencias futuras
+                    detalle.setProductId(product.getId());
+                }
+
                 if (product == null) {
-                    throw new RuntimeException("Producto no encontrado: " + detalle.getProductId());
+                    throw new RuntimeException("Producto no encontrado y no se pudo crear (falta nombre): " + detalle.getProductId());
                 }
 
                 BigDecimal lineSubtotal = detalle.getCantidad().multiply(detalle.getPrecioUnitario());
@@ -69,7 +92,9 @@ public class InvoiceService {
             // Crear detalles
             List<DetalleFactura> detalles = new ArrayList<>();
             for (DetalleRequest detalleReq : request.getDetalles()) {
+                // El producto ya debe existir o haber sido creado en el paso 2
                 ProductDTO product = catalogClient.getProductById(detalleReq.getProductId());
+                
                 DetalleFactura detalle = new DetalleFactura();
                 detalle.setFactura(factura);
                 detalle.setProductId(detalleReq.getProductId());
@@ -87,6 +112,7 @@ public class InvoiceService {
             for (DetalleFactura detalle : factura.getDetalles()) {
                 MovementRequest movRequest = new MovementRequest();
                 movRequest.setProductId(detalle.getProductId());
+                movRequest.setInvoiceId(factura.getId());
                 movRequest.setQuantity(detalle.getCantidad());
                 movRequest.setUnitPrice(detalle.getPrecioUnitario());
                 movRequest.setDescription("Factura: " + factura.getNumeroFactura());
@@ -172,5 +198,89 @@ public class InvoiceService {
     private String generarNumeroFactura() {
         return "F-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
                 + "-" + String.format("%04d", facturaRepository.count() + 1);
+    }
+
+    @Transactional
+    public void regenerateInventoryFromInvoices() {
+        log.info("Iniciando regeneración de inventario...");
+        List<Factura> facturas = facturaRepository.findAll();
+        
+        for (Factura factura : facturas) {
+            if (factura.getEstado() == Factura.EstadoFactura.ANULADA) continue;
+
+            log.info("Procesando factura: " + factura.getNumeroFactura());
+            boolean needsSave = false;
+
+            for (DetalleFactura detalle : factura.getDetalles()) {
+                try {
+                    String productId = detalle.getProductId();
+                    ProductDTO product = null;
+
+                    // 1. Intentar buscar por ID si existe
+                    if (productId != null && !productId.isEmpty()) {
+                        try {
+                            product = catalogClient.getProductById(productId);
+                        } catch (Exception e) {
+                            log.warn("Producto ID {} no encontrado, intentando por nombre", productId);
+                        }
+                    }
+
+                    // 2. Si no se encuentra, buscar por Nombre
+                    if (product == null) {
+                        try {
+                            List<ProductDTO> found = catalogClient.searchProducts(detalle.getProducto());
+                            if (found != null && !found.isEmpty()) {
+                                product = found.get(0);
+                                log.info("Producto encontrado por nombre: {} -> {}", detalle.getProducto(), product.getId());
+                            }
+                        } catch (Exception e) {
+                            log.warn("Error buscando producto por nombre: {}", detalle.getProducto());
+                        }
+                    }
+
+                    // 3. Si sigue sin encontrarse, crear nuevo
+                    if (product == null) {
+                        log.info("Creando nuevo producto para regeneración: {}", detalle.getProducto());
+                        ProductDTO newProduct = new ProductDTO();
+                        newProduct.setName(detalle.getProducto());
+                        newProduct.setUnitPrice(detalle.getPrecioUnitario());
+                        newProduct.setMeasurementUnit("UNIDAD"); // Default
+                        product = catalogClient.createProduct(newProduct);
+                    }
+
+                    if (product == null) {
+                        log.error("No se pudo resolver el producto para detalle: " + detalle.getProducto());
+                        continue;
+                    }
+
+                    // 4. Actualizar Detalle con el ID correcto
+                    if (product != null && !product.getId().equals(detalle.getProductId())) {
+                        detalle.setProductId(product.getId());
+                        needsSave = true;
+                    }
+
+                    // 5. Registrar movimiento de entrada
+                    MovementRequest movRequest = new MovementRequest();
+                    movRequest.setProductId(product.getId());
+                    movRequest.setInvoiceId(factura.getId());
+                    movRequest.setQuantity(detalle.getCantidad());
+                    movRequest.setUnitPrice(detalle.getPrecioUnitario());
+                    movRequest.setDescription("Regeneración: " + factura.getNumeroFactura());
+
+                    MovementDTO movement = inventoryClient.registrarEntrada(movRequest);
+                    
+                    detalle.setMovementId(movement.getId());
+                    needsSave = true;
+                    
+                } catch (Exception e) {
+                    log.error("Error regenerando ítem de factura " + factura.getNumeroFactura(), e);
+                }
+            }
+
+            if (needsSave) {
+                facturaRepository.save(factura);
+            }
+        }
+        log.info("Regeneración completada.");
     }
 }

@@ -7,8 +7,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.math.BigDecimal;
 
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 @FeignClient(name = "catalog-service")
 public interface CatalogClient {
     @GetMapping("/api/products/{id}")
     ProductDTO getProductById(@PathVariable("id") String id);
+
+    @GetMapping("/api/products/search")
+    java.util.List<ProductDTO> searchProducts(@org.springframework.web.bind.annotation.RequestParam("name") String name);
+
+    @PostMapping("/api/products")
+    ProductDTO createProduct(@RequestBody ProductDTO product);
 }

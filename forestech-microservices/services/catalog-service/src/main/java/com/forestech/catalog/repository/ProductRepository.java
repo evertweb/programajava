@@ -29,7 +29,7 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     /**
      * Buscar por unidad de medida
      */
-    List<Product> findByMeasurementUnit(Product.MeasurementUnit unit);
+    List<Product> findByMeasurementUnit(String unit);
 
     /**
      * Verificar si existe un producto por nombre (exacto)

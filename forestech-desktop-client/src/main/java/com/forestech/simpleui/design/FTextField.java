@@ -95,4 +95,12 @@ public class FTextField extends JPanel {
         textField.setEnabled(enabled);
         label.setEnabled(enabled);
     }
+
+    public void setHorizontalAlignment(int alignment) {
+        textField.setHorizontalAlignment(alignment);
+    }
+
+    public void requestFocus() {
+        textField.requestFocus();
+    }
 }

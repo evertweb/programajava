@@ -33,6 +33,7 @@ public class MovementController {
         movement.setMovementType(Movement.MovementType.ENTRADA);
         movement.setProductId(request.getProductId());
         movement.setVehicleId(request.getVehicleId());
+        movement.setInvoiceId(request.getInvoiceId());
         movement.setQuantity(request.getQuantity());
         movement.setUnitPrice(request.getUnitPrice());
         movement.setDescription(request.getDescription());
@@ -64,6 +65,12 @@ public class MovementController {
         return ResponseEntity.ok(new StockResponse(productId, stock));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMovement(@PathVariable String id) {
+        movementService.deleteMovement(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @ExceptionHandler({ MovementService.ProductNotFoundException.class,
             MovementService.VehicleNotFoundException.class })
     public ResponseEntity<String> handleNotFound(RuntimeException ex) {
@@ -74,6 +81,7 @@ public class MovementController {
     static class MovementRequest {
         private String productId;
         private String vehicleId;
+        private String invoiceId;
         private BigDecimal quantity;
         private BigDecimal unitPrice;
         private String description;

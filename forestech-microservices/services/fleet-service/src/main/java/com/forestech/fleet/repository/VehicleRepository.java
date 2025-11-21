@@ -16,7 +16,7 @@ public interface VehicleRepository extends JpaRepository<Vehicle, String> {
 
     List<Vehicle> findByIsActiveTrue();
 
-    List<Vehicle> findByCategory(Vehicle.VehicleCategory category);
+    List<Vehicle> findByCategory(String category);
 
     boolean existsByPlacaIgnoreCase(String placa);
 

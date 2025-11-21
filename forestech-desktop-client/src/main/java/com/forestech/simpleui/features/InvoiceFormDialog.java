@@ -30,6 +30,7 @@ public class InvoiceFormDialog extends JDialog {
 
     // Detail Fields
     private JComboBox<Product> productCombo;
+    private FTextField unitField; // Read-only display
     private FTextField quantityField;
     private FTextField priceField;
     private FButton addButton;
@@ -69,12 +70,18 @@ public class InvoiceFormDialog extends JDialog {
 
     private void initUI() {
         // --- TOP: Master Info ---
-        JPanel masterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel masterPanel = new JPanel(new GridBagLayout());
         masterPanel.setBackground(Color.WHITE);
-        masterPanel.setBorder(BorderFactory.createTitledBorder("Datos del Cliente"));
+        masterPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Datos del Cliente"),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+
+        GridBagConstraints gbcMaster = new GridBagConstraints();
+        gbcMaster.insets = new Insets(5, 5, 5, 5);
+        gbcMaster.fill = GridBagConstraints.HORIZONTAL;
 
         supplierCombo = new JComboBox<>();
-        supplierCombo.setPreferredSize(new Dimension(300, 40));
+        supplierCombo.setPreferredSize(new Dimension(400, 45));
         supplierCombo.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
@@ -87,8 +94,15 @@ public class InvoiceFormDialog extends JDialog {
             }
         });
 
-        masterPanel.add(new JLabel("Proveedor/Cliente:"));
-        masterPanel.add(supplierCombo);
+        gbcMaster.gridx = 0;
+        gbcMaster.gridy = 0;
+        gbcMaster.weightx = 0.0;
+        masterPanel.add(new JLabel("Proveedor/Cliente:"), gbcMaster);
+
+        gbcMaster.gridx = 1;
+        gbcMaster.gridy = 0;
+        gbcMaster.weightx = 1.0;
+        masterPanel.add(supplierCombo, gbcMaster);
 
         add(masterPanel, BorderLayout.NORTH);
 
@@ -97,13 +111,45 @@ public class InvoiceFormDialog extends JDialog {
         centerPanel.setBackground(Color.WHITE);
         centerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Input Row
-        JPanel inputPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        // Input Row (Redesigned with GridBagLayout)
+        JPanel inputPanel = new JPanel(new GridBagLayout());
         inputPanel.setBackground(Color.WHITE);
-        inputPanel.setBorder(BorderFactory.createTitledBorder("Agregar Item"));
+        inputPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Agregar Item"),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Row 1: Labels
+        gbc.gridy = 0;
+        gbc.weightx = 0.4;
+        gbc.gridx = 0;
+        inputPanel.add(new JLabel("Producto"), gbc);
+
+        gbc.weightx = 0.15;
+        gbc.gridx = 1;
+        inputPanel.add(new JLabel("Unidad"), gbc);
+
+        gbc.weightx = 0.15;
+        gbc.gridx = 2;
+        inputPanel.add(new JLabel("Cantidad"), gbc);
+
+        gbc.weightx = 0.15;
+        gbc.gridx = 3;
+        inputPanel.add(new JLabel("Precio U."), gbc);
+
+        gbc.weightx = 0.15;
+        gbc.gridx = 4;
+        inputPanel.add(new JLabel("Acción"), gbc);
+
+        // Row 2: Inputs
+        gbc.gridy = 1;
+
+        // Product Combo
         productCombo = new JComboBox<>();
-        productCombo.setPreferredSize(new Dimension(250, 40));
+        productCombo.setPreferredSize(new Dimension(300, 45));
         productCombo.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
@@ -116,54 +162,89 @@ public class InvoiceFormDialog extends JDialog {
             }
         });
         productCombo.addActionListener(e -> updatePriceFromProduct());
+        gbc.gridx = 0;
+        gbc.weightx = 0.4;
+        inputPanel.add(productCombo, gbc);
 
-        quantityField = new FTextField("Cant.");
-        quantityField.setPreferredSize(new Dimension(80, 50));
+        // Unit Field
+        unitField = new FTextField("");
+        unitField.setPreferredSize(new Dimension(100, 45));
+        unitField.setEnabled(false);
+        unitField.setHorizontalAlignment(SwingConstants.CENTER);
+        gbc.gridx = 1;
+        gbc.weightx = 0.15;
+        inputPanel.add(unitField, gbc);
 
-        priceField = new FTextField("Precio U.");
-        priceField.setPreferredSize(new Dimension(100, 50));
+        // Quantity Field
+        quantityField = new FTextField("");
+        quantityField.setPreferredSize(new Dimension(100, 45));
+        gbc.gridx = 2;
+        gbc.weightx = 0.15;
+        inputPanel.add(quantityField, gbc);
 
+        // Price Field
+        priceField = new FTextField("");
+        priceField.setPreferredSize(new Dimension(120, 45));
+        gbc.gridx = 3;
+        gbc.weightx = 0.15;
+        inputPanel.add(priceField, gbc);
+
+        // Add Button
         addButton = new FButton("Agregar", FButton.Variant.SECONDARY);
+        addButton.setPreferredSize(new Dimension(100, 45));
         addButton.addActionListener(e -> addDetail());
-
-        inputPanel.add(new JLabel("Producto:"));
-        inputPanel.add(productCombo);
-        inputPanel.add(quantityField);
-        inputPanel.add(priceField);
-        inputPanel.add(addButton);
+        gbc.gridx = 4;
+        gbc.weightx = 0.15;
+        inputPanel.add(addButton, gbc);
 
         centerPanel.add(inputPanel, BorderLayout.NORTH);
 
         // Table
-        String[] columns = { "Producto", "Cantidad", "Precio U.", "Subtotal", "Acción" };
+        String[] columns = { "Producto", "Unidad", "Cantidad", "Precio U.", "Subtotal", "Acción" };
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 4; // Only action button (handled by click)
+                return column == 5; // Only action button (handled by click)
             }
         };
         detailsTable = new FTable();
         detailsTable.setModel(tableModel);
+        detailsTable.setRowHeight(35); // Taller rows
 
         JScrollPane scrollPane = new JScrollPane(detailsTable);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
         centerPanel.add(scrollPane, BorderLayout.CENTER);
 
         // Totals Panel
-        JPanel totalsPanel = new JPanel(new GridLayout(3, 2, 5, 5));
+        JPanel totalsPanel = new JPanel(new GridLayout(3, 2, 10, 5));
         totalsPanel.setBackground(Color.WHITE);
-        totalsPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        totalsPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
-        totalsPanel.add(new JLabel("Subtotal:"));
+        Font labelFont = ThemeConstants.FONT_REGULAR.deriveFont(Font.BOLD, 14f);
+        Font valueFont = ThemeConstants.FONT_REGULAR.deriveFont(14f);
+
+        JLabel lblSub = new JLabel("Subtotal:");
+        lblSub.setFont(labelFont);
+        totalsPanel.add(lblSub);
+
         subtotalLabel = new JLabel("0.00");
         subtotalLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        subtotalLabel.setFont(valueFont);
         totalsPanel.add(subtotalLabel);
 
-        totalsPanel.add(new JLabel("IVA (13%):"));
+        JLabel lblIva = new JLabel("IVA (13%):");
+        lblIva.setFont(labelFont);
+        totalsPanel.add(lblIva);
+
         ivaLabel = new JLabel("0.00");
         ivaLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        ivaLabel.setFont(valueFont);
         totalsPanel.add(ivaLabel);
 
-        totalsPanel.add(new JLabel("TOTAL:"));
+        JLabel lblTotal = new JLabel("TOTAL:");
+        lblTotal.setFont(ThemeConstants.FONT_H2);
+        totalsPanel.add(lblTotal);
+
         totalLabel = new JLabel("0.00");
         totalLabel.setFont(ThemeConstants.FONT_H2);
         totalLabel.setForeground(ThemeConstants.PRIMARY_COLOR);
@@ -179,14 +260,16 @@ public class InvoiceFormDialog extends JDialog {
         add(centerPanel, BorderLayout.CENTER);
 
         // --- BOTTOM: Actions ---
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
         buttonPanel.setBackground(ThemeConstants.BACKGROUND_COLOR);
         buttonPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, ThemeConstants.BORDER_COLOR));
 
         cancelButton = new FButton("Cancelar", FButton.Variant.SECONDARY);
+        cancelButton.setPreferredSize(new Dimension(120, 45));
         cancelButton.addActionListener(e -> dispose());
 
         saveButton = new FButton("Guardar Factura", FButton.Variant.PRIMARY);
+        saveButton.setPreferredSize(new Dimension(180, 45));
         saveButton.setEnabled(false);
         saveButton.addActionListener(e -> saveInvoice());
 
@@ -224,8 +307,17 @@ public class InvoiceFormDialog extends JDialog {
 
     private void updatePriceFromProduct() {
         Product p = (Product) productCombo.getSelectedItem();
-        if (p != null && p.getUnitPrice() != null) {
-            priceField.setText(p.getUnitPrice().toString());
+        if (p != null) {
+            if (p.getUnitPrice() != null) {
+                priceField.setText(p.getUnitPrice().toString());
+            }
+            if (p.getPresentation() != null) {
+                unitField.setText(p.getPresentation());
+            } else if (p.getMeasurementUnit() != null) {
+                unitField.setText(p.getMeasurementUnit());
+            } else {
+                unitField.setText("");
+            }
         }
     }
 
@@ -264,6 +356,7 @@ public class InvoiceFormDialog extends JDialog {
         // Add to table
         Vector<Object> row = new Vector<>();
         row.add(p.getName());
+        row.add(p.getPresentation() != null ? p.getPresentation() : p.getMeasurementUnit()); // Add Unit
         row.add(qty);
         row.add(price);
         row.add(qty.multiply(price));

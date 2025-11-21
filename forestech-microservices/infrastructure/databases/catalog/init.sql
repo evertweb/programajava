@@ -4,7 +4,7 @@ USE catalog_db;
 CREATE TABLE IF NOT EXISTS oil_products (
     id VARCHAR(50) PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    measurement_unit ENUM('LITROS', 'GALONES', 'BARRILES') NOT NULL,
+    measurement_unit VARCHAR(50) NOT NULL,
     unit_price DECIMAL(10,2) NOT NULL,
     description TEXT,
     is_active BOOLEAN DEFAULT TRUE,

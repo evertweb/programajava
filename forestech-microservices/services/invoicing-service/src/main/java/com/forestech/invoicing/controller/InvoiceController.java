@@ -41,9 +41,9 @@ public class InvoiceController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Factura> updateFactura(@PathVariable String id, @RequestBody FacturaRequest request) {
-        Factura factura = invoiceService.updateInvoice(id, request);
-        return ResponseEntity.ok(factura);
+    @PostMapping("/regenerate-inventory")
+    public ResponseEntity<String> regenerateInventory() {
+        invoiceService.regenerateInventoryFromInvoices();
+        return ResponseEntity.ok("Inventario regenerado exitosamente basado en facturas existentes.");
     }
 }

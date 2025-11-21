@@ -49,9 +49,7 @@ public class MovementPanel extends JPanel {
         refreshBtn.addActionListener(e -> loadData());
         actions.add(refreshBtn);
 
-        FButton entradaBtn = new FButton("Registrar Entrada", FButton.Variant.PRIMARY);
-        entradaBtn.addActionListener(e -> openCreateDialog("ENTRADA"));
-        actions.add(entradaBtn);
+        // Entrada button removed as per new workflow (Invoices -> Inventory)
 
         FButton salidaBtn = new FButton("Registrar Salida", FButton.Variant.DANGER);
         salidaBtn.addActionListener(e -> openCreateDialog("SALIDA"));

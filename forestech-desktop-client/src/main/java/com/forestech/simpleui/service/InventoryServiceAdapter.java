@@ -43,10 +43,11 @@ public class InventoryServiceAdapter {
     }
 
     public java.math.BigDecimal getStock(String productId) throws Exception {
-        String response = client.get("/api/movements/stock/" + productId);
-        // Response is likely just a number or a simple JSON wrapper.
-        // Assuming it returns a raw number string based on typical Spring Boot
-        // RestController returning BigDecimal.
-        return new java.math.BigDecimal(response);
+        String json = client.get("/api/movements/stock/" + productId);
+        com.fasterxml.jackson.databind.JsonNode node = mapper.readTree(json);
+        if (node.has("stock")) {
+            return new java.math.BigDecimal(node.get("stock").asText());
+        }
+        return java.math.BigDecimal.ZERO;
     }
 }

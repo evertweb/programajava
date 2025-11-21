@@ -114,8 +114,8 @@ public class StockPanel extends JPanel {
     }
 
     private void updateTable(StockData data) {
-        String[] columns = { "Producto", "Categoría", "Stock Actual", "Estado" };
-        Object[][] tableData = new Object[data.products.size()][4];
+        String[] columns = { "Producto", "Categoría", "Unidad", "Stock Actual", "Estado" };
+        Object[][] tableData = new Object[data.products.size()][5];
 
         for (int i = 0; i < data.products.size(); i++) {
             Product p = data.products.get(i);
@@ -123,14 +123,15 @@ public class StockPanel extends JPanel {
 
             tableData[i][0] = p.getName();
             tableData[i][1] = p.getCategory();
-            tableData[i][2] = stock;
+            tableData[i][2] = p.getPresentation() != null ? p.getPresentation() : p.getMeasurementUnit();
+            tableData[i][3] = stock;
 
             if (stock.compareTo(BigDecimal.ZERO) <= 0) {
-                tableData[i][3] = "AGOTADO";
+                tableData[i][4] = "AGOTADO";
             } else if (stock.compareTo(new BigDecimal("10")) < 0) {
-                tableData[i][3] = "BAJO";
+                tableData[i][4] = "BAJO";
             } else {
-                tableData[i][3] = "OK";
+                tableData[i][4] = "OK";
             }
         }
 

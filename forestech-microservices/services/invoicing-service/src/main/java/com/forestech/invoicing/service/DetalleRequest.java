@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 @Data
 public class DetalleRequest {
     private String productId;
+    private String productName; // Optional: For new products
     private BigDecimal cantidad;
     private BigDecimal precioUnitario;
 }

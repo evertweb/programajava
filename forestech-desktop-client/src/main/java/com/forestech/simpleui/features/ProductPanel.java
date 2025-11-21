@@ -20,7 +20,7 @@ public class ProductPanel extends JPanel {
     private final FTable table;
     private final CatalogServiceAdapter service;
     private boolean loaded = false;
-    private List<Product> currentProducts;
+    // private List<Product> currentProducts;
 
     public ProductPanel() {
         setLayout(new BorderLayout());
@@ -40,6 +40,8 @@ public class ProductPanel extends JPanel {
         FButton refreshBtn = new FButton("Refrescar", FButton.Variant.SECONDARY);
         refreshBtn.addActionListener(e -> loadData());
 
+        // Catalog is now Read-Only (Managed via Invoices)
+        /*
         FButton createBtn = new FButton("Nuevo", FButton.Variant.PRIMARY);
         createBtn.addActionListener(e -> openCreateDialog());
 
@@ -48,13 +50,14 @@ public class ProductPanel extends JPanel {
 
         FButton deleteBtn = new FButton("Eliminar", FButton.Variant.DANGER);
         deleteBtn.addActionListener(e -> deleteProduct());
+        */
 
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         actions.setOpaque(false);
         actions.add(refreshBtn);
-        actions.add(createBtn);
-        actions.add(editBtn);
-        actions.add(deleteBtn);
+        // actions.add(createBtn);
+        // actions.add(editBtn);
+        // actions.add(deleteBtn);
 
         header.add(actions, BorderLayout.EAST);
 
@@ -104,6 +107,7 @@ public class ProductPanel extends JPanel {
                 });
     }
 
+    /*
     private void openCreateDialog() {
         Window window = SwingUtilities.getWindowAncestor(this);
         if (window instanceof Frame) {
@@ -159,16 +163,19 @@ public class ProductPanel extends JPanel {
                     });
         }
     }
+    */
 
+    /*
     private Product getSelectedProduct() {
         int row = table.getSelectedRow();
         if (row == -1 || currentProducts == null || row >= currentProducts.size())
             return null;
         return currentProducts.get(row);
     }
+    */
 
     private void updateTable(List<Product> products) {
-        this.currentProducts = products;
+        // this.currentProducts = products;
         String[] columns = { "ID", "Nombre", "Precio", "Unidad", "Activo" };
         Object[][] data = new Object[products.size()][5];
 
@@ -177,7 +184,7 @@ public class ProductPanel extends JPanel {
             data[i][0] = p.getId();
             data[i][1] = p.getName();
             data[i][2] = p.getUnitPrice();
-            data[i][3] = p.getMeasurementUnit();
+            data[i][3] = p.getPresentation() != null ? p.getPresentation() : p.getMeasurementUnit();
             data[i][4] = p.getIsActive() ? "Sí" : "No";
         }
 

@@ -20,9 +20,10 @@ echo ""
 echo "🔨 [1/3] Compilando proyecto..."
 cd ..
 mvn clean package -q
+MVN_EXIT_CODE=$?
 cd build-scripts
 
-if [ $? -ne 0 ]; then
+if [ $MVN_EXIT_CODE -ne 0 ]; then
     echo ""
     echo "❌ ERROR: Falló la compilación"
     echo "   Revisa los errores de Maven arriba"
@@ -33,23 +34,29 @@ echo "   ✅ Compilación exitosa"
 echo ""
 
 # ============================================================================
-# PASO 2: COPIAR A WINDOWS
+# PASO 2: COPIAR A WINDOWS (Si aplica)
 # ============================================================================
-echo "📦 [2/3] Copiando JAR a Windows..."
-
-# Crear directorio si no existe
 WINDOWS_DIR="/mnt/c/forestech-build"
-if [ ! -d "$WINDOWS_DIR" ]; then
-    mkdir -p "$WINDOWS_DIR"
+
+if [ -d "/mnt/c" ]; then
+    echo "📦 [2/3] Detectado entorno WSL. Copiando JAR a Windows..."
+
+    # Crear directorio si no existe
+    if [ ! -d "$WINDOWS_DIR" ]; then
+        mkdir -p "$WINDOWS_DIR"
+    fi
+
+    # Copiar JAR
+    cp ../target/forestech-app.jar "$WINDOWS_DIR/"
+    echo "   ✅ JAR copiado a: C:\\forestech-build\\forestech-app.jar"
+
+    # Copiar XML de Launch4j (siempre sobrescribe)
+    cp launch4j-config.xml "$WINDOWS_DIR/forestech.xml"
+    echo "   ✅ XML copiado a: C:\\forestech-build\\forestech.xml"
+else
+    echo "🐧 [2/3] Entorno Linux nativo detectado (No WSL)."
+    echo "   ⏭️  Saltando copia a Windows."
 fi
-
-# Copiar JAR
-cp ../target/forestech-app.jar "$WINDOWS_DIR/"
-echo "   ✅ JAR copiado a: C:\\forestech-build\\forestech-app.jar"
-
-# Copiar XML de Launch4j (siempre sobrescribe)
-cp launch4j-config.xml "$WINDOWS_DIR/forestech.xml"
-echo "   ✅ XML copiado a: C:\\forestech-build\\forestech.xml"
 echo ""
 
 # ============================================================================

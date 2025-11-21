@@ -12,6 +12,7 @@ public class Product {
     private String description;
     private BigDecimal unitPrice;
     private String measurementUnit;
+    private String presentation;
     private String category;
     private boolean isActive;
     private String createdAt;
@@ -87,6 +88,14 @@ public class Product {
 
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getPresentation() {
+        return presentation;
+    }
+
+    public void setPresentation(String presentation) {
+        this.presentation = presentation;
     }
 
     @Override

@@ -34,9 +34,11 @@ public class Product {
     private String name;
 
     @NotNull(message = "La unidad de medida es obligatoria")
-    @Enumerated(EnumType.STRING)
-    @Column(name = "measurement_unit", nullable = false)
-    private MeasurementUnit measurementUnit;
+    @Column(name = "measurement_unit", nullable = false, length = 50)
+    private String measurementUnit;
+
+    @Column(name = "presentation", length = 50)
+    private String presentation;
 
     @NotNull(message = "El precio unitario es obligatorio")
     @DecimalMin(value = "0.0", inclusive = false, message = "El precio debe ser mayor a 0")
@@ -46,6 +48,7 @@ public class Product {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @lombok.Builder.Default
     @Column(name = "is_active")
     private Boolean isActive = true;
 
@@ -56,8 +59,4 @@ public class Product {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    public enum MeasurementUnit {
-        LITROS, GALONES, BARRILES, GALON, CANECA, CUARTO, UNIDAD
-    }
 }

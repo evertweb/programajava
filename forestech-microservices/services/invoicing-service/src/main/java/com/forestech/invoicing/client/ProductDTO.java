@@ -9,4 +9,5 @@ public class ProductDTO {
     private String name;
     private BigDecimal unitPrice;
     private String measurementUnit;
+    private String presentation;
 }

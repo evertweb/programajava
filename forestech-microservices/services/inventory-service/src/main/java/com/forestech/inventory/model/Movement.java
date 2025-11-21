@@ -25,7 +25,13 @@ public class Movement {
     @Column(name = "vehicle_id")
     private String vehicleId;
 
+    @Column(name = "invoice_id")
+    private String invoiceId;
+
     private BigDecimal quantity;
+
+    @Column(name = "remaining_quantity")
+    private BigDecimal remainingQuantity;
 
     @Column(name = "unit_price")
     private BigDecimal unitPrice;

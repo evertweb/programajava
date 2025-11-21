@@ -98,6 +98,13 @@ public class MovementFormDialog extends JDialog {
                 return this;
             }
         });
+        productCombo.addActionListener(e -> {
+            Product p = (Product) productCombo.getSelectedItem();
+            if (p != null && p.getUnitPrice() != null) {
+                priceField.setText(p.getUnitPrice().toString());
+            }
+            validateForm();
+        });
         content.add(productCombo);
         content.add(Box.createVerticalStrut(15));
 
