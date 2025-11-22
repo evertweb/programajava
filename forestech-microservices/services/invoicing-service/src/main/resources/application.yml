@@ -7,9 +7,9 @@ spring:
   config:
     import: "optional:configserver:http://config-server:8888/"
   datasource:
-    url: jdbc:mysql://mysql-forestech:3306/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: forestech_root_2024
+    url: jdbc:mysql://${MYSQL_HOST:mysql-forestech}:${MYSQL_PORT:3306}/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:forestech_root_2024}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:

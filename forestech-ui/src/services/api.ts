@@ -1,12 +1,19 @@
 /**
  * API Configuration
  * Base URL configuration for microservices
+ *
+ * Environment variable VITE_API_URL can be used to override the default gateway URL.
+ * This allows the frontend to connect to different backends:
+ * - Local development: http://localhost:8080/api (default)
+ * - Codespaces: Use the forwarded port URL
+ * - Production: Use the production API gateway URL
  */
 
 import axios from 'axios';
 
 // Base URL - All requests go through API Gateway
-const GATEWAY_URL = 'http://localhost:8080/api';
+// Can be overridden via environment variable for different environments
+const GATEWAY_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 // All services use the same gateway URL (routing handled by gateway)
 export const API_BASE_URLS = {

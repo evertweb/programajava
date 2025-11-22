@@ -12,9 +12,9 @@ spring:
         health-check-path: /actuator/health
         health-check-interval: 10s
   datasource:
-    url: jdbc:mysql://localhost:3307/FORESTECHOIL?useSSL=false&serverTimezone=UTC
-    username: root
-    password: forestech_root_2024
+    url: jdbc:mysql://${MYSQL_HOST:mysql-forestech}:${MYSQL_PORT:3306}/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:forestech_root_2024}
   jpa:
     hibernate:
       ddl-auto: validate

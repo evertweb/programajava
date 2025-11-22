@@ -23,19 +23,19 @@ spring:
 # Datasource Configuration (Multi-datasource simulation pointing to same DB for now)
 datasource:
   catalog:
-    jdbc-url: jdbc:mysql://mysql-forestech:3306/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: ${MYSQL_ROOT_PASSWORD:hp}
+    jdbc-url: jdbc:mysql://${MYSQL_HOST:mysql-forestech}:${MYSQL_PORT:3306}/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:forestech_root_2024}
     driver-class-name: com.mysql.cj.jdbc.Driver
   fleet:
-    jdbc-url: jdbc:mysql://mysql-forestech:3306/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: ${MYSQL_ROOT_PASSWORD:hp}
+    jdbc-url: jdbc:mysql://${MYSQL_HOST:mysql-forestech}:${MYSQL_PORT:3306}/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:forestech_root_2024}
     driver-class-name: com.mysql.cj.jdbc.Driver
   inventory:
-    jdbc-url: jdbc:mysql://mysql-forestech:3306/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: ${MYSQL_ROOT_PASSWORD:hp}
+    jdbc-url: jdbc:mysql://${MYSQL_HOST:mysql-forestech}:${MYSQL_PORT:3306}/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:forestech_root_2024}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 logging:

@@ -1,0 +1,32 @@
+# Base image for ForestechOil development in Codespaces
+FROM mcr.microsoft.com/devcontainers/base:ubuntu-22.04
+
+# Labels
+LABEL maintainer="ForestechOil Team"
+LABEL description="Development container for ForestechOil microservices"
+
+# Avoid prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install essential tools
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    git \
+    vim \
+    htop \
+    jq \
+    unzip \
+    net-tools \
+    iputils-ping \
+    dnsutils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create workspace directory
+WORKDIR /workspaces/forestechOil
+
+# Set default shell to bash
+SHELL ["/bin/bash", "-c"]
+
+# Default command
+CMD ["sleep", "infinity"]

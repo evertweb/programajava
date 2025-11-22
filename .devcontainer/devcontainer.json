@@ -1,0 +1,103 @@
+{
+  "name": "ForestechOil Development",
+  "dockerComposeFile": "docker-compose.devcontainer.yml",
+  "service": "devcontainer",
+  "workspaceFolder": "/workspaces/forestechOil",
+
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": true,
+      "installDockerComposeV2": true,
+      "dockerDashComposeVersion": "v2"
+    },
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "17",
+      "installMaven": true,
+      "mavenVersion": "3.9.6"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest",
+      "ppa": true
+    }
+  },
+
+  "forwardPorts": [
+    8080,
+    8081,
+    8082,
+    8083,
+    8084,
+    8085,
+    8086,
+    8500,
+    8888,
+    3307,
+    6379,
+    5173
+  ],
+
+  "portsAttributes": {
+    "8080": { "label": "API Gateway", "onAutoForward": "notify" },
+    "8081": { "label": "Catalog Service", "onAutoForward": "silent" },
+    "8082": { "label": "Fleet Service", "onAutoForward": "silent" },
+    "8083": { "label": "Inventory Service", "onAutoForward": "silent" },
+    "8084": { "label": "Partners Service", "onAutoForward": "silent" },
+    "8085": { "label": "Invoicing Service", "onAutoForward": "silent" },
+    "8086": { "label": "Reports Service", "onAutoForward": "silent" },
+    "8500": { "label": "Consul UI", "onAutoForward": "notify" },
+    "8888": { "label": "Config Server", "onAutoForward": "silent" },
+    "3307": { "label": "MySQL", "onAutoForward": "silent" },
+    "6379": { "label": "Redis", "onAutoForward": "silent" },
+    "5173": { "label": "Vite Dev Server", "onAutoForward": "notify" }
+  },
+
+  "postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
+  "postStartCommand": "bash .devcontainer/scripts/post-start.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vmware.vscode-boot-dev-pack",
+        "vscjava.vscode-spring-initializr",
+        "vscjava.vscode-spring-boot-dashboard",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "ms-azuretools.vscode-docker",
+        "redhat.vscode-yaml",
+        "eamodio.gitlens"
+      ],
+      "settings": {
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "java.server.launchMode": "Standard",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[java]": {
+          "editor.defaultFormatter": "redhat.java"
+        }
+      }
+    },
+    "jetbrains": {
+      "backend": "IntelliJ"
+    }
+  },
+
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "16gb",
+    "storage": "64gb"
+  },
+
+  "remoteEnv": {
+    "MYSQL_HOST": "mysql-forestech",
+    "MYSQL_PORT": "3306",
+    "MYSQL_ROOT_PASSWORD": "forestech_root_2024",
+    "MYSQL_DATABASE": "FORESTECHOIL",
+    "CONSUL_HOST": "consul",
+    "REDIS_HOST": "redis"
+  }
+}

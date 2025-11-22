@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  devcontainer:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ..:/workspaces/forestechOil:cached
+      - maven-cache:/root/.m2
+      - npm-cache:/root/.npm
+    command: sleep infinity
+    network_mode: host
+
+    # Environment for development
+    environment:
+      - MYSQL_HOST=localhost
+      - MYSQL_PORT=3307
+      - MYSQL_ROOT_PASSWORD=forestech_root_2024
+      - MYSQL_DATABASE=FORESTECHOIL
+      - CONSUL_HOST=localhost
+      - CONSUL_PORT=8500
+      - REDIS_HOST=localhost
+      - REDIS_PORT=6379
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+      - MAVEN_OPTS=-Xmx1024m
+
+volumes:
+  maven-cache:
+    name: forestech-maven-cache
+  npm-cache:
+    name: forestech-npm-cache
