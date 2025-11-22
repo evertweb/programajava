@@ -1,0 +1,81 @@
+/* 
+ * Global Styles - Windows 11 Fluent Design
+ * Most styling is handled by Material UI Theme (src/theme/theme.ts)
+ */
+
+:root {
+  font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  /* Mica effect variables */
+  --mica-blur: 40px;
+  --acrylic-blur: 20px;
+
+  /* Ensure full height for the app */
+  height: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  /* Let MainLayout handle scrolling */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+/* Selection colors */
+::selection {
+  background-color: rgba(46, 125, 50, 0.25);
+  color: inherit;
+}
+
+::-moz-selection {
+  background-color: rgba(46, 125, 50, 0.25);
+  color: inherit;
+}
+
+/* Scrollbar styling for WebKit browsers (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Focus visible for keyboard navigation (Windows 11 style) */
+*:focus-visible {
+  outline: 2px solid #2e7d32;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Disable focus for mouse users */
+*:focus:not(:focus-visible) {
+  outline: none;
+}

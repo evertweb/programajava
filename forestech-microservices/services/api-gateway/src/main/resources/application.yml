@@ -1,0 +1,98 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    consul:
+      host: consul
+      port: 8500
+      discovery:
+        instance-id: ${spring.application.name}:${random.value}
+    gateway:
+      # CORS handled by CorsConfig.java bean
+      discovery:
+        locator:
+          enabled: true  # Descubrimiento automático vía Consul
+          lower-case-service-id: true
+      routes:
+        # Catalog Service
+        - id: catalog-service
+          uri: lb://catalog-service
+          predicates:
+            - Path=/api/products/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: catalogCircuitBreaker
+                fallbackUri: forward:/fallback/catalog
+            # Rate limiter temporarily disabled - requires Redis fix
+            # - name: RequestRateLimiter
+            #   args:
+            #     redis-rate-limiter:
+            #       replenishRate: 10
+            #       burstCapacity: 20
+        
+        # Fleet Service
+        - id: fleet-service
+          uri: lb://fleet-service
+          predicates:
+            - Path=/api/vehicles/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: fleetCircuitBreaker
+        
+        # Inventory Service
+        - id: inventory-service
+          uri: lb://inventory-service
+          predicates:
+            - Path=/api/movements/**, /api/stock/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: inventoryCircuitBreaker
+        
+        # Partners Service
+        - id: partners-service
+          uri: lb://partners-service
+          predicates:
+            - Path=/api/suppliers/**
+        
+        # Invoicing Service
+        - id: invoicing-service
+          uri: lb://invoicing-service
+          predicates:
+            - Path=/api/invoices/**
+        
+        # Reports Service (próxima sesión)
+        - id: reports-service
+          uri: lb://reports-service
+          predicates:
+            - Path=/api/reports/**
+  # Redis Configuration (para rate limiting)
+  data:
+    redis:
+      host: redis
+      port: 6379
+
+# Circuit Breaker Configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      catalogCircuitBreaker:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+      fleetCircuitBreaker:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+      inventoryCircuitBreaker:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: INFO

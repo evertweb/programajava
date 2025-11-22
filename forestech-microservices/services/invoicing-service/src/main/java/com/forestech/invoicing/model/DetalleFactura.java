@@ -1,0 +1,51 @@
+package com.forestech.invoicing.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import jakarta.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+
+@Entity
+@Table(name = "detalle_factura")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class DetalleFactura implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_detalle")
+    private Integer idDetalle;
+
+    @ManyToOne
+    @JoinColumn(name = "numero_factura", referencedColumnName = "numero_factura")
+    @JsonIgnore
+    private Factura factura;
+
+    @Column(name = "product_id", length = 50)
+    private String productId;
+
+    @Column(length = 200, nullable = false)
+    private String producto;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal cantidad;
+
+    @Column(name = "precio_unitario", nullable = false, precision = 12, scale = 2)
+    private BigDecimal precioUnitario;
+
+    @Column(name = "movement_id", length = 255)
+    private String movementId;
+
+    @Column(name = "iva_percent", precision = 5, scale = 2)
+    @Builder.Default
+    private BigDecimal ivaPercent = new BigDecimal("13.0");
+}
