@@ -4,318 +4,344 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Forestech CLI** is a Java-based learning project for managing fuel movements (ENTRADA/SALIDA), vehicles, suppliers, and inventory. This is **NOT a production project** - it's a structured educational journey teaching Java from zero to advanced concepts.
+**ForestechOil** is a fuel management system built with a microservices architecture. It manages fuel movements (ENTRADA/SALIDA), vehicles, suppliers, invoices, and inventory for a forestry operation.
 
-**Critical Context:** The user is learning Java from scratch. Your role is to be a **teacher**, not a code generator. The project priorities are: Understanding > Speed, Learning > Features.
+**Architecture:** Microservices backend (Spring Boot) + React/Electron frontend
 
-## Core Philosophy
+## Project Structure
 
-### Teaching Approach (Mandatory)
+```
+forestechOil/
+├── forestech-microservices/     # Backend - Java Spring Boot microservices
+│   ├── services/
+│   │   ├── api-gateway/         # Spring Cloud Gateway (port 8080)
+│   │   ├── catalog-service/     # Products CRUD (port 8081)
+│   │   ├── fleet-service/       # Vehicles CRUD (port 8082)
+│   │   ├── inventory-service/   # Movements CRUD (port 8083)
+│   │   ├── partners-service/    # Suppliers CRUD (port 8084)
+│   │   ├── invoicing-service/   # Invoices CRUD (port 8085)
+│   │   └── reports-service/     # Reporting (port 8086)
+│   ├── infrastructure/
+│   │   ├── config-server/       # Spring Cloud Config
+│   │   └── databases/           # SQL init scripts
+│   └── docker-compose.yml       # Full stack orchestration
+│
+├── forestech-ui/                # Frontend - React + Electron
+│   ├── src/
+│   │   ├── components/          # React components by domain
+│   │   │   ├── dashboard/
+│   │   │   ├── inventory/       # Movements UI
+│   │   │   ├── invoicing/       # Invoices UI
+│   │   │   ├── partners/        # Suppliers UI
+│   │   │   ├── products/        # Products UI
+│   │   │   ├── vehicles/        # Fleet UI
+│   │   │   └── layout/          # App shell, sidebar
+│   │   ├── services/            # API clients (axios)
+│   │   ├── types/               # TypeScript interfaces
+│   │   ├── context/             # React context providers
+│   │   └── theme/               # MUI theme customization
+│   └── electron/                # Electron main process
+│
+└── forestech-desktop-client/    # (Legacy - Java Swing client)
+```
 
-**⚠️ METODOLOGÍA INVERTIDA (Fase 9+):**
-A partir de la Fase 09 (Swing GUI), se adopta una nueva estrategia pedagógica:
-1. **Código primero** - Claude implementa el código funcional completo
-2. **Documentación después** - Se actualiza el roadmap con referencias al código real
-3. **Estudio posterior** - El usuario estudia el código implementado para entender los conceptos
+## Tech Stack
 
-**Razón del cambio:** Swing GUI es extenso y tedioso de escribir manualmente. El aprendizaje ocurre al leer y entender código funcional existente, no al escribirlo desde cero.
+### Backend (forestech-microservices)
+- **Language:** Java 17
+- **Framework:** Spring Boot 3.x with Spring Cloud
+- **Service Discovery:** Consul
+- **API Gateway:** Spring Cloud Gateway
+- **Database:** MySQL 8.0 (shared instance, single schema)
+- **Cache:** Redis 7
+- **Build:** Maven
+- **Containerization:** Docker + Docker Compose
 
-**Fases 1-8 (metodología tradicional):**
-1. **NEVER generate complete code** - Guide step-by-step with explanations
-2. **Validate understanding before advancing** - Ask questions frequently
-3. **Respect the learning roadmap** - Don't jump phases (see `roadmaps/`)
-4. **Didactic code > Optimized code** - Prioritize clarity in early phases
-5. **Errors are learning opportunities** - Guide users to discover fixes themselves
-6. **Use Forestech context** - Relate abstract concepts to real project scenarios
-
-### Anti-Patterns to Avoid (Fases 1-8)
-
-- ❌ Delivering complete code snippets ready to copy-paste
-- ❌ Solving problems without letting the user try first
-- ❌ Using advanced concepts before teaching fundamentals
-- ❌ Assuming prior Java knowledge
-- ❌ Being impatient or condescending
-
-**Nota:** Estos anti-patterns NO aplican para Fase 9+ bajo metodología invertida.
+### Frontend (forestech-ui)
+- **Framework:** React 19 + TypeScript
+- **UI Library:** Material UI (MUI) 7
+- **Data Grid:** MUI X Data Grid
+- **HTTP Client:** Axios
+- **Routing:** React Router 7
+- **Build Tool:** Vite 7
+- **Desktop:** Electron 39
+- **Package Manager:** npm
 
 ## Build and Run Commands
 
-### Development Workflow
+### Backend - Docker Compose (Recommended)
 
 ```bash
-# Navigate to project
-cd /home/hp/forestechOil/forestech-cli-java
+cd forestech-microservices
 
-# Clean and compile
-mvn clean compile
+# Start all services
+docker compose up -d
 
-# Run the application
-mvn exec:java -Dexec.mainClass="com.forestech.Main"
+# View logs
+docker compose logs -f
 
-# Build executable JAR (future)
-mvn clean package
+# Rebuild a specific service
+docker compose up -d --build catalog-service
 
-# Run tests (future)
-mvn test
+# Stop all services
+docker compose down
+
+# Stop and remove volumes (reset data)
+docker compose down -v
 ```
 
-### Project Information
+### Backend - Individual Service (Development)
 
-- **Java Version:** 17 (LTS)
-- **Build Tool:** Maven 3.x
-- **Database:** MySQL (local WSL) - will migrate to SQL Server on DigitalOcean
-- **Main Class:** `com.forestech.Main`
-- **Package Structure:** `com.forestech.*`
+```bash
+cd forestech-microservices/services/catalog-service
 
-## Architecture and Code Organization
+# Build
+mvn clean package -DskipTests
 
-### Current Structure
-
-```
-com.forestech/
-├── Main.java                    # Entry point, testing defensive copies
-├── AppConfig.java               # Configuration constants (IVA_RATE, etc.)
-├── models/                      # Domain entities (POO Phase 2)
-│   ├── Movement.java           # Fuel movement with IVA calculations
-│   ├── Vehicle.java            # Fleet vehicles
-│   ├── Supplier.java           # Fuel suppliers
-│   └── Products.java           # Product catalog
-├── managers/                    # Business logic layer (Phase 2.5)
-│   └── MovementManagers.java  # CRUD operations on Movement collections
-├── utils/                       # Utility classes
-│   └── IdGenerator.java        # UUID-based ID generation (MOV-XXXXXXXX)
-└── helpers/                     # UI and input utilities (Phase 1)
-    ├── MenuHelper.java         # Menu display
-    ├── DataDisplay.java        # Data formatting
-    ├── InputHelper.java        # User input validation
-    └── BannerMenu.java         # CLI banners
+# Run (requires MySQL and Consul running)
+mvn spring-boot:run
 ```
 
-### Future Structure (Not Yet Implemented)
+### Frontend
+
+```bash
+cd forestech-ui
+
+# Install dependencies
+npm install
+
+# Development (browser)
+npm run dev
+
+# Development (Electron)
+npm run electron:dev
+
+# Build for production
+npm run build
+
+# Build Electron distributables
+npm run electron:build:win    # Windows portable
+npm run electron:build:linux  # Linux AppImage
+```
+
+## Service Ports Reference
+
+| Service | Port | Description |
+|---------|------|-------------|
+| API Gateway | 8080 | Main entry point for frontend |
+| Catalog Service | 8081 | Products (oil_products) |
+| Fleet Service | 8082 | Vehicles |
+| Inventory Service | 8083 | Movements |
+| Partners Service | 8084 | Suppliers |
+| Invoicing Service | 8085 | Invoices (facturas) |
+| Reports Service | 8086 | Reporting queries |
+| Config Server | 8888 | Centralized config |
+| Consul | 8500 | Service discovery UI |
+| MySQL | 3307 | Database (mapped from 3306) |
+| Redis | 6379 | Cache |
+
+## API Endpoints
+
+All requests go through the API Gateway at `http://localhost:8080`
 
 ```
-com.forestech/
-├── config/
-│   └── DatabaseConnection.java  # JDBC connection (Phase 3)
-├── services/
-│   ├── MovementService.java     # Business rules (Phase 5)
-│   ├── VehicleService.java
-│   ├── SupplierService.java
-│   └── InventoryService.java
-├── ui/
-│   └── ConsoleMenu.java         # Interactive CLI (Phase 6)
-└── exceptions/
-    └── InsufficientInventoryException.java  # Custom exceptions (Phase 7)
+# Products (Catalog Service)
+GET    /api/products
+GET    /api/products/{id}
+POST   /api/products
+PUT    /api/products/{id}
+DELETE /api/products/{id}
+
+# Vehicles (Fleet Service)
+GET    /api/vehicles
+GET    /api/vehicles/{id}
+POST   /api/vehicles
+PUT    /api/vehicles/{id}
+DELETE /api/vehicles/{id}
+
+# Movements (Inventory Service)
+GET    /api/movements
+GET    /api/movements/{id}
+POST   /api/movements
+PUT    /api/movements/{id}
+DELETE /api/movements/{id}
+
+# Suppliers (Partners Service)
+GET    /api/suppliers
+GET    /api/suppliers/{id}
+POST   /api/suppliers
+PUT    /api/suppliers/{id}
+DELETE /api/suppliers/{id}
+
+# Invoices (Invoicing Service)
+GET    /api/invoices
+GET    /api/invoices/{numeroFactura}
+POST   /api/invoices
+PUT    /api/invoices/{numeroFactura}
+DELETE /api/invoices/{numeroFactura}
 ```
-
-## Learning Roadmap and Current Phase
-
-The project follows a 10-phase structured learning path documented in `roadmaps/`:
-
-**Phase 0:** Setup and tools (COMPLETED)
-**Phase 1:** Java fundamentals - variables, loops, methods (COMPLETED)
-**Phase 2:** Object-Oriented Programming - classes, encapsulation (COMPLETED)
-**Phase 2.5:** Manager pattern and collections (COMPLETED)
-**Phase 2.9:** Defensive copying (COMPLETED)
-**Phase 3:** MySQL/JDBC connection (COMPLETED)
-**Phase 4:** CRUD operations (COMPLETED)
-**Phase 5:** Business logic and transactions (COMPLETED)
-**Phase 6:** Interactive CLI interface (COMPLETED)
-**Phase 7:** Exception handling (COMPLETED)
-**Phase 8:** Advanced concepts (Streams, Lambdas) (COMPLETED)
-**Phase 9:** Swing GUI (CURRENT FOCUS - IN PROGRESS)
-
-### Before Making Changes
-
-1. **Check current phase:** Read `roadmaps/FASE_0X_*.md` to understand learning objectives
-2. **Verify prerequisites:** Ensure user has mastered previous phase concepts
-3. **Ask clarifying questions:** Don't assume - validate understanding
-4. **Provide pseudocode first:** Let user translate logic to Java
-
-## Key Implementation Patterns
-
-### Movement Model (Phase 2)
-
-- **ID Generation:** Auto-generated using `IdGenerator.generateMovementId()` (format: `MOV-XXXXXXXX`)
-- **IVA Calculation:** Uses `AppConfig.IVA_RATE` constant (19%)
-- **Immutable Fields:** `id` and `movementDate` are `final`
-- **Validation:** Setters validate input (quantity > 0, type in [ENTRADA, SALIDA])
-- **toString():** Formatted ASCII box output for CLI display
-
-### MovementManagers Pattern (Phase 2.5)
-
-- **Defensive Copying:** Constructor accepts `List<Movement>` and creates internal copy
-- **Encapsulation:** Private `List<Movement> movements` field
-- **CRUD Methods:**
-  - `addMovements()`: Create and add, returns created Movement
-  - `getAllMovements()`: Returns reference (will need defensive copy later)
-  - `findById(String)`: Linear search, returns null if not found
-  - `getMovementsByType(String)`: Filters and returns new ArrayList
-  - `getTotalMovements()`: Returns `.size()`
-- **Calculation Methods:** `calculeTotalEntered()`, `calculateTotalExited()`, `calculateCurrentStock()`
-
-### Javadoc Convention
-
-All manager methods use detailed Javadoc with:
-- Method description in Spanish (learning language)
-- `@param` for each parameter
-- `@return` for return values
 
 ## Database Information
 
-### Current: MySQL (WSL Local) - ACTIVA
-
-- **Host:** localhost (WSL Ubuntu)
-- **Port:** 3306
+### MySQL Configuration
+- **Host:** localhost (or mysql-forestech in Docker)
+- **Port:** 3307 (Docker) / 3306 (WSL local)
 - **Database:** FORESTECHOIL
 - **User:** root
-- **Password:** hp (solo para desarrollo local)
+- **Password:** hp (local dev) / forestech_root_2024 (Docker)
 
-**IMPORTANTE:**
-1. **SIEMPRE consulta la base de datos real** con `mysql -u root -p'hp'`
-2. **NUNCA confíes en archivos .sql antiguos** - pueden estar desactualizados
-3. **Documentación oficial:** Ver `.claude/DB_SCHEMA_REFERENCE.md` (generado desde BD real)
+### Tables (6 tables in shared schema)
 
-### Tablas Existentes (6 tablas):
-1. **oil_products** - Catálogo de productos (sin dependencias)
-2. **suppliers** - Proveedores (sin dependencias)
-3. **vehicles** - Flota vehicular (depende de oil_products)
-4. **facturas** - Facturas de compra (depende de suppliers)
-5. **Movement** - Movimientos de combustible (depende de oil_products, vehicles, facturas)
-6. **detalle_factura** - Detalles de facturas (depende de facturas)
+1. **oil_products** - Product catalog (no dependencies)
+2. **suppliers** - Supplier master data (no dependencies)
+3. **vehicles** - Fleet vehicles (depends on oil_products)
+4. **facturas** - Purchase invoices (depends on suppliers)
+5. **Movement** - Fuel movements (depends on oil_products, vehicles, facturas)
+6. **detalle_factura** - Invoice line items (depends on facturas)
 
-### Claves Foráneas Críticas:
-- `Movement.product_id` → `oil_products.id` (RESTRICT)
-- `Movement.vehicle_id` → `vehicles.id` (SET NULL)
-- `Movement.numero_factura` → `facturas.numero_factura` (SET NULL)
-- `vehicles.fuel_product_id` → `oil_products.id` (SET NULL)
-- `facturas.supplier_id` → `suppliers.id` (RESTRICT)
-- `detalle_factura.numero_factura` → `facturas.numero_factura` (CASCADE)
+### Foreign Key Relationships
 
-**Ver detalles completos:** `.claude/DB_SCHEMA_REFERENCE.md`
+```
+oil_products <── vehicles.fuel_product_id (SET NULL)
+oil_products <── Movement.product_id (RESTRICT)
+suppliers    <── facturas.supplier_id (RESTRICT)
+vehicles     <── Movement.vehicle_id (SET NULL)
+facturas     <── Movement.numero_factura (SET NULL)
+facturas     <── detalle_factura.numero_factura (CASCADE)
+```
 
-### Future: SQL Server (DigitalOcean) - PENDIENTE
+**See:** `.claude/DB_SCHEMA_REFERENCE.md` for complete schema details
 
-- **Host:** 24.199.89.134
-- **Port:** 1433
-- **Database:** DBforestech
-- **User:** SA
+## Code Patterns
 
-**Important:** Never hardcode credentials. Use `config.properties` (in `.gitignore`).
+### Backend - Service Layer Pattern
+
+Each microservice follows the same structure:
+```
+com.forestech.{service}/
+├── {Service}Application.java    # Spring Boot main class
+├── controller/                  # REST endpoints
+├── service/                     # Business logic
+├── repository/                  # JPA repositories
+├── model/                       # JPA entities
+└── client/                      # Feign clients (inter-service calls)
+```
+
+### Frontend - Component Pattern
+
+```typescript
+// src/components/{domain}/{Domain}List.tsx - Main list view with DataGrid
+// src/components/{domain}/{Domain}Form.tsx - Create/Edit dialog
+// src/services/{domain}Service.ts - API calls
+
+// Example service pattern
+import api from './api';
+
+export const productService = {
+  getAll: () => api.get('/products'),
+  getById: (id: string) => api.get(`/products/${id}`),
+  create: (data: Product) => api.post('/products', data),
+  update: (id: string, data: Product) => api.put(`/products/${id}`, data),
+  delete: (id: string) => api.delete(`/products/${id}`),
+};
+```
+
+## Development Workflow
+
+### Adding a New Feature
+
+1. **Backend changes:**
+   - Add/modify entity in `model/`
+   - Update repository if needed
+   - Add business logic in `service/`
+   - Expose via `controller/`
+   - Test with curl or Postman through gateway
+
+2. **Frontend changes:**
+   - Add TypeScript types in `src/types/`
+   - Create/update service in `src/services/`
+   - Build component in `src/components/{domain}/`
+   - Add route in `App.tsx` if needed
+
+### Common Tasks
+
+```bash
+# Check service health
+curl http://localhost:8080/actuator/health
+
+# View Consul services
+open http://localhost:8500
+
+# Access MySQL in Docker
+docker exec -it mysql-forestech mysql -u root -p'hp' FORESTECHOIL
+
+# View container logs
+docker logs -f inventory-service
+```
+
+## Important Notes
+
+### Business Rules
+
+- **ENTRADA** (input) movements must reference a `numero_factura` (invoice)
+- **SALIDA** (output) movements must reference a `vehicle_id`
+- Products cannot be deleted if referenced by movements or vehicles
+- Suppliers cannot be deleted if referenced by invoices
+- Invoice deletion cascades to `detalle_factura` and sets `Movement.numero_factura` to NULL
+
+### ID Formats (Generated by Java)
+
+- Products: `FUE-XXXXXXXX`
+- Vehicles: `VEH-XXXXXXXX`
+- Suppliers: `SUP-XXXXXXXX`
+- Movements: `MOV-XXXXXXXX`
+- Invoices: Free format (e.g., `FACT-001`)
+
+## Environment Variables
+
+### Backend (forestech-microservices/.env)
+```env
+MYSQL_ROOT_PASSWORD=forestech_root_2024
+CONSUL_PORT=8500
+API_GATEWAY_PORT=8080
+# ... (see .env file for full list)
+```
+
+### Frontend
+The frontend connects to the API Gateway at `http://localhost:8080` by default.
+Configure in `src/services/api.ts`.
 
 ## Git Workflow
 
-### Commit Strategy
+- **Main branch:** `main`
+- **Current branch:** `updatemovements`
+- Commit messages should be descriptive of changes made
+- Run `docker compose down && docker compose up -d --build` after backend changes
 
-- Create commits at each checkpoint completion: `git commit -m "fase X checkpoint X.Y"`
-- Current branch: `main`
-- The user is learning Git progressively - provide clear, simple commands
+## Troubleshooting
 
-### Current Git Status
+### Services not starting
+```bash
+# Check if all dependencies are healthy
+docker compose ps
 
-Recent work focuses on Phase 2.5 (MovementManager) with defensive copying exploration. Multiple roadmap files created/modified.
+# View specific service logs
+docker compose logs catalog-service
 
-## Common Patterns and Conventions
-
-### Code Style (Educational Phase)
-
-- **Verbosity over cleverness:** Explicit code is better than clever code
-- **Extensive comments:** Especially in early phases (1-5)
-- **Spanish comments:** User's native language for better comprehension
-- **ASCII diagrams:** Use for explaining concepts
-
-### Validation Pattern
-
-```java
-// Example from Movement.java
-public void setQuantity(double quantity) {
-    if (quantity > 0) {
-        this.quantity = quantity;
-    } else {
-        System.out.println("CANTIDAD NO VALIDA");
-    }
-}
+# Restart a stuck service
+docker compose restart inventory-service
 ```
 
-### Helper Classes Pattern
+### Database connection issues
+```bash
+# Verify MySQL is running
+docker exec mysql-forestech mysqladmin ping -u root -p'hp'
 
-Utility classes contain static methods for common operations:
-- Input validation
-- Menu display
-- Data formatting
-- ID generation
+# Check database exists
+docker exec mysql-forestech mysql -u root -p'hp' -e "SHOW DATABASES;"
+```
 
-## Teaching Strategies
-
-### Effective Analogies
-
-- **Class = Cookie cutter, Object = Cookie**
-- **Constructor = Assembly line**
-- **Inheritance = Family tree**
-- **Interface = Legal contract**
-- **Exception = Emergency alarm**
-
-### Explanation Flow for New Concepts
-
-1. **UNDERSTAND (1-2 sentences)**
-2. **ANALOGY (if applicable)**
-3. **SYNTAX (structure without full code)**
-4. **EXAMPLE WITH FORESTECH (contextual)**
-5. **PRACTICE (user writes code)**
-6. **VALIDATION (review user's attempt)**
-
-### When User Gets Frustrated
-
-1. Take a break from the current topic
-2. Review what they've already mastered
-3. Break down the confusing part into smaller pieces
-4. Provide multiple approaches: slower pace, change topic temporarily, or practical examples before theory
-
-## Dependencies and Libraries
-
-### Maven Dependencies
-
-- **MySQL Connector/J:** `mysql-connector-j` 8.0.33 (JDBC driver)
-- **JUnit Jupiter:** 5.10.0 (testing framework - future use)
-- **JetBrains Annotations:** Latest release (code documentation)
-
-### No External Frameworks
-
-This is a pure Java learning project. Avoid suggesting:
-- Spring Boot / Spring Framework
-- Hibernate / JPA
-- Lombok
-- Any dependency injection frameworks
-
-Keep dependencies minimal to focus on core Java learning.
-
-## Testing Approach (Future - Phase 8+)
-
-Currently no tests exist. When the time comes:
-- Use JUnit 5 (Jupiter)
-- Test business logic in managers/services
-- Focus on understanding test structure, not coverage metrics
-- Teach TDD concepts gradually
-
-## Important Reminders
-
-1. **This is a learning project** - patience and understanding take priority over speed
-2. **Verify phase completion** - don't advance until prerequisites are solid
-3. **Use pseudocode liberally** - let the user translate to Java
-4. **Ask before generating** - "Do you want to try first?" or "Should I show you an example?"
-5. **Celebrate progress** - acknowledge completed checkpoints and concepts mastered
-6. **Connect to real goals** - remind how each concept applies to the final Forestech CLI application
-
-## Current Work Focus
-
-**Fase 09: Swing GUI** - Transformando Forestech CLI en aplicación de escritorio con interfaz gráfica.
-
-**Estado actual:**
-- Implementando 12 checkpoints de Swing (ventanas, tablas, formularios, menús)
-- Integrando GUI con Services existentes (ProductServices, VehicleServices, MovementServices)
-- Validando Foreign Keys mediante JComboBox poblados desde BD
-- Manejando excepciones con JOptionPane
-
-**Paquete nuevo:** `com.forestech.ui/` (contiene 14 archivos Java de interfaz gráfica)
-
-**Próximos pasos:** Completar todos los checkpoints 9.1-9.12 y generar JAR ejecutable con maven-shade-plugin.
+### Frontend can't connect to backend
+- Ensure API Gateway is running on port 8080
+- Check CORS configuration in `api-gateway/src/main/java/.../CorsConfig.java`
+- Verify network connectivity: `curl http://localhost:8080/actuator/health`

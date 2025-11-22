@@ -19,4 +19,16 @@ public interface MovementRepository extends JpaRepository<Movement, String> {
 
     List<Movement> findByProductIdAndMovementTypeAndRemainingQuantityGreaterThanOrderByCreatedAtAsc(
             String productId, Movement.MovementType movementType, BigDecimal remainingQuantity);
+
+    // Obtener suma de remaining_quantity para un producto (stock actual)
+    @Query("SELECT COALESCE(SUM(m.remainingQuantity), 0) FROM Movement m WHERE m.productId = :productId AND m.movementType = 'ENTRADA'")
+    BigDecimal sumRemainingQuantityByProductId(@Param("productId") String productId);
+
+    // Obtener suma ponderada (remaining_quantity * unit_price) para calcular promedio
+    @Query("SELECT COALESCE(SUM(m.remainingQuantity * m.unitPrice), 0) FROM Movement m WHERE m.productId = :productId AND m.movementType = 'ENTRADA' AND m.remainingQuantity > 0")
+    BigDecimal sumWeightedValueByProductId(@Param("productId") String productId);
+
+    // Obtener todos los productos distintos con entradas
+    @Query("SELECT DISTINCT m.productId FROM Movement m WHERE m.movementType = 'ENTRADA'")
+    List<String> findDistinctProductIds();
 }

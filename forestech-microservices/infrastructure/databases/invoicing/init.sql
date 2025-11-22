@@ -5,15 +5,21 @@ CREATE TABLE IF NOT EXISTS facturas (
     id VARCHAR(50) PRIMARY KEY,
     numero_factura VARCHAR(50) UNIQUE NOT NULL,
     supplier_id VARCHAR(50) NOT NULL,
-    fecha TIMESTAMP NOT NULL,
+    fecha_emision DATE NOT NULL,
+    fecha_vencimiento DATE NOT NULL,
+    cliente_nombre VARCHAR(150),
+    cliente_nit VARCHAR(20),
     subtotal DECIMAL(12,2) NOT NULL,
     iva DECIMAL(12,2) NOT NULL,
     total DECIMAL(12,2) NOT NULL,
+    observaciones TEXT,
+    forma_pago VARCHAR(50),
+    cuenta_bancaria VARCHAR(50),
     estado ENUM('PENDIENTE', 'PAGADA', 'ANULADA') DEFAULT 'PENDIENTE',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_supplier (supplier_id),
-    INDEX idx_fecha (fecha),
+    INDEX idx_fecha_emision (fecha_emision),
     INDEX idx_estado (estado)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

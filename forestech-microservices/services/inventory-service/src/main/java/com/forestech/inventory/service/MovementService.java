@@ -140,6 +140,49 @@ public class MovementService {
         return entradas.subtract(salidas);
     }
 
+    /**
+     * Calcula el precio promedio ponderado del stock actual de un producto.
+     * Fórmula: Σ(remaining_quantity × unit_price) / Σ(remaining_quantity)
+     * Solo considera las entradas que aún tienen stock disponible.
+     */
+    @Transactional(readOnly = true)
+    public BigDecimal calculateWeightedAveragePrice(String productId) {
+        BigDecimal totalRemainingQuantity = movementRepository.sumRemainingQuantityByProductId(productId);
+
+        if (totalRemainingQuantity == null || totalRemainingQuantity.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal weightedSum = movementRepository.sumWeightedValueByProductId(productId);
+
+        if (weightedSum == null) {
+            return BigDecimal.ZERO;
+        }
+
+        // Precio promedio = suma ponderada / cantidad total
+        return weightedSum.divide(totalRemainingQuantity, 2, java.math.RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Obtiene el stock con precio promedio ponderado para un producto.
+     */
+    @Transactional(readOnly = true)
+    public StockWithPrice getStockWithPrice(String productId) {
+        BigDecimal stock = movementRepository.sumRemainingQuantityByProductId(productId);
+        BigDecimal weightedAveragePrice = calculateWeightedAveragePrice(productId);
+
+        return new StockWithPrice(productId, stock, weightedAveragePrice);
+    }
+
+    // DTO para stock con precio
+    @lombok.Data
+    @lombok.AllArgsConstructor
+    public static class StockWithPrice {
+        private String productId;
+        private BigDecimal stock;
+        private BigDecimal weightedAveragePrice;
+    }
+
     @Transactional
     public void deleteMovement(String id) {
         Movement movement = movementRepository.findById(id)

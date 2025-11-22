@@ -18,6 +18,10 @@ public interface CatalogClient {
     @GetMapping("/api/products/search")
     java.util.List<ProductDTO> searchProducts(@org.springframework.web.bind.annotation.RequestParam("name") String name);
 
-    @PostMapping("/api/products")
+    /**
+     * Endpoint interno para crear productos
+     * Solo invoicing-service puede crear productos (al crear facturas)
+     */
+    @PostMapping("/api/products/internal")
     ProductDTO createProduct(@RequestBody ProductDTO product);
 }

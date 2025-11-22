@@ -26,9 +26,14 @@ public class MovementController {
         return ResponseEntity.ok(movementService.getAllMovements());
     }
 
-    @PostMapping("/entrada")
-    public ResponseEntity<Movement> registrarEntrada(@RequestBody MovementRequest request) {
-        log.info("POST /api/movements/entrada");
+    /**
+     * ENDPOINT INTERNO - Solo para uso de invoicing-service
+     * Los movimientos ENTRADA solo se crean automáticamente al registrar facturas
+     * La única forma de agregar stock es mediante facturas de compra
+     */
+    @PostMapping("/internal/entrada")
+    public ResponseEntity<Movement> registrarEntradaInternal(@RequestBody MovementRequest request) {
+        log.info("POST /api/movements/internal/entrada (llamada interna desde invoicing-service)");
         Movement movement = new Movement();
         movement.setMovementType(Movement.MovementType.ENTRADA);
         movement.setProductId(request.getProductId());
@@ -65,8 +70,27 @@ public class MovementController {
         return ResponseEntity.ok(new StockResponse(productId, stock));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMovement(@PathVariable String id) {
+    /**
+     * Obtiene el stock con precio promedio ponderado para un producto.
+     * Útil para valoración de inventario.
+     */
+    @GetMapping("/stock/{productId}/valued")
+    public ResponseEntity<StockValuedResponse> getStockValued(@PathVariable String productId) {
+        MovementService.StockWithPrice stockWithPrice = movementService.getStockWithPrice(productId);
+        return ResponseEntity.ok(new StockValuedResponse(
+                stockWithPrice.getProductId(),
+                stockWithPrice.getStock(),
+                stockWithPrice.getWeightedAveragePrice()
+        ));
+    }
+
+    /**
+     * ENDPOINT INTERNO - Solo para uso de invoicing-service
+     * Los movimientos solo se eliminan al anular facturas
+     */
+    @DeleteMapping("/internal/{id}")
+    public ResponseEntity<Void> deleteMovementInternal(@PathVariable String id) {
+        log.info("DELETE /api/movements/internal/{} (llamada interna desde invoicing-service)", id);
         movementService.deleteMovement(id);
         return ResponseEntity.noContent().build();
     }
@@ -91,5 +115,12 @@ public class MovementController {
     static class StockResponse {
         private final String productId;
         private final BigDecimal stock;
+    }
+
+    @Data
+    static class StockValuedResponse {
+        private final String productId;
+        private final BigDecimal stock;
+        private final BigDecimal weightedAveragePrice;
     }
 }

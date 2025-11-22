@@ -11,9 +11,17 @@ import java.math.BigDecimal;
 
 @FeignClient(name = "inventory-service")
 public interface InventoryClient {
-    @PostMapping("/api/movements/entrada")
+    /**
+     * Endpoint interno para registrar entrada de stock
+     * Solo invoicing-service puede crear movimientos ENTRADA (al crear facturas)
+     */
+    @PostMapping("/api/movements/internal/entrada")
     MovementDTO registrarEntrada(@RequestBody MovementRequest request);
 
-    @DeleteMapping("/api/movements/{id}")
+    /**
+     * Endpoint interno para eliminar movimientos
+     * Solo invoicing-service puede eliminar movimientos (al anular facturas)
+     */
+    @DeleteMapping("/api/movements/internal/{id}")
     void deleteMovement(@PathVariable("id") String id);
 }

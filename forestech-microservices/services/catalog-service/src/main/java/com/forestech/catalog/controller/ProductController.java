@@ -47,25 +47,35 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
-    @PostMapping
-    public ResponseEntity<Product> createProduct(@Valid @RequestBody Product product) {
-        log.info("POST /api/products - {}", product.getName());
+    /**
+     * ENDPOINT INTERNO - Solo para uso de invoicing-service
+     * Los productos solo pueden ser creados al crear facturas
+     */
+    @PostMapping("/internal")
+    public ResponseEntity<Product> createProductInternal(@Valid @RequestBody Product product) {
+        log.info("POST /api/products/internal - {} (llamada interna desde invoicing-service)", product.getName());
         Product created = productService.create(product);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(
+    /**
+     * ENDPOINT INTERNO - Solo para uso de invoicing-service
+     */
+    @PutMapping("/internal/{id}")
+    public ResponseEntity<Product> updateProductInternal(
             @PathVariable String id,
             @Valid @RequestBody Product product) {
-        log.info("PUT /api/products/{}", id);
+        log.info("PUT /api/products/internal/{} (llamada interna)", id);
         Product updated = productService.update(id, product);
         return ResponseEntity.ok(updated);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable String id) {
-        log.info("DELETE /api/products/{}", id);
+    /**
+     * ENDPOINT INTERNO - Solo para uso de invoicing-service
+     */
+    @DeleteMapping("/internal/{id}")
+    public ResponseEntity<Void> deleteProductInternal(@PathVariable String id) {
+        log.info("DELETE /api/products/internal/{} (llamada interna)", id);
         productService.delete(id);
         return ResponseEntity.noContent().build();
     }

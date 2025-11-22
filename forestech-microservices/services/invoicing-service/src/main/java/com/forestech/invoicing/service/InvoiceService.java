@@ -42,9 +42,12 @@ public class InvoiceService {
 
             // PASO 2: Validar y calcular totales
             BigDecimal subtotal = BigDecimal.ZERO;
+            BigDecimal totalIva = BigDecimal.ZERO;
+            BigDecimal defaultIvaPercent = new BigDecimal("13.0");
+
             for (DetalleRequest detalle : request.getDetalles()) {
                 ProductDTO product = null;
-                
+
                 // Intentar buscar producto existente
                 if (detalle.getProductId() != null && !detalle.getProductId().isEmpty()) {
                     try {
@@ -57,12 +60,21 @@ public class InvoiceService {
                 // Si no existe, intentar crearlo si hay nombre
                 if (product == null && detalle.getProductName() != null && !detalle.getProductName().isEmpty()) {
                     log.info("Creando nuevo producto automáticamente: " + detalle.getProductName());
+
+                    // Extraer presentación del nombre del producto
+                    String[] parsedProduct = parseProductNameAndPresentation(detalle.getProductName());
+                    String cleanName = parsedProduct[0];
+                    String presentation = parsedProduct[1];
+
                     ProductDTO newProduct = new ProductDTO();
-                    newProduct.setName(detalle.getProductName());
+                    newProduct.setName(cleanName);
                     newProduct.setUnitPrice(detalle.getPrecioUnitario());
-                    newProduct.setMeasurementUnit("UNIDAD"); // Default
+                    newProduct.setPresentation(presentation);
+                    newProduct.setMeasurementUnit(presentation); // Usar presentación como unidad de medida
                     product = catalogClient.createProduct(newProduct);
-                    
+
+                    log.info("Producto creado: {} con presentación: {}", cleanName, presentation);
+
                     // Actualizar el ID en el request para referencias futuras
                     detalle.setProductId(product.getId());
                 }
@@ -73,10 +85,14 @@ public class InvoiceService {
 
                 BigDecimal lineSubtotal = detalle.getCantidad().multiply(detalle.getPrecioUnitario());
                 subtotal = subtotal.add(lineSubtotal);
+
+                // Calculate IVA per line using the line's ivaPercent (default to 13.0 if null)
+                BigDecimal lineIvaPercent = detalle.getIvaPercent() != null ? detalle.getIvaPercent() : defaultIvaPercent;
+                BigDecimal lineIva = lineSubtotal.multiply(lineIvaPercent).divide(new BigDecimal("100"));
+                totalIva = totalIva.add(lineIva);
             }
 
-            BigDecimal iva = subtotal.multiply(new BigDecimal("0.19"));
-            BigDecimal total = subtotal.add(iva);
+            BigDecimal total = subtotal.add(totalIva);
 
             // PASO 3: Crear factura
             factura.setNumeroFactura(generarNumeroFactura());
@@ -84,7 +100,7 @@ public class InvoiceService {
             factura.setFechaEmision(LocalDate.now());
             factura.setFechaVencimiento(LocalDate.now().plusDays(30));
             factura.setSubtotal(subtotal);
-            factura.setIva(iva);
+            factura.setIva(totalIva);
             factura.setTotal(total);
             factura.setEstado(Factura.EstadoFactura.PENDIENTE);
             factura.setObservaciones("Generada automáticamente");
@@ -94,13 +110,15 @@ public class InvoiceService {
             for (DetalleRequest detalleReq : request.getDetalles()) {
                 // El producto ya debe existir o haber sido creado en el paso 2
                 ProductDTO product = catalogClient.getProductById(detalleReq.getProductId());
-                
+
                 DetalleFactura detalle = new DetalleFactura();
                 detalle.setFactura(factura);
                 detalle.setProductId(detalleReq.getProductId());
                 detalle.setProducto(product.getName()); // Legacy field
                 detalle.setCantidad(detalleReq.getCantidad());
                 detalle.setPrecioUnitario(detalleReq.getPrecioUnitario());
+                // Set IVA percent per line (default to 13.0 if null)
+                detalle.setIvaPercent(detalleReq.getIvaPercent() != null ? detalleReq.getIvaPercent() : defaultIvaPercent);
                 detalles.add(detalle);
             }
             factura.setDetalles(detalles);
@@ -241,11 +259,20 @@ public class InvoiceService {
                     // 3. Si sigue sin encontrarse, crear nuevo
                     if (product == null) {
                         log.info("Creando nuevo producto para regeneración: {}", detalle.getProducto());
+
+                        // Extraer presentación del nombre del producto
+                        String[] parsedProduct = parseProductNameAndPresentation(detalle.getProducto());
+                        String cleanName = parsedProduct[0];
+                        String presentation = parsedProduct[1];
+
                         ProductDTO newProduct = new ProductDTO();
-                        newProduct.setName(detalle.getProducto());
+                        newProduct.setName(cleanName);
                         newProduct.setUnitPrice(detalle.getPrecioUnitario());
-                        newProduct.setMeasurementUnit("UNIDAD"); // Default
+                        newProduct.setPresentation(presentation);
+                        newProduct.setMeasurementUnit(presentation);
                         product = catalogClient.createProduct(newProduct);
+
+                        log.info("Producto creado: {} con presentación: {}", cleanName, presentation);
                     }
 
                     if (product == null) {
@@ -282,5 +309,41 @@ public class InvoiceService {
             }
         }
         log.info("Regeneración completada.");
+    }
+
+    /**
+     * Extrae la presentación del nombre del producto.
+     * Busca palabras clave al final del nombre como GALON, CANECA, CUARTO, GARRAFA, LITRO, UNIDAD.
+     *
+     * Ejemplos:
+     * - "MOBIL SUPER MIL 20W50 GALON" -> ["MOBIL SUPER MIL 20W50", "GALON"]
+     * - "LUBRIGRAS GRASA CHASIS ROJA X 16K CANECA" -> ["LUBRIGRAS GRASA CHASIS ROJA X 16K", "CANECA"]
+     * - "BATERIA 31H MAC" -> ["BATERIA 31H MAC", "UNIDAD"]
+     *
+     * @param fullName Nombre completo del producto
+     * @return Array con [nombreLimpio, presentación]
+     */
+    private String[] parseProductNameAndPresentation(String fullName) {
+        if (fullName == null || fullName.isEmpty()) {
+            return new String[]{"", "UNIDAD"};
+        }
+
+        String upperName = fullName.toUpperCase().trim();
+
+        // Lista de presentaciones conocidas (ordenadas por longitud descendente para evitar matches parciales)
+        String[] presentations = {"KILOGRAMO", "GARRAFA", "CANECA", "CUARTO", "GALÓN", "GALON", "LITRO", "UNIDAD"};
+
+        for (String presentation : presentations) {
+            if (upperName.endsWith(" " + presentation)) {
+                // Encontró la presentación al final
+                String cleanName = fullName.substring(0, fullName.length() - presentation.length() - 1).trim();
+                // Normalizar GALÓN a GALON
+                String normalizedPresentation = presentation.equals("GALÓN") ? "GALON" : presentation;
+                return new String[]{cleanName, normalizedPresentation};
+            }
+        }
+
+        // No se encontró presentación conocida, usar UNIDAD por defecto
+        return new String[]{fullName.trim(), "UNIDAD"};
     }
 }

@@ -44,4 +44,8 @@ public class DetalleFactura implements Serializable {
 
     @Column(name = "movement_id", length = 255)
     private String movementId;
+
+    @Column(name = "iva_percent", precision = 5, scale = 2)
+    @Builder.Default
+    private BigDecimal ivaPercent = new BigDecimal("13.0");
 }

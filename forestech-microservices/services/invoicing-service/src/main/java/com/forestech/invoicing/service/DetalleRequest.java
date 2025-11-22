@@ -9,4 +9,5 @@ public class DetalleRequest {
     private String productName; // Optional: For new products
     private BigDecimal cantidad;
     private BigDecimal precioUnitario;
+    private BigDecimal ivaPercent; // Optional: defaults to 13.0 if null
 }
