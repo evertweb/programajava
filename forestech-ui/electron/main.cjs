@@ -1,10 +1,16 @@
 /**
  * Electron Main Process
  * ForestechOil Desktop Application
+ * With Auto-Update Support
  */
 
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
+
+// Configure auto-updater
+autoUpdater.autoDownload = false;
+autoUpdater.autoInstallOnAppQuit = true;
 
 // Disable hardware acceleration for better compatibility
 app.disableHardwareAcceleration();
@@ -47,6 +53,15 @@ function createWindow() {
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
     mainWindow.focus();
+
+    // Check for updates (only in production)
+    const isDev = process.env.NODE_ENV === 'development';
+    if (!isDev) {
+      setTimeout(() => {
+        console.log('Checking for updates...');
+        autoUpdater.checkForUpdates();
+      }, 3000);
+    }
   });
 
   // Handle window close
@@ -129,6 +144,100 @@ function createMenu() {
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
 }
+
+// ============================================
+// Auto-Updater Event Handlers
+// ============================================
+
+autoUpdater.on('checking-for-update', () => {
+  console.log('Checking for updates...');
+});
+
+autoUpdater.on('update-available', (info) => {
+  console.log('Update available:', info.version);
+
+  dialog.showMessageBox(mainWindow, {
+    type: 'info',
+    title: 'Actualización Disponible',
+    message: `Hay una nueva versión disponible: ${info.version}`,
+    detail: '¿Desea descargar e instalar la actualización ahora?',
+    buttons: ['Descargar Ahora', 'Más Tarde'],
+    defaultId: 0,
+    cancelId: 1,
+  }).then((result) => {
+    if (result.response === 0) {
+      autoUpdater.downloadUpdate();
+
+      // Show download progress
+      dialog.showMessageBox(mainWindow, {
+        type: 'info',
+        title: 'Descargando Actualización',
+        message: 'La actualización se está descargando...',
+        buttons: ['OK'],
+      });
+    }
+  });
+});
+
+autoUpdater.on('update-not-available', () => {
+  console.log('No updates available');
+});
+
+autoUpdater.on('download-progress', (progressObj) => {
+  console.log(`Download speed: ${progressObj.bytesPerSecond}`);
+  console.log(`Downloaded ${progressObj.percent}%`);
+  console.log(`(${progressObj.transferred}/${progressObj.total})`);
+});
+
+autoUpdater.on('update-downloaded', (info) => {
+  console.log('Update downloaded:', info.version);
+
+  dialog.showMessageBox(mainWindow, {
+    type: 'info',
+    title: 'Actualización Lista',
+    message: 'La actualización se ha descargado exitosamente.',
+    detail: 'La aplicación se reiniciará para instalar la actualización.',
+    buttons: ['Reiniciar Ahora', 'Más Tarde'],
+    defaultId: 0,
+    cancelId: 1,
+  }).then((result) => {
+    if (result.response === 0) {
+      autoUpdater.quitAndInstall(false, true);
+    }
+  });
+});
+
+autoUpdater.on('error', (error) => {
+  console.error('Error in auto-updater:', error);
+
+  if (mainWindow) {
+    dialog.showMessageBox(mainWindow, {
+      type: 'error',
+      title: 'Error de Actualización',
+      message: 'Ocurrió un error al verificar actualizaciones.',
+      detail: error.message,
+      buttons: ['OK'],
+    });
+  }
+});
+
+// ============================================
+// IPC Handlers
+// ============================================
+
+// Manual update check from UI
+ipcMain.handle('check-for-updates', async () => {
+  const isDev = process.env.NODE_ENV === 'development';
+  if (!isDev) {
+    try {
+      return await autoUpdater.checkForUpdates();
+    } catch (error) {
+      console.error('Error checking for updates:', error);
+      return null;
+    }
+  }
+  return null;
+});
 
 // App lifecycle events
 app.whenReady().then(createWindow);

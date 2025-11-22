@@ -17,6 +17,8 @@ release
 *.exe
 *.dmg
 *.AppImage
+*.tar.gz
+*.zip
 
 # Editor directories and files
 .vscode/*

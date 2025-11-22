@@ -1,20 +1,25 @@
 /**
  * Main Application Component
  * Entry point with theme provider and routing
+ * Optimized with lazy loading and smooth transitions
  */
 
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import { theme } from './theme/theme';
 import { NotificationProvider } from './context/NotificationContext';
 import MainLayout from './components/layout/MainLayout';
-import ProductsPanel from './components/products/ProductsPanel';
-import VehiclesPanel from './components/vehicles/VehiclesPanel';
-import SuppliersPanel from './components/partners/SuppliersPanel';
-import MovementsPanel from './components/inventory/MovementsPanel';
-import StockView from './components/inventory/StockView';
-import Dashboard from './components/dashboard/Dashboard';
-import InvoicesPanel from './components/invoicing/InvoicesPanel';
+import PageTransition from './components/common/PageTransition';
+import PageLoader from './components/common/PageLoader';
+
+// Lazy load all panel components for code splitting
+const Dashboard = lazy(() => import('./components/dashboard/Dashboard'));
+const ProductsPanel = lazy(() => import('./components/products/ProductsPanel'));
+const VehiclesPanel = lazy(() => import('./components/vehicles/VehiclesPanel'));
+const SuppliersPanel = lazy(() => import('./components/partners/SuppliersPanel'));
+const MovementsPanel = lazy(() => import('./components/inventory/MovementsPanel'));
+const StockView = lazy(() => import('./components/inventory/StockView'));
+const InvoicesPanel = lazy(() => import('./components/invoicing/InvoicesPanel'));
 
 function App() {
   const [currentRoute, setCurrentRoute] = useState('products');
@@ -44,7 +49,11 @@ function App() {
     <ThemeProvider theme={theme}>
       <NotificationProvider>
         <MainLayout onNavigate={setCurrentRoute} currentRoute={currentRoute}>
-          {renderContent()}
+          <PageTransition routeKey={currentRoute}>
+            <Suspense fallback={<PageLoader />}>
+              {renderContent()}
+            </Suspense>
+          </PageTransition>
         </MainLayout>
       </NotificationProvider>
     </ThemeProvider>

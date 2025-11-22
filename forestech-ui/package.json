@@ -12,8 +12,14 @@
     "electron:dev": "concurrently \"cross-env BROWSER=none npm run dev\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .\"",
     "electron:build": "npm run build && electron-builder",
     "electron:build:win": "npm run build && electron-builder --win --x64",
+    "electron:build:dir": "npm run build && electron-builder --dir",
     "electron:build:linux": "npm run build && electron-builder --linux",
     "electron:build:mac": "npm run build && electron-builder --mac",
+    "electron:publish": "npm run build && electron-builder --publish always",
+    "version:patch": "npm version patch",
+    "version:minor": "npm version minor",
+    "version:major": "npm version major",
+    "release": "npm run version:patch && npm run electron:publish",
     "build:release": "node scripts/build-release.js"
   },
   "dependencies": {
@@ -25,6 +31,8 @@
     "@mui/x-date-pickers": "^8.19.0",
     "axios": "^1.13.2",
     "date-fns": "^4.1.0",
+    "electron-updater": "^6.6.2",
+    "framer-motion": "^12.23.24",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.6"
@@ -62,19 +70,34 @@
     "win": {
       "target": [
         {
-          "target": "portable",
+          "target": "nsis",
           "arch": [
             "x64"
           ]
         }
-      ]
+      ],
+      "icon": "public/vite.svg",
+      "publisherName": "Forestech"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "ForestechOil"
+      "shortcutName": "ForestechOil",
+      "installerIcon": "public/vite.svg",
+      "uninstallerIcon": "public/vite.svg",
+      "deleteAppDataOnUninstall": false,
+      "menuCategory": true,
+      "runAfterFinish": true,
+      "warningsAsErrors": false,
+      "differentialPackage": true
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "evertweb",
+      "repo": "programajava"
     },
     "linux": {
       "target": [
