@@ -1,7 +1,7 @@
 {
   "name": "forestech-ui",
   "private": true,
-  "version": "0.0.0-25-11-21",
+  "version": "0.0.1",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
@@ -76,8 +76,7 @@
           ]
         }
       ],
-      "icon": "public/vite.svg",
-      "publisherName": "Forestech"
+      "icon": "public/vite.svg"
     },
     "nsis": {
       "oneClick": false,
@@ -98,16 +97,6 @@
       "provider": "github",
       "owner": "evertweb",
       "repo": "programajava"
-    },
-    "linux": {
-      "target": [
-        "AppImage"
-      ],
-      "category": "Office"
-    },
-    "mac": {
-      "target": "dmg",
-      "category": "public.app-category.business"
     }
   }
 }
