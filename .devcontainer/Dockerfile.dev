@@ -8,7 +8,7 @@ LABEL description="Development container for ForestechOil microservices"
 # Avoid prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install essential tools
+# Install essential tools and SSH server
 RUN apt-get update && apt-get install -y \
     curl \
     wget \
@@ -20,7 +20,12 @@ RUN apt-get update && apt-get install -y \
     net-tools \
     iputils-ping \
     dnsutils \
-    && rm -rf /var/lib/apt/lists/*
+    openssh-server \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /var/run/sshd \
+    && echo "PermitRootLogin yes" >> /etc/ssh/sshd_config \
+    && echo "PasswordAuthentication no" >> /etc/ssh/sshd_config \
+    && echo "PubkeyAuthentication yes" >> /etc/ssh/sshd_config
 
 # Create workspace directory
 WORKDIR /workspaces/forestechOil
