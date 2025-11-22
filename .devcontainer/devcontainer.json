@@ -1,14 +1,12 @@
 {
   "name": "ForestechOil Development",
-  "dockerComposeFile": "docker-compose.devcontainer.yml",
-  "service": "devcontainer",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
   "workspaceFolder": "/workspaces/forestechOil",
 
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "moby": true,
-      "installDockerComposeV2": true,
-      "dockerDashComposeVersion": "v2"
+      "installDockerComposeV2": true
     },
     "ghcr.io/devcontainers/features/java:1": {
       "version": "17",
@@ -19,28 +17,14 @@
       "version": "20"
     },
     "ghcr.io/devcontainers/features/git:1": {
-      "version": "latest",
-      "ppa": true
+      "version": "latest"
     },
     "ghcr.io/devcontainers/features/sshd:1": {
       "version": "latest"
     }
   },
 
-  "forwardPorts": [
-    8080,
-    8081,
-    8082,
-    8083,
-    8084,
-    8085,
-    8086,
-    8500,
-    8888,
-    3307,
-    6379,
-    5173
-  ],
+  "forwardPorts": [8080, 8081, 8082, 8083, 8084, 8085, 8086, 8500, 8888, 3307, 6379, 5173],
 
   "portsAttributes": {
     "8080": { "label": "API Gateway", "onAutoForward": "notify" },
@@ -69,7 +53,6 @@
         "vscjava.vscode-spring-boot-dashboard",
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "bradlc.vscode-tailwindcss",
         "ms-azuretools.vscode-docker",
         "redhat.vscode-yaml",
         "eamodio.gitlens"
@@ -77,11 +60,7 @@
       "settings": {
         "java.configuration.updateBuildConfiguration": "automatic",
         "java.server.launchMode": "Standard",
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "[java]": {
-          "editor.defaultFormatter": "redhat.java"
-        }
+        "editor.formatOnSave": true
       }
     },
     "jetbrains": {
@@ -96,11 +75,9 @@
   },
 
   "remoteEnv": {
-    "MYSQL_HOST": "mysql-forestech",
-    "MYSQL_PORT": "3306",
-    "MYSQL_ROOT_PASSWORD": "forestech_root_2024",
-    "MYSQL_DATABASE": "FORESTECHOIL",
-    "CONSUL_HOST": "consul",
-    "REDIS_HOST": "redis"
+    "MYSQL_HOST": "localhost",
+    "MYSQL_PORT": "3307",
+    "MYSQL_PASSWORD": "forestech_root_2024",
+    "MYSQL_DATABASE": "FORESTECHOIL"
   }
 }
