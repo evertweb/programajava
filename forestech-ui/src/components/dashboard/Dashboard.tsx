@@ -1,7 +1,7 @@
 /**
  * Dashboard Component
  * Displays key metrics and system overview
- * Optimized with API caching
+ * Optimized with API caching and connection-aware loading
  */
 
 import { useMemo } from 'react';
@@ -15,12 +15,15 @@ import {
   CardContent,
   CardHeader,
   Avatar,
+  Button,
 } from '@mui/material';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import PeopleIcon from '@mui/icons-material/People';
 import MoveToInboxIcon from '@mui/icons-material/MoveToInbox';
+import CloudOffIcon from '@mui/icons-material/CloudOff';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 import { productService } from '../../services/productService';
 import { vehicleService } from '../../services/vehicleService';
@@ -38,7 +41,7 @@ interface DashboardMetrics {
 }
 
 export default function Dashboard() {
-  const { data: metrics, loading } = useApiCache<DashboardMetrics>(
+  const { data: metrics, loading, isDisconnected, refetch } = useApiCache<DashboardMetrics>(
     'dashboard-metrics',
     async () => {
       // Fetch all data in parallel
@@ -85,6 +88,37 @@ export default function Dashboard() {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
         <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Show disconnected state
+  if (isDisconnected && !metrics) {
+    return (
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100%',
+        gap: 2,
+      }}>
+        <CloudOffIcon sx={{ fontSize: 64, color: 'text.secondary' }} />
+        <Typography variant="h5" color="text.secondary">
+          Sin conexion al servidor
+        </Typography>
+        <Typography variant="body2" color="text.secondary" textAlign="center">
+          No se pudo conectar con los microservicios.<br />
+          Verifique que el servidor este activo.
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<RefreshIcon />}
+          onClick={() => refetch()}
+          sx={{ mt: 2 }}
+        >
+          Reintentar
+        </Button>
       </Box>
     );
   }

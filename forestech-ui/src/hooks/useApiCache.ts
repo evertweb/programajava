@@ -1,16 +1,18 @@
 /**
  * API Cache Hook
  * Custom hook for caching API responses and reducing redundant calls
+ * Now with connection-aware fetching (hybrid approach)
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { getConnectionContext } from '../context/ConnectionContext';
 
 interface CacheEntry<T> {
     data: T;
     timestamp: number;
 }
 
-const cache = new Map<string, CacheEntry<any>>();
+const cache = new Map<string, CacheEntry<unknown>>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 interface UseApiCacheOptions {
@@ -22,6 +24,7 @@ interface UseApiCacheReturn<T> {
     data: T | null;
     loading: boolean;
     error: Error | null;
+    isDisconnected: boolean;
     refetch: () => Promise<void>;
     invalidate: () => void;
 }
@@ -33,19 +36,31 @@ export function useApiCache<T>(
 ): UseApiCacheReturn<T> {
     const { enabled = true, cacheDuration = CACHE_DURATION } = options;
     const [data, setData] = useState<T | null>(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
+    const [isDisconnected, setIsDisconnected] = useState(false);
     const abortControllerRef = useRef<AbortController | null>(null);
     const isMountedRef = useRef(true);
+    const hasAttemptedFetch = useRef(false);
 
     const fetchData = useCallback(async (force = false) => {
         if (!enabled) return;
 
-        // Check cache
+        // Check connection status before fetching (only if not forcing)
+        const connectionContext = getConnectionContext();
+        if (connectionContext?.status === 'disconnected' && !force) {
+            setIsDisconnected(true);
+            setLoading(false);
+            return;
+        }
+
+        // Check cache first
         if (!force) {
             const cached = cache.get(key);
             if (cached && Date.now() - cached.timestamp < cacheDuration) {
-                setData(cached.data);
+                setData(cached.data as T);
+                setLoading(false);
+                setIsDisconnected(false);
                 return;
             }
         }
@@ -65,10 +80,18 @@ export function useApiCache<T>(
             if (isMountedRef.current) {
                 cache.set(key, { data: result, timestamp: Date.now() });
                 setData(result);
+                setIsDisconnected(false);
             }
         } catch (err) {
             if (err instanceof Error && err.name !== 'AbortError' && isMountedRef.current) {
                 setError(err);
+                // Check if it was a network error
+                const errorMsg = err.message || '';
+                if (errorMsg.includes('Network Error') ||
+                    errorMsg.includes('ECONNREFUSED') ||
+                    errorMsg.includes('ERR_NETWORK')) {
+                    setIsDisconnected(true);
+                }
             }
         } finally {
             if (isMountedRef.current) {
@@ -77,9 +100,33 @@ export function useApiCache<T>(
         }
     }, [key, fetcher, enabled, cacheDuration]);
 
+    // Initial fetch based on connection status
     useEffect(() => {
         isMountedRef.current = true;
-        fetchData();
+        hasAttemptedFetch.current = false;
+
+        const connectionContext = getConnectionContext();
+
+        // Determine if we should fetch
+        if (connectionContext?.status === 'disconnected') {
+            // Disconnected - don't fetch, show disconnected state
+            setIsDisconnected(true);
+            setLoading(false);
+        } else if (connectionContext?.status === 'checking') {
+            // Still checking - wait a bit then try
+            setLoading(true);
+            const timer = setTimeout(() => {
+                if (isMountedRef.current && !hasAttemptedFetch.current) {
+                    hasAttemptedFetch.current = true;
+                    fetchData();
+                }
+            }, 500);
+            return () => clearTimeout(timer);
+        } else {
+            // Connected or no context - fetch immediately
+            hasAttemptedFetch.current = true;
+            fetchData();
+        }
 
         return () => {
             isMountedRef.current = false;
@@ -97,7 +144,11 @@ export function useApiCache<T>(
         data,
         loading,
         error,
-        refetch: () => fetchData(true),
+        isDisconnected,
+        refetch: () => {
+            hasAttemptedFetch.current = true;
+            return fetchData(true);
+        },
         invalidate,
     };
 }
