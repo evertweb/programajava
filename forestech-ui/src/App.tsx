@@ -22,7 +22,7 @@ const StockView = lazy(() => import('./components/inventory/StockView'));
 const InvoicesPanel = lazy(() => import('./components/invoicing/InvoicesPanel'));
 
 function App() {
-  const [currentRoute, setCurrentRoute] = useState('products');
+  const [currentRoute, setCurrentRoute] = useState('dashboard');
 
   const renderContent = () => {
     switch (currentRoute) {

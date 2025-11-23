@@ -6,7 +6,7 @@
     "email": "info@forestech.com"
   },
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
@@ -72,7 +72,13 @@
       "electron/**/*",
       "package.json"
     ],
+    "differentialPackage": true,
+    "installerLanguages": [
+      "es_ES"
+    ],
+    "license": "build/license.txt",
     "win": {
+      "icon": "public/icon.png",
       "target": [
         {
           "target": "nsis",

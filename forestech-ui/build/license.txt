@@ -1,0 +1,23 @@
+ACUERDO DE LICENCIA DE USUARIO FINAL (EULA)
+
+IMPORTANTE: POR FAVOR LEA ESTE ACUERDO CUIDADOSAMENTE ANTES DE INSTALAR O USAR ESTE SOFTWARE.
+
+1. CONCESIÓN DE LICENCIA
+Forestech le otorga una licencia no exclusiva, intransferible y limitada para descargar, instalar y utilizar el software "ForestechOil" estrictamente de acuerdo con los términos de este Acuerdo.
+
+2. PROPIEDAD INTELECTUAL
+El Software, incluyendo todos los derechos de propiedad intelectual, es propiedad exclusiva de Forestech.
+
+3. RESTRICCIONES
+Usted acepta no, y no permitirá a otros:
+a) Licenciar, vender, alquilar, arrendar, asignar, distribuir, transmitir, alojar, subcontratar, divulgar o explotar comercialmente el Software.
+b) Modificar, realizar trabajos derivados, desensamblar, descifrar, compilar inversamente o realizar ingeniería inversa de cualquier parte del Software.
+c) Eliminar, alterar u ocultar cualquier aviso de propiedad (incluyendo cualquier aviso de derechos de autor o marca registrada) de Forestech o sus afiliados.
+
+4. TERMINACIÓN
+Este Acuerdo es efectivo hasta que sea terminado por usted o Forestech. Sus derechos bajo este Acuerdo terminarán automáticamente sin previo aviso de Forestech si usted incumple cualquiera de los términos de este Acuerdo.
+
+5. LEY APLICABLE
+Este Acuerdo se regirá e interpretará de acuerdo con las leyes del país en el que reside.
+
+AL INSTALAR ESTE SOFTWARE, USTED ACEPTA ESTAR OBLIGADO POR LOS TÉRMINOS DE ESTE ACUERDO.

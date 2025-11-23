@@ -24,7 +24,7 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 768,
     title: 'ForestechOil - Sistema de Gestión',
-    icon: path.join(__dirname, '../public/vite.svg'),
+    icon: path.join(__dirname, '../public/icon.png'),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
