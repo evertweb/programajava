@@ -89,10 +89,7 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "ForestechOil",
-      "installerIcon": "public/vite.svg",
-      "uninstallerIcon": "public/vite.svg",
       "deleteAppDataOnUninstall": false,
-      "menuCategory": true,
       "runAfterFinish": true,
       "warningsAsErrors": false,
       "differentialPackage": true
