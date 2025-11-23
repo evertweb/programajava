@@ -129,12 +129,12 @@ export default function Dashboard() {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight="600" gutterBottom sx={{ mb: 3, color: 'text.primary' }}>
+      <Typography variant="h5" fontWeight="600" gutterBottom sx={{ mb: 2.5, color: 'text.primary' }}>
         Dashboard
       </Typography>
 
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+      <Grid container spacing={2.5}>
+        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
           <MetricCard
             title="Productos"
             value={metrics?.productsCount ?? 0}
@@ -142,7 +142,7 @@ export default function Dashboard() {
             color="#1976d2"
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
           <MetricCard
             title="Vehículos"
             value={metrics?.vehiclesCount ?? 0}
@@ -150,7 +150,7 @@ export default function Dashboard() {
             color="#2e7d32"
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
           <MetricCard
             title="Movimientos"
             value={metrics?.movementsCount ?? 0}
@@ -158,7 +158,7 @@ export default function Dashboard() {
             color="#ed6c02"
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
           <MetricCard
             title="Facturas"
             value={metrics?.invoicesCount ?? 0}
@@ -166,7 +166,7 @@ export default function Dashboard() {
             color="#9c27b0"
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
           <MetricCard
             title="Proveedores"
             value={metrics?.suppliersCount ?? 0}
@@ -177,7 +177,7 @@ export default function Dashboard() {
 
         {/* Welcome Section */}
         <Grid size={{ xs: 12 }}>
-          <Paper sx={{ p: 3, mt: 2 }}>
+          <Paper sx={{ p: 3, mt: 1 }}>
             <Typography variant="h5" gutterBottom>
               Bienvenido a ForestechOil
             </Typography>

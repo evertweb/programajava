@@ -81,7 +81,7 @@ export default function VehiclesPanel() {
         {
             field: 'placa',
             headerName: 'Placa',
-            width: 120,
+            width: 130,
             renderCell: (params) => (
                 <Typography fontWeight="bold">{params.value}</Typography>
             ),
@@ -89,27 +89,27 @@ export default function VehiclesPanel() {
         {
             field: 'marca',
             headerName: 'Marca',
-            width: 120,
+            width: 150,
         },
         {
             field: 'modelo',
             headerName: 'Modelo',
-            width: 120,
+            width: 150,
         },
         {
             field: 'anio',
             headerName: 'Año',
-            width: 80,
+            width: 100,
         },
         {
             field: 'category',
             headerName: 'Categoría',
-            width: 150,
+            width: 180,
         },
         {
             field: 'isActive',
             headerName: 'Estado',
-            width: 100,
+            width: 120,
             renderCell: (params) => (
                 <Chip
                     label={params.value ? 'Activo' : 'Inactivo'}
@@ -122,13 +122,13 @@ export default function VehiclesPanel() {
             field: 'descripcion',
             headerName: 'Descripción',
             flex: 1,
-            minWidth: 200,
+            minWidth: 250,
         },
         {
             field: 'actions',
             type: 'actions',
             headerName: 'Acciones',
-            width: 120,
+            width: 130,
             getActions: (params) => [
                 <GridActionsCellItem
                     icon={
@@ -189,10 +189,10 @@ export default function VehiclesPanel() {
                     rows={vehicles}
                     columns={columns}
                     loading={loading}
-                    density="compact"
+                    density="standard"
                     pageSizeOptions={[25, 50, 100]}
                     initialState={{
-                        pagination: { paginationModel: { pageSize: 25 } },
+                        pagination: { paginationModel: { pageSize: 50 } },
                     }}
                     disableRowSelectionOnClick
                     sx={{

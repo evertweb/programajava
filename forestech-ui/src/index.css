@@ -76,3 +76,18 @@ body {
 *:focus:not(:focus-visible) {
   outline: none;
 }
+
+/* Optimizations for large screens (1920x1080 and above) */
+@media (min-width: 1920px) {
+
+  /* Slightly larger scrollbars for better visibility on large screens */
+  ::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Better text rendering on large screens */
+  body {
+    font-size: 15px;
+  }
+}

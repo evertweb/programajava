@@ -23,6 +23,7 @@ import {
   Button,
   CircularProgress,
 } from '@mui/material';
+import ConnectionBanner from '../common/ConnectionBanner';
 import MenuIcon from '@mui/icons-material/Menu';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
@@ -33,7 +34,7 @@ import MoveToInboxIcon from '@mui/icons-material/MoveToInbox';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import SystemUpdateIcon from '@mui/icons-material/SystemUpdate';
 
-const drawerWidth = 240; // Compact for desktop optimization
+const drawerWidth = 260; // Optimized for 1920x1080 screens
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -222,6 +223,7 @@ export default function MainLayout({ children, onNavigate, currentRoute }: MainL
       <CssBaseline />
 
       {/* Top Bar - Minimalist Native Style */}
+      {/*
       <AppBar
         position="fixed"
         elevation={0}
@@ -231,7 +233,7 @@ export default function MainLayout({ children, onNavigate, currentRoute }: MainL
           zIndex: theme.zIndex.drawer + 1,
         }}
       >
-        <Toolbar sx={{ minHeight: '48px !important', px: 2 }}>
+        <Toolbar sx={{ minHeight: '43px !important', px: 2 }}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -246,7 +248,6 @@ export default function MainLayout({ children, onNavigate, currentRoute }: MainL
             <MenuIcon />
           </IconButton>
 
-          {/* Breadcrumb-like Title */}
           <Typography
             variant="h6"
             noWrap
@@ -261,10 +262,9 @@ export default function MainLayout({ children, onNavigate, currentRoute }: MainL
           </Typography>
 
           <Box sx={{ flexGrow: 1 }} />
-
-          {/* Placeholder for future actions/search */}
         </Toolbar>
       </AppBar>
+      */}
 
       <Box
         component="nav"
@@ -307,13 +307,17 @@ export default function MainLayout({ children, onNavigate, currentRoute }: MainL
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
+          p: 2.5,
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           height: '100vh',
           overflow: 'auto',
-          pt: '56px', // Space for AppBar
+          // Header temporarily removed — remove top padding so content fills top
+          pt: 0,
         }}
       >
+        {/* Connection banner commented out temporarily */}
+        {/* <ConnectionBanner /> */}
+
         {children}
       </Box>
     </Box>

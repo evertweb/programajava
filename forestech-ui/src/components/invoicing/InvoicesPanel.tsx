@@ -90,23 +90,23 @@ export default function InvoicesPanel() {
     {
       field: 'numeroFactura',
       headerName: 'No. Factura',
-      width: 150,
+      width: 140,
     },
     {
       field: 'fechaEmision',
       headerName: 'Fecha Emisión',
-      width: 150,
+      width: 160,
     },
     {
       field: 'clienteNombre',
       headerName: 'Cliente / Proveedor',
-      flex: 1,
-      minWidth: 200,
+      flex: 1.2,
+      minWidth: 250,
     },
     {
       field: 'total',
       headerName: 'Total',
-      width: 150,
+      width: 180,
       valueFormatter: (value) => {
         if (value == null) return '';
         return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(Number(value));
@@ -115,7 +115,7 @@ export default function InvoicesPanel() {
     {
       field: 'estado',
       headerName: 'Estado',
-      width: 120,
+      width: 130,
       renderCell: (params) => (
         <Chip
           label={params.value}
@@ -129,7 +129,7 @@ export default function InvoicesPanel() {
       field: 'actions',
       type: 'actions',
       headerName: 'Acciones',
-      width: 120,
+      width: 130,
       getActions: (params) => {
         const actions = [
           <GridActionsCellItem
@@ -199,10 +199,10 @@ export default function InvoicesPanel() {
           rows={invoices}
           columns={columns}
           loading={loading}
-          density="compact"
+          density="standard"
           pageSizeOptions={[25, 50, 100]}
           initialState={{
-            pagination: { paginationModel: { pageSize: 25 } },
+            pagination: { paginationModel: { pageSize: 50 } },
             sorting: { sortModel: [{ field: 'fechaEmision', sort: 'desc' }] },
           }}
           disableRowSelectionOnClick

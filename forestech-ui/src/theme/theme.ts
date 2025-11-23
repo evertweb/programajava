@@ -143,6 +143,25 @@ export const theme = createTheme({
               background: corporateColors.secondaryLight,
             },
           },
+          // MUI DataGrid global gridlines
+          '.MuiDataGrid-root': {
+            border: `1px solid ${corporateColors.border}`,
+            borderRadius: 4,
+            '& .MuiDataGrid-columnHeaders': {
+              borderBottom: `1px solid ${corporateColors.border}`,
+              background: corporateColors.bgTertiary,
+            },
+            '& .MuiDataGrid-cell': {
+              borderRight: `1px solid ${corporateColors.border}`,
+              borderBottom: `1px solid ${corporateColors.border}`,
+            },
+            '& .MuiDataGrid-row:last-child .MuiDataGrid-cell': {
+              borderBottom: `1px solid ${corporateColors.border}`,
+            },
+            '& .MuiDataGrid-columnSeparator': {
+              display: 'none',
+            },
+          },
         },
       },
     },
@@ -384,13 +403,26 @@ export const theme = createTheme({
     MuiTableCell: {
       styleOverrides: {
         root: {
-          borderBottom: `1px solid ${corporateColors.border}`,
+          // show full grid: all sides have a thin border so the table looks like a grid
+          border: `1px solid ${corporateColors.border}`,
           padding: '8px 16px',
+          // ensure internal cells don't double-border visually when table uses collapse
+          boxSizing: 'border-box',
         },
         head: {
           fontWeight: 600,
           backgroundColor: corporateColors.bgTertiary,
+          // stronger border for the header row
           borderBottom: `2px solid ${corporateColors.border}`,
+        },
+      },
+    },
+    MuiTable: {
+      styleOverrides: {
+        root: {
+          // collapse borders so adjacent cells share the same grid lines
+          borderCollapse: 'collapse',
+          width: '100%',
         },
       },
     },
@@ -412,6 +444,8 @@ export const theme = createTheme({
         },
       },
     },
+    // DataGrid (MUI X) styling: use CssBaseline global overrides instead of a components entry
+    // (MuiDataGrid type may not be available in the core theme definitions)
     MuiTooltip: {
       styleOverrides: {
         tooltip: {

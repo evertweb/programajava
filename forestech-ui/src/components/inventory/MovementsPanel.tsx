@@ -1,19 +1,16 @@
+/**
+ * MovementsPanel Component - Optimized for 1920x1080
+ * Converted from Table to DataGrid for better performance and consistency
+ */
+
 import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
   Typography,
   Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Chip,
-  IconButton,
   Tooltip,
-  CircularProgress,
   ToggleButtonGroup,
   ToggleButton,
   Dialog,
@@ -21,7 +18,9 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  CircularProgress,
 } from '@mui/material';
+import { DataGrid, type GridColDef, GridActionsCellItem } from '@mui/x-data-grid';
 import {
   Remove as RemoveIcon,
   Refresh as RefreshIcon,
@@ -135,9 +134,103 @@ export default function MovementsPanel() {
     }).format(amount);
   };
 
+  const columns: GridColDef[] = [
+    {
+      field: 'createdAt',
+      headerName: 'Fecha',
+      width: 180,
+      valueFormatter: (value) => formatDate(value),
+    },
+    {
+      field: 'movementType',
+      headerName: 'Tipo',
+      width: 120,
+      renderCell: (params) => (
+        <Chip
+          label={params.value}
+          color={params.value === 'ENTRADA' ? 'success' : 'warning'}
+          size="small"
+        />
+      ),
+    },
+    {
+      field: 'productId',
+      headerName: 'Producto',
+      flex: 1,
+      minWidth: 200,
+      valueGetter: (_value, row) => products[row.productId]?.name || 'Producto desconocido',
+    },
+    {
+      field: 'vehicleId',
+      headerName: 'Vehículo',
+      width: 180,
+      valueGetter: (_value, row) => {
+        if (!row.vehicleId) return '-';
+        const vehicle = vehicles[row.vehicleId];
+        return vehicle ? `${vehicle.placa} - ${vehicle.marca}` : '-';
+      },
+    },
+    {
+      field: 'quantity',
+      headerName: 'Cantidad',
+      width: 140,
+      align: 'right',
+      headerAlign: 'right',
+      valueGetter: (_value, row) => {
+        const product = products[row.productId];
+        return `${row.quantity} ${product?.measurementUnit || ''}`;
+      },
+    },
+    {
+      field: 'unitPrice',
+      headerName: 'Precio Unit.',
+      width: 150,
+      align: 'right',
+      headerAlign: 'right',
+      valueFormatter: (value) => formatCurrency(value),
+    },
+    {
+      field: 'total',
+      headerName: 'Total',
+      width: 150,
+      align: 'right',
+      headerAlign: 'right',
+      valueGetter: (_value, row) => row.quantity * row.unitPrice,
+      valueFormatter: (value) => formatCurrency(value),
+    },
+    {
+      field: 'description',
+      headerName: 'Descripción',
+      flex: 0.8,
+      minWidth: 180,
+    },
+    {
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Acciones',
+      width: 100,
+      getActions: (params) => {
+        if (params.row.movementType !== 'SALIDA') return [];
+
+        return [
+          <GridActionsCellItem
+            icon={
+              <Tooltip title="Eliminar salida y restaurar stock">
+                <DeleteIcon color="error" />
+              </Tooltip>
+            }
+            label="Eliminar"
+            onClick={() => handleDeleteClick(params.row as Movement)}
+            showInMenu={false}
+          />,
+        ];
+      },
+    },
+  ];
+
   return (
-    <Box sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h5" component="h1" fontWeight="600">
           Movimientos de Inventario
         </Typography>
@@ -165,90 +258,39 @@ export default function MovementsPanel() {
             Registrar Salida
           </Button>
           <Tooltip title="Actualizar">
-            <IconButton onClick={loadData} disabled={loading}>
-              <RefreshIcon />
-            </IconButton>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<RefreshIcon />}
+              onClick={loadData}
+              disabled={loading}
+            >
+              Actualizar
+            </Button>
           </Tooltip>
         </Box>
       </Box>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Fecha</TableCell>
-              <TableCell>Tipo</TableCell>
-              <TableCell>Producto</TableCell>
-              <TableCell>Vehículo</TableCell>
-              <TableCell align="right">Cantidad</TableCell>
-              <TableCell align="right">Precio Unit.</TableCell>
-              <TableCell align="right">Total</TableCell>
-              <TableCell>Descripción</TableCell>
-              <TableCell align="center">Acciones</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={9} align="center" sx={{ py: 3 }}>
-                  <CircularProgress />
-                </TableCell>
-              </TableRow>
-            ) : movements.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={9} align="center" sx={{ py: 3 }}>
-                  No hay movimientos registrados
-                </TableCell>
-              </TableRow>
-            ) : (
-              movements.map((movement) => {
-                const product = products[movement.productId];
-                const vehicle = movement.vehicleId ? vehicles[movement.vehicleId] : null;
-
-                return (
-                  <TableRow key={movement.id}>
-                    <TableCell>{formatDate(movement.createdAt)}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={movement.movementType}
-                        color={movement.movementType === 'ENTRADA' ? 'success' : 'warning'}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>{product?.name || 'Producto desconocido'}</TableCell>
-                    <TableCell>
-                      {vehicle ? `${vehicle.placa} - ${vehicle.marca}` : '-'}
-                    </TableCell>
-                    <TableCell align="right">
-                      {movement.quantity} {product?.measurementUnit}
-                    </TableCell>
-                    <TableCell align="right">
-                      {formatCurrency(movement.unitPrice)}
-                    </TableCell>
-                    <TableCell align="right">
-                      {formatCurrency(movement.quantity * movement.unitPrice)}
-                    </TableCell>
-                    <TableCell>{movement.description}</TableCell>
-                    <TableCell align="center">
-                      {movement.movementType === 'SALIDA' && (
-                        <Tooltip title="Eliminar salida y restaurar stock">
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleDeleteClick(movement)}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Paper sx={{ flex: 1, p: 0, border: '1px solid', borderColor: 'divider' }}>
+        <DataGrid
+          rows={movements}
+          columns={columns}
+          loading={loading}
+          density="standard"
+          pageSizeOptions={[25, 50, 100]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 50 } },
+            sorting: { sortModel: [{ field: 'createdAt', sort: 'desc' }] },
+          }}
+          disableRowSelectionOnClick
+          sx={{
+            border: 'none',
+            '& .MuiDataGrid-cell:focus': {
+              outline: 'none',
+            },
+          }}
+        />
+      </Paper>
 
       <MovementDialog
         open={dialogOpen}

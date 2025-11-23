@@ -13,7 +13,6 @@ import { ConnectionProvider, useConnection, setConnectionContextRef } from './co
 import MainLayout from './components/layout/MainLayout';
 import PageTransition from './components/common/PageTransition';
 import PageLoader from './components/common/PageLoader';
-import ConnectionBanner from './components/common/ConnectionBanner';
 
 // Lazy load all panel components for code splitting
 const Dashboard = lazy(() => import('./components/dashboard/Dashboard'));
@@ -66,7 +65,6 @@ function App() {
         <ConnectionContextRegistrar>
           <NotificationProvider>
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-              <ConnectionBanner />
               <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
                 <MainLayout onNavigate={setCurrentRoute} currentRoute={currentRoute}>
                   <PageTransition routeKey={currentRoute}>

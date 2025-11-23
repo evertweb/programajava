@@ -42,19 +42,19 @@ export default function ProductsPanel() {
     {
       field: 'id',
       headerName: 'ID',
-      width: 150,
+      width: 100,
       hideable: true,
     },
     {
       field: 'name',
       headerName: 'Nombre del Producto',
-      flex: 1,
-      minWidth: 200,
+      flex: 1.5,
+      minWidth: 250,
     },
     {
       field: 'unitPrice',
       headerName: 'Precio Unitario',
-      width: 150,
+      width: 180,
       type: 'number',
       valueFormatter: (value) => {
         return new Intl.NumberFormat('es-CR', {
@@ -66,7 +66,7 @@ export default function ProductsPanel() {
     {
       field: 'presentation',
       headerName: 'Presentación',
-      width: 130,
+      width: 150,
       valueGetter: (_value, row) => row.presentation || row.measurementUnit || 'N/A',
     },
   ];
@@ -97,10 +97,10 @@ export default function ProductsPanel() {
           rows={products}
           columns={columns}
           loading={loading}
-          density="compact"
+          density="standard"
           pageSizeOptions={[25, 50, 100]}
           initialState={{
-            pagination: { paginationModel: { pageSize: 25 } },
+            pagination: { paginationModel: { pageSize: 50 } },
           }}
           disableRowSelectionOnClick
           sx={{
