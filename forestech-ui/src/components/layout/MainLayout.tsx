@@ -3,7 +3,7 @@
  * Native Fluent Design (Windows 11 Style)
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AppBar,
   Box,
@@ -20,6 +20,8 @@ import {
   useTheme,
   alpha,
   Tooltip,
+  Button,
+  CircularProgress,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -29,6 +31,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MoveToInboxIcon from '@mui/icons-material/MoveToInbox';
 import AssessmentIcon from '@mui/icons-material/Assessment';
+import SystemUpdateIcon from '@mui/icons-material/SystemUpdate';
 
 const drawerWidth = 240; // Compact for desktop optimization
 
@@ -48,9 +51,66 @@ const menuItems = [
   { text: 'Proveedores', icon: <PeopleIcon />, route: 'suppliers' },
 ];
 
+// Type definition for Electron API
+declare global {
+  interface Window {
+    electronAPI?: {
+      platform: string;
+      version: string;
+      getAppVersion: () => Promise<string>;
+      checkForUpdates: () => Promise<{ checking: boolean; isDev?: boolean; error?: string }>;
+      onUpdateAvailable: (callback: (info: { version: string }) => void) => void;
+      onUpdateNotAvailable: (callback: () => void) => void;
+      onUpdateDownloaded: (callback: (info: { version: string }) => void) => void;
+      onUpdateError: (callback: (error: string) => void) => void;
+      onDownloadProgress: (callback: (progress: { percent: number }) => void) => void;
+      removeUpdateListeners: () => void;
+    };
+  }
+}
+
 export default function MainLayout({ children, onNavigate, currentRoute }: MainLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [appVersion, setAppVersion] = useState<string>('');
+  const [checkingUpdates, setCheckingUpdates] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState<string>('');
   const theme = useTheme();
+
+  // Get app version on mount
+  useEffect(() => {
+    if (window.electronAPI?.getAppVersion) {
+      window.electronAPI.getAppVersion().then((version) => {
+        setAppVersion(version);
+      });
+    }
+  }, []);
+
+  const handleCheckUpdates = async () => {
+    if (!window.electronAPI?.checkForUpdates) {
+      setUpdateStatus('Solo disponible en la app de escritorio');
+      setTimeout(() => setUpdateStatus(''), 3000);
+      return;
+    }
+
+    setCheckingUpdates(true);
+    setUpdateStatus('Buscando actualizaciones...');
+
+    try {
+      const result = await window.electronAPI.checkForUpdates();
+      if (result.isDev) {
+        setUpdateStatus('No disponible en modo desarrollo');
+      } else if (result.error) {
+        setUpdateStatus('Error al buscar actualizaciones');
+      } else {
+        setUpdateStatus('Verificando...');
+      }
+    } catch {
+      setUpdateStatus('Error de conexion');
+    } finally {
+      setCheckingUpdates(false);
+      setTimeout(() => setUpdateStatus(''), 4000);
+    }
+  };
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -123,40 +183,55 @@ export default function MainLayout({ children, onNavigate, currentRoute }: MainL
         ))}
       </List>
 
-      {/* User Profile Area (Bottom) */}
+      {/* Update & Version Area (Bottom) */}
       <Box sx={{
-        p: 2,
+        p: 1.5,
         borderTop: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
         backgroundColor: alpha(theme.palette.primary.main, 0.04),
       }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{
-            width: 32,
-            height: 32,
-            borderRadius: '50%',
-            bgcolor: alpha(theme.palette.primary.main, 0.15),
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'primary.main',
-            fontWeight: 700,
-            fontSize: '0.875rem',
-          }}>
-            A
-          </Box>
-          <Box sx={{ overflow: 'hidden' }}>
-            <Typography variant="subtitle2" fontWeight="600" noWrap>Admin</Typography>
-            <Typography variant="caption" color="text.secondary" noWrap>
-              admin@forestech.com
+        {/* Version Info */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+          <Typography variant="caption" color="text.secondary">
+            {appVersion ? `v${appVersion}` : 'Cargando...'}
+          </Typography>
+          {updateStatus && (
+            <Typography variant="caption" color="primary.main" sx={{ fontSize: '0.7rem' }}>
+              {updateStatus}
             </Typography>
-          </Box>
+          )}
         </Box>
+
+        {/* Update Button */}
+        <Button
+          fullWidth
+          size="small"
+          variant="outlined"
+          onClick={handleCheckUpdates}
+          disabled={checkingUpdates}
+          startIcon={checkingUpdates ? (
+            <CircularProgress size={14} color="inherit" />
+          ) : (
+            <SystemUpdateIcon fontSize="small" />
+          )}
+          sx={{
+            textTransform: 'none',
+            fontSize: '0.8rem',
+            py: 0.5,
+            borderColor: alpha(theme.palette.primary.main, 0.3),
+            '&:hover': {
+              borderColor: theme.palette.primary.main,
+              backgroundColor: alpha(theme.palette.primary.main, 0.08),
+            },
+          }}
+        >
+          {checkingUpdates ? 'Verificando...' : 'Buscar Actualizaciones'}
+        </Button>
       </Box>
     </Box>
   );
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh', bgcolor: 'background.default' }}>
+    <Box sx={{ display: 'flex', height: '100%', bgcolor: 'background.default' }}>
       <CssBaseline />
 
       {/* Top Bar - Minimalist Native Style */}

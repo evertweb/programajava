@@ -29,6 +29,7 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       webSecurity: true,
+      preload: path.join(__dirname, 'preload.cjs'),
     },
     backgroundColor: '#f5f5f5',
     show: false, // Don't show until ready
@@ -156,6 +157,11 @@ autoUpdater.on('checking-for-update', () => {
 autoUpdater.on('update-available', (info) => {
   console.log('Update available:', info.version);
 
+  // Send event to renderer
+  if (mainWindow) {
+    mainWindow.webContents.send('update-available', info);
+  }
+
   dialog.showMessageBox(mainWindow, {
     type: 'info',
     title: 'Actualización Disponible',
@@ -181,16 +187,28 @@ autoUpdater.on('update-available', (info) => {
 
 autoUpdater.on('update-not-available', () => {
   console.log('No updates available');
+  // Send event to renderer
+  if (mainWindow) {
+    mainWindow.webContents.send('update-not-available');
+  }
 });
 
 autoUpdater.on('download-progress', (progressObj) => {
   console.log(`Download speed: ${progressObj.bytesPerSecond}`);
   console.log(`Downloaded ${progressObj.percent}%`);
   console.log(`(${progressObj.transferred}/${progressObj.total})`);
+  // Send progress to renderer
+  if (mainWindow) {
+    mainWindow.webContents.send('download-progress', progressObj);
+  }
 });
 
 autoUpdater.on('update-downloaded', (info) => {
   console.log('Update downloaded:', info.version);
+  // Send event to renderer
+  if (mainWindow) {
+    mainWindow.webContents.send('update-downloaded', info);
+  }
 
   dialog.showMessageBox(mainWindow, {
     type: 'info',
@@ -225,18 +243,27 @@ autoUpdater.on('error', (error) => {
 // IPC Handlers
 // ============================================
 
+// Get app version
+ipcMain.handle('get-app-version', () => {
+  return app.getVersion();
+});
+
 // Manual update check from UI
 ipcMain.handle('check-for-updates', async () => {
   const isDev = process.env.NODE_ENV === 'development';
   if (!isDev) {
     try {
-      return await autoUpdater.checkForUpdates();
+      const result = await autoUpdater.checkForUpdates();
+      return { checking: true, result };
     } catch (error) {
       console.error('Error checking for updates:', error);
-      return null;
+      if (mainWindow) {
+        mainWindow.webContents.send('update-error', error.message);
+      }
+      return { checking: false, error: error.message };
     }
   }
-  return null;
+  return { checking: false, isDev: true };
 });
 
 // App lifecycle events

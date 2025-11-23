@@ -9,11 +9,23 @@
  * - Production: Use the production API gateway URL
  */
 
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
+import { getConnectionContext } from '../context/ConnectionContext';
 
 // Base URL - All requests go through API Gateway
 // Can be overridden via environment variable for different environments
 const GATEWAY_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+
+// Helper to check if error is a network/connection error
+const isNetworkError = (error: AxiosError): boolean => {
+  return (
+    !error.response || // No response = network error
+    error.code === 'ECONNABORTED' || // Timeout
+    error.code === 'ERR_NETWORK' || // Network error
+    error.code === 'ECONNREFUSED' || // Connection refused
+    error.message.includes('Network Error')
+  );
+};
 
 // All services use the same gateway URL (routing handled by gateway)
 export const API_BASE_URLS = {
@@ -67,12 +79,23 @@ export const invoicingAPI = axios.create({
   timeout: 10000,
 });
 
-// Add response interceptor for error handling
+// Add response interceptor for error handling and connection state
 [catalogAPI, fleetAPI, inventoryAPI, partnersAPI, invoicingAPI].forEach(api => {
   api.interceptors.response.use(
     (response) => response,
-    (error) => {
-      console.error('API Error:', error.response?.data || error.message);
+    (error: AxiosError) => {
+      // Check if it's a network error and update connection state
+      if (isNetworkError(error)) {
+        const connectionContext = getConnectionContext();
+        if (connectionContext) {
+          connectionContext.setDisconnected();
+        }
+        // Log network errors minimally (only once, not full error object)
+        if (import.meta.env.DEV) {
+          console.warn('[API] Connection lost - server unreachable');
+        }
+      }
+      // Don't log every API error to reduce noise
       return Promise.reject(error);
     }
   );
