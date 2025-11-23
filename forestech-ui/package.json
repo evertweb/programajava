@@ -96,9 +96,9 @@
       "differentialPackage": true,
       "license": "build/license.txt",
       "installerLanguages": [
-        "es-419"
+        "Spanish"
       ],
-      "language": "es-419",
+      "language": "1034",
       "installerIcon": "build/icon.png",
       "uninstallerIcon": "build/icon.png",
       "installerSidebar": "build/installerSidebar.png",
