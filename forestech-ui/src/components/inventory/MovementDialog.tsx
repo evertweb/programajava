@@ -167,6 +167,8 @@ export default function MovementDialog({ open, mode, onClose, onSuccess }: Movem
           <Autocomplete
             options={products}
             getOptionLabel={(option) => option.name}
+            getOptionKey={(option) => option.id}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
             value={selectedProduct || null}
             onChange={handleProductChange}
             loading={loading}
@@ -184,6 +186,8 @@ export default function MovementDialog({ open, mode, onClose, onSuccess }: Movem
             <Autocomplete
               options={vehicles}
               getOptionLabel={(option) => `${option.placa} - ${option.marca} ${option.modelo}`}
+              getOptionKey={(option) => option.id}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
               value={selectedVehicle || null}
               onChange={handleVehicleChange}
               loading={loading}

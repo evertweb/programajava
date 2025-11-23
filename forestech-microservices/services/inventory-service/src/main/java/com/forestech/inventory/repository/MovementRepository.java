@@ -31,4 +31,11 @@ public interface MovementRepository extends JpaRepository<Movement, String> {
     // Obtener todos los productos distintos con entradas
     @Query("SELECT DISTINCT m.productId FROM Movement m WHERE m.movementType = 'ENTRADA'")
     List<String> findDistinctProductIds();
+
+    // Filtrar movimientos por tipo
+    List<Movement> findByMovementType(Movement.MovementType movementType);
+
+    // Buscar entradas de un producto ordenadas por fecha DESC (para recomposición FIFO inversa)
+    List<Movement> findByProductIdAndMovementTypeOrderByCreatedAtDesc(
+            String productId, Movement.MovementType movementType);
 }

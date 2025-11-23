@@ -6,9 +6,12 @@
 import { inventoryAPI } from './api';
 import type { Movement, MovementFormData } from '../types/movement.types';
 
+export type MovementTypeFilter = 'ENTRADA' | 'SALIDA' | 'ALL';
+
 export const movementService = {
-    async getAll(): Promise<Movement[]> {
-        const response = await inventoryAPI.get<Movement[]>('/movements');
+    async getAll(type?: MovementTypeFilter): Promise<Movement[]> {
+        const params = type && type !== 'ALL' ? { type } : {};
+        const response = await inventoryAPI.get<Movement[]>('/movements', { params });
         return response.data;
     },
 
@@ -36,5 +39,9 @@ export const movementService = {
     async getByProduct(productId: string): Promise<Movement[]> {
         const response = await inventoryAPI.get<Movement[]>(`/movements/product/${productId}`);
         return response.data;
+    },
+
+    async delete(id: string): Promise<void> {
+        await inventoryAPI.delete(`/movements/${id}`);
     }
 };

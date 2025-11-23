@@ -29,6 +29,11 @@ public class MovementService {
         return movementRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
+    public List<Movement> getMovementsByType(Movement.MovementType type) {
+        return movementRepository.findByMovementType(type);
+    }
+
     @Transactional
     public Movement createMovement(Movement movement) {
         log.info("Creating movement for product: {}", movement.getProductId());
@@ -188,15 +193,67 @@ public class MovementService {
         Movement movement = movementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Movimiento no encontrado: " + id));
 
-        // Validación de integridad: No eliminar si ya fue consumido (FIFO)
+        // Validación de integridad: No eliminar ENTRADA si ya fue consumido (FIFO)
         if (movement.getMovementType() == Movement.MovementType.ENTRADA) {
             if (movement.getRemainingQuantity().compareTo(movement.getQuantity()) != 0) {
                 throw new RuntimeException("No se puede eliminar este movimiento de entrada porque su stock ya ha sido utilizado en salidas posteriores.");
             }
         }
 
+        // Para SALIDA: Recomponer el stock (restaurar remaining_quantity de entradas)
+        if (movement.getMovementType() == Movement.MovementType.SALIDA) {
+            restoreFifoStock(movement);
+        }
+
         log.warn("Eliminando movimiento {} (Tipo: {})", id, movement.getMovementType());
         movementRepository.delete(movement);
+    }
+
+    /**
+     * Restaura el stock de las entradas después de eliminar una salida.
+     * Usa FIFO inverso: restaura primero las entradas más recientes.
+     */
+    private void restoreFifoStock(Movement salida) {
+        BigDecimal quantityToRestore = salida.getQuantity();
+        String productId = salida.getProductId();
+
+        log.info("Restaurando {} unidades al stock del producto {}", quantityToRestore, productId);
+
+        // Buscar entradas del mismo producto ordenadas por fecha DESC (más recientes primero)
+        List<Movement> entries = movementRepository
+                .findByProductIdAndMovementTypeOrderByCreatedAtDesc(productId, Movement.MovementType.ENTRADA);
+
+        for (Movement entry : entries) {
+            if (quantityToRestore.compareTo(BigDecimal.ZERO) <= 0) break;
+
+            BigDecimal currentRemaining = entry.getRemainingQuantity();
+            BigDecimal originalQuantity = entry.getQuantity();
+            BigDecimal spaceAvailable = originalQuantity.subtract(currentRemaining);
+
+            if (spaceAvailable.compareTo(BigDecimal.ZERO) > 0) {
+                // Esta entrada tiene espacio para restaurar (fue parcial o totalmente consumida)
+                BigDecimal toRestore;
+                if (spaceAvailable.compareTo(quantityToRestore) >= 0) {
+                    // Podemos restaurar todo lo que falta en esta entrada
+                    toRestore = quantityToRestore;
+                    quantityToRestore = BigDecimal.ZERO;
+                } else {
+                    // Restauramos todo el espacio disponible y seguimos
+                    toRestore = spaceAvailable;
+                    quantityToRestore = quantityToRestore.subtract(spaceAvailable);
+                }
+
+                entry.setRemainingQuantity(currentRemaining.add(toRestore));
+                movementRepository.save(entry);
+
+                log.info("FIFO Restore: Restored {} to Entry {} (now: {}/{})",
+                        toRestore, entry.getId(), entry.getRemainingQuantity(), entry.getQuantity());
+            }
+        }
+
+        if (quantityToRestore.compareTo(BigDecimal.ZERO) > 0) {
+            log.warn("No se pudo restaurar completamente el stock. Restante: {}", quantityToRestore);
+        }
     }
 
     // Excepciones

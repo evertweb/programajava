@@ -22,7 +22,17 @@ public class MovementController {
     private final MovementService movementService;
 
     @GetMapping
-    public ResponseEntity<List<Movement>> getAllMovements() {
+    public ResponseEntity<List<Movement>> getAllMovements(
+            @RequestParam(required = false) String type) {
+        if (type != null && !type.isEmpty()) {
+            try {
+                Movement.MovementType movementType = Movement.MovementType.valueOf(type.toUpperCase());
+                return ResponseEntity.ok(movementService.getMovementsByType(movementType));
+            } catch (IllegalArgumentException e) {
+                log.warn("Tipo de movimiento inválido: {}", type);
+                return ResponseEntity.badRequest().build();
+            }
+        }
         return ResponseEntity.ok(movementService.getAllMovements());
     }
 
@@ -91,6 +101,17 @@ public class MovementController {
     @DeleteMapping("/internal/{id}")
     public ResponseEntity<Void> deleteMovementInternal(@PathVariable String id) {
         log.info("DELETE /api/movements/internal/{} (llamada interna desde invoicing-service)", id);
+        movementService.deleteMovement(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * ENDPOINT PÚBLICO - Eliminar movimiento SALIDA con recomposición de stock
+     * Al eliminar una SALIDA, se restaura automáticamente el stock a las entradas FIFO
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMovement(@PathVariable String id) {
+        log.info("DELETE /api/movements/{}", id);
         movementService.deleteMovement(id);
         return ResponseEntity.noContent().build();
     }
