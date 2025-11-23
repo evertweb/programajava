@@ -157,13 +157,14 @@ export default function VehiclesPanel() {
     return (
         <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             {/* Header */}
-            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h4" component="h1" fontWeight="bold">
-                    🚚 Gestión de Vehículos
+            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="h5" component="h1" fontWeight="600">
+                    Gestión de Vehículos
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1 }}>
                     <Button
                         variant="outlined"
+                        size="small"
                         startIcon={<RefreshIcon />}
                         onClick={loadVehicles}
                         disabled={loading}
@@ -172,6 +173,7 @@ export default function VehiclesPanel() {
                     </Button>
                     <Button
                         variant="contained"
+                        size="small"
                         startIcon={<AddIcon />}
                         onClick={handleCreate}
                         color="primary"
@@ -182,22 +184,21 @@ export default function VehiclesPanel() {
             </Box>
 
             {/* Data Grid */}
-            <Paper sx={{ flex: 1, p: 2 }}>
+            <Paper sx={{ flex: 1, p: 0, border: '1px solid', borderColor: 'divider' }}>
                 <DataGrid
                     rows={vehicles}
                     columns={columns}
                     loading={loading}
-                    pageSizeOptions={[10, 25, 50, 100]}
+                    density="compact"
+                    pageSizeOptions={[25, 50, 100]}
                     initialState={{
                         pagination: { paginationModel: { pageSize: 25 } },
                     }}
                     disableRowSelectionOnClick
                     sx={{
+                        border: 'none',
                         '& .MuiDataGrid-cell:focus': {
                             outline: 'none',
-                        },
-                        '& .MuiDataGrid-row:hover': {
-                            backgroundColor: 'action.hover',
                         },
                     }}
                 />

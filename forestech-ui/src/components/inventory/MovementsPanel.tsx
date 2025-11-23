@@ -136,9 +136,9 @@ export default function MovementsPanel() {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h4" component="h1">
+    <Box sx={{ p: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+        <Typography variant="h5" component="h1" fontWeight="600">
           Movimientos de Inventario
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
@@ -158,6 +158,7 @@ export default function MovementsPanel() {
           <Button
             variant="contained"
             color="warning"
+            size="small"
             startIcon={<RemoveIcon />}
             onClick={() => handleOpenDialog('SALIDA')}
           >
@@ -253,7 +254,7 @@ export default function MovementsPanel() {
         open={dialogOpen}
         mode={dialogMode}
         onClose={handleCloseDialog}
-        onSuccess={() => {}}
+        onSuccess={() => { }}
       />
 
       {/* Dialog de confirmación de eliminación */}

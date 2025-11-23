@@ -120,29 +120,16 @@ export default function MainLayout({ children, onNavigate, currentRoute }: MainL
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* App Title Area */}
       <Box sx={{
-        p: 2.5,
+        p: 2,
         display: 'flex',
         alignItems: 'center',
         gap: 1.5,
         color: theme.palette.text.primary,
-        borderBottom: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        backgroundColor: 'background.paper',
       }}>
-        <Box sx={{
-          width: 36,
-          height: 36,
-          borderRadius: 1.5,
-          bgcolor: 'primary.main',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontSize: '1.25rem',
-          boxShadow: '0 2px 8px rgba(46, 125, 50, 0.2)',
-        }}>
-          🌲
-        </Box>
         <Box>
-          <Typography variant="subtitle1" noWrap fontWeight="700" sx={{ lineHeight: 1.2 }}>
+          <Typography variant="subtitle1" noWrap fontWeight="600" sx={{ lineHeight: 1.2 }}>
             ForestechOil
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>

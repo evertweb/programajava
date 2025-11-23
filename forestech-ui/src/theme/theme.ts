@@ -1,124 +1,113 @@
 /**
  * Material-UI Theme Configuration
- * Liquid Glass (Glassmorphism) Style for Forestech Oil
+ * Corporate ERP/POS Style for Forestech Oil
+ * Professional, dense, and utilitarian design
  */
 
 import { createTheme, alpha } from '@mui/material/styles';
 
-// Liquid Glass Color Palette - Vibrant & Modern
-const glassColors = {
-  // Gradients
-  primaryGradient: 'linear-gradient(135deg, #2dd4bf 0%, #10b981 50%, #059669 100%)',
-  secondaryGradient: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%)',
-  accentGradient: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #7c3aed 100%)',
+// Corporate Color Palette - Professional & Neutral
+const corporateColors = {
+  // Primary - Corporate Blue
+  primary: '#1565C0',
+  primaryLight: '#1976D2',
+  primaryDark: '#0D47A1',
 
-  // Main colors - More vibrant
-  primary: '#10b981',      // Emerald green
-  primaryLight: '#34d399',
-  primaryDark: '#059669',
+  // Secondary - Neutral Greys
+  secondary: '#424242',
+  secondaryLight: '#616161',
+  secondaryDark: '#212121',
 
-  secondary: '#3b82f6',    // Bright blue
-  secondaryLight: '#60a5fa',
-  secondaryDark: '#2563eb',
+  // Backgrounds
+  bgPrimary: '#FFFFFF',
+  bgSecondary: '#FAFAFA',
+  bgTertiary: '#F5F5F5',
 
-  accent: '#8b5cf6',       // Purple
-  accentLight: '#a78bfa',
-  accentDark: '#7c3aed',
+  // Borders
+  border: '#E0E0E0',
+  borderDark: '#BDBDBD',
+  borderLight: '#F0F0F0',
 
-  // Glass surfaces
-  glassBase: 'rgba(255, 255, 255, 0.1)',
-  glassMedium: 'rgba(255, 255, 255, 0.15)',
-  glassStrong: 'rgba(255, 255, 255, 0.25)',
+  // Text
+  textPrimary: '#212121',
+  textSecondary: '#616161',
+  textDisabled: '#9E9E9E',
 
-  // Background with gradient
-  bgGradient: 'linear-gradient(135deg, #f0fdfa 0%, #ecfdf5 50%, #f0fdf4 100%)',
+  // States - Corporate colors
+  success: '#388E3C',
+  warning: '#F57C00',
+  error: '#D32F2F',
+  info: '#1976D2',
 
-  // Text colors
-  textPrimary: '#0f172a',
-  textSecondary: '#475569',
-  textDisabled: '#94a3b8',
-  textOnGlass: '#1e293b',
-
-  // Borders with shimmer
-  borderGlass: 'rgba(255, 255, 255, 0.4)',
-  borderShimmer: 'rgba(16, 185, 129, 0.3)',
-
-  // Hover effects - NO BLACK!
-  hoverGlass: 'rgba(16, 185, 129, 0.08)',
-  hoverGlassStrong: 'rgba(16, 185, 129, 0.12)',
-  pressedGlass: 'rgba(16, 185, 129, 0.15)',
-
-  // Glow effects
-  glowPrimary: 'rgba(16, 185, 129, 0.4)',
-  glowSecondary: 'rgba(59, 130, 246, 0.4)',
-  glowAccent: 'rgba(139, 92, 246, 0.4)',
+  // Interactive states
+  selected: '#E3F2FD',      // Light blue for selections
+  hover: '#F5F5F5',         // Light grey for hover
+  pressed: '#EEEEEE',       // Slightly darker grey for pressed
 };
 
 export const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: glassColors.primary,
-      light: glassColors.primaryLight,
-      dark: glassColors.primaryDark,
+      main: corporateColors.primary,
+      light: corporateColors.primaryLight,
+      dark: corporateColors.primaryDark,
       contrastText: '#fff',
     },
     secondary: {
-      main: glassColors.secondary,
-      light: glassColors.secondaryLight,
-      dark: glassColors.secondaryDark,
+      main: corporateColors.secondary,
+      light: corporateColors.secondaryLight,
+      dark: corporateColors.secondaryDark,
       contrastText: '#fff',
     },
     background: {
-      default: '#f0fdf4',
-      paper: 'rgba(255, 255, 255, 0.8)',
+      default: corporateColors.bgSecondary,
+      paper: corporateColors.bgPrimary,
     },
     text: {
-      primary: glassColors.textPrimary,
-      secondary: glassColors.textSecondary,
-      disabled: glassColors.textDisabled,
+      primary: corporateColors.textPrimary,
+      secondary: corporateColors.textSecondary,
+      disabled: corporateColors.textDisabled,
     },
-    divider: glassColors.borderGlass,
+    divider: corporateColors.border,
     success: {
-      main: '#10b981',
+      main: corporateColors.success,
     },
     warning: {
-      main: '#f59e0b',
+      main: corporateColors.warning,
     },
     error: {
-      main: '#ef4444',
+      main: corporateColors.error,
     },
     info: {
-      main: '#3b82f6',
+      main: corporateColors.info,
     },
   },
   typography: {
     fontFamily: [
-      '"Segoe UI Variable"',
+      'Roboto',
       '"Segoe UI"',
-      'system-ui',
-      '-apple-system',
-      'BlinkMacSystemFont',
+      'Arial',
       'sans-serif',
     ].join(','),
-    h1: { fontWeight: 700, letterSpacing: '-0.03em' },
-    h2: { fontWeight: 700, letterSpacing: '-0.02em' },
-    h3: { fontWeight: 600, letterSpacing: '-0.01em' },
-    h4: { fontWeight: 600, letterSpacing: '-0.01em' },
-    h5: { fontWeight: 600, letterSpacing: '0em' },
-    h6: { fontWeight: 600, letterSpacing: '0.01em' },
+    h1: { fontWeight: 600, letterSpacing: '-0.01em' },
+    h2: { fontWeight: 600, letterSpacing: '-0.01em' },
+    h3: { fontWeight: 600, letterSpacing: '0em' },
+    h4: { fontWeight: 600, letterSpacing: '0em' },
+    h5: { fontWeight: 500, letterSpacing: '0em' },
+    h6: { fontWeight: 500, letterSpacing: '0em' },
     subtitle1: { fontWeight: 500 },
     subtitle2: { fontWeight: 500 },
     button: {
       textTransform: 'none',
-      fontWeight: 600,
-      letterSpacing: '0.03em',
+      fontWeight: 500,
+      letterSpacing: '0.02em',
     },
-    body1: { lineHeight: 1.6 },
-    body2: { lineHeight: 1.6 },
+    body1: { lineHeight: 1.5 },
+    body2: { lineHeight: 1.5 },
   },
   shape: {
-    borderRadius: 16,
+    borderRadius: 4, // Minimal border radius for corporate look
   },
   transitions: {
     duration: {
@@ -130,81 +119,59 @@ export const theme = createTheme({
       enteringScreen: 200,
       leavingScreen: 150,
     },
-    easing: {
-      easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
-      easeOut: 'cubic-bezier(0.0, 0, 0.2, 1)',
-      easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
-      sharp: 'cubic-bezier(0.4, 0, 0.6, 1)',
-    },
   },
   components: {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          background: glassColors.bgGradient,
+          background: corporateColors.bgSecondary,
           backgroundAttachment: 'fixed',
           scrollbarWidth: 'thin',
-          scrollbarColor: `${alpha(glassColors.primary, 0.3)} transparent`,
+          scrollbarColor: `${corporateColors.borderDark} transparent`,
           '&::-webkit-scrollbar': {
-            width: '10px',
-            height: '10px',
+            width: '12px',
+            height: '12px',
           },
           '&::-webkit-scrollbar-track': {
-            background: 'transparent',
+            background: corporateColors.bgTertiary,
           },
           '&::-webkit-scrollbar-thumb': {
-            background: `linear-gradient(180deg, ${alpha(glassColors.primary, 0.3)}, ${alpha(glassColors.primaryDark, 0.5)})`,
-            borderRadius: '10px',
-            border: '2px solid transparent',
-            backgroundClip: 'padding-box',
-            transition: 'all 0.3s ease',
+            background: corporateColors.borderDark,
+            borderRadius: '4px',
+            border: `2px solid ${corporateColors.bgTertiary}`,
             '&:hover': {
-              background: `linear-gradient(180deg, ${alpha(glassColors.primary, 0.5)}, ${alpha(glassColors.primaryDark, 0.7)})`,
+              background: corporateColors.secondaryLight,
             },
           },
         },
       },
     },
     MuiButton: {
+      defaultProps: {
+        disableElevation: true,
+      },
       styleOverrides: {
         root: {
-          borderRadius: 12,
-          padding: '8px 20px',
-          fontSize: '0.9375rem',
+          borderRadius: 4,
+          padding: '6px 16px',
+          fontSize: '0.875rem',
+          fontWeight: 500,
+          textTransform: 'none',
           boxShadow: 'none',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           '&:hover': {
-            boxShadow: `0 4px 20px ${alpha(glassColors.glowPrimary, 0.6)}`,
-            transform: 'translateY(-2px)',
-          },
-          '&:active': {
-            transform: 'translateY(0)',
+            boxShadow: 'none',
           },
         },
         contained: {
-          background: glassColors.primaryGradient,
-          boxShadow: `0 4px 15px ${alpha(glassColors.glowPrimary, 0.4)}`,
+          boxShadow: 'none',
           '&:hover': {
-            background: glassColors.primaryGradient,
-            boxShadow: `0 6px 25px ${alpha(glassColors.glowPrimary, 0.6)}`,
+            boxShadow: 'none',
           },
         },
         outlined: {
-          borderWidth: '2px',
-          borderColor: alpha(glassColors.primary, 0.4),
-          background: glassColors.glassBase,
-          backdropFilter: 'blur(10px)',
+          borderWidth: '1px',
           '&:hover': {
-            borderWidth: '2px',
-            borderColor: glassColors.primary,
-            background: glassColors.glassMedium,
-            boxShadow: `0 4px 20px ${alpha(glassColors.glowPrimary, 0.3)}`,
-          },
-        },
-        text: {
-          '&:hover': {
-            background: glassColors.hoverGlass,
-            backdropFilter: 'blur(10px)',
+            borderWidth: '1px',
           },
         },
       },
@@ -212,160 +179,125 @@ export const theme = createTheme({
     MuiIconButton: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          borderRadius: 4,
           '&:hover': {
-            background: glassColors.hoverGlass,
-            backdropFilter: 'blur(10px)',
-            boxShadow: `0 4px 15px ${alpha(glassColors.glowPrimary, 0.25)}`,
-          },
-          '&:active': {
-            background: glassColors.pressedGlass,
+            backgroundColor: corporateColors.hover,
           },
         },
       },
     },
     MuiPaper: {
+      defaultProps: {
+        elevation: 0,
+      },
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          background: glassColors.glassStrong,
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-        },
-        rounded: {
-          borderRadius: 16,
+          background: corporateColors.bgPrimary,
+          border: `1px solid ${corporateColors.border}`,
+          borderRadius: 4,
         },
         elevation0: {
-          border: `1px solid ${glassColors.borderGlass}`,
-          boxShadow: `inset 0 1px 0 ${alpha('#fff', 0.8)}`,
+          boxShadow: 'none',
         },
         elevation1: {
-          boxShadow: `0 8px 32px ${alpha(glassColors.glowPrimary, 0.15)}, inset 0 1px 0 ${alpha('#fff', 0.8)}`,
-          border: `1px solid ${glassColors.borderGlass}`,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
         },
         elevation2: {
-          boxShadow: `0 12px 40px ${alpha(glassColors.glowPrimary, 0.2)}, inset 0 1px 0 ${alpha('#fff', 0.8)}`,
-          border: `1px solid ${glassColors.borderGlass}`,
+          boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
         },
         elevation3: {
-          boxShadow: `0 16px 48px ${alpha(glassColors.glowPrimary, 0.25)}, inset 0 1px 0 ${alpha('#fff', 0.8)}`,
-          border: `1px solid ${glassColors.borderGlass}`,
+          boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
         },
       },
     },
     MuiCard: {
+      defaultProps: {
+        elevation: 0,
+      },
       styleOverrides: {
         root: {
-          background: `linear-gradient(135deg, ${alpha('#fff', 0.9)} 0%, ${alpha('#fff', 0.7)} 100%)`,
-          backdropFilter: 'blur(30px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(30px) saturate(180%)',
-          boxShadow: `0 8px 32px ${alpha(glassColors.glowPrimary, 0.15)}, inset 0 1px 0 ${alpha('#fff', 0.9)}`,
-          border: `1px solid ${glassColors.borderGlass}`,
-          borderRadius: 20,
-          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-          position: 'relative',
-          overflow: 'hidden',
-          willChange: 'transform, box-shadow',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '2px',
-            background: `linear-gradient(90deg, transparent, ${alpha(glassColors.primary, 0.6)}, transparent)`,
-            opacity: 0,
-            transition: 'opacity 0.4s ease',
-          },
+          background: corporateColors.bgPrimary,
+          border: `1px solid ${corporateColors.border}`,
+          borderRadius: 4,
+          boxShadow: 'none',
           '&:hover': {
-            boxShadow: `0 12px 48px ${alpha(glassColors.glowPrimary, 0.3)}, inset 0 1px 0 ${alpha('#fff', 1)}`,
-            transform: 'translateY(-4px)',
-            borderColor: alpha(glassColors.primary, 0.4),
-            '&::before': {
-              opacity: 1,
-            },
+            borderColor: corporateColors.borderDark,
+          },
+        },
+      },
+    },
+    MuiCardHeader: {
+      styleOverrides: {
+        root: {
+          padding: '12px 16px',
+          borderBottom: `1px solid ${corporateColors.borderLight}`,
+        },
+        title: {
+          fontSize: '0.875rem',
+          fontWeight: 500,
+          color: corporateColors.textSecondary,
+        },
+      },
+    },
+    MuiCardContent: {
+      styleOverrides: {
+        root: {
+          padding: '16px',
+          '&:last-child': {
+            paddingBottom: '16px',
           },
         },
       },
     },
     MuiAppBar: {
+      defaultProps: {
+        elevation: 0,
+      },
       styleOverrides: {
         root: {
-          background: `linear-gradient(135deg, ${alpha('#fff', 0.95)} 0%, ${alpha('#fff', 0.85)} 100%)`,
-          backdropFilter: 'blur(30px) saturate(200%)',
-          WebkitBackdropFilter: 'blur(30px) saturate(200%)',
-          boxShadow: `0 4px 24px ${alpha(glassColors.glowPrimary, 0.1)}, inset 0 -1px 0 ${alpha('#fff', 0.8)}`,
-          borderBottom: `1px solid ${glassColors.borderGlass}`,
-          color: glassColors.textPrimary,
+          background: corporateColors.bgPrimary,
+          borderBottom: `1px solid ${corporateColors.border}`,
+          boxShadow: 'none',
+          color: corporateColors.textPrimary,
+        },
+      },
+    },
+    MuiToolbar: {
+      styleOverrides: {
+        root: {
+          minHeight: '64px !important',
+          '@media (min-width: 600px)': {
+            minHeight: '64px !important',
+          },
         },
       },
     },
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          background: `linear-gradient(180deg, ${alpha('#fff', 0.9)} 0%, ${alpha('#fff', 0.8)} 100%)`,
-          backdropFilter: 'blur(60px) saturate(200%)',
-          WebkitBackdropFilter: 'blur(60px) saturate(200%)',
-          borderRight: `1px solid ${glassColors.borderGlass}`,
-          boxShadow: `inset -1px 0 0 ${alpha('#fff', 0.9)}, 4px 0 24px ${alpha(glassColors.glowPrimary, 0.08)}`,
+          background: corporateColors.bgTertiary,
+          borderRight: `1px solid ${corporateColors.border}`,
+          boxShadow: 'none',
         },
       },
     },
     MuiListItemButton: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
-          margin: '4px 12px',
-          padding: '12px 16px',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          position: 'relative',
-          overflow: 'hidden',
-          willChange: 'transform',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            inset: 0,
-            borderRadius: 12,
-            padding: '1px',
-            background: 'transparent',
-            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-            WebkitMaskComposite: 'xor',
-            maskComposite: 'exclude',
-            transition: 'all 0.3s ease',
-          },
+          borderRadius: 0,
+          margin: 0,
+          padding: '10px 16px',
           '&:hover': {
-            background: `linear-gradient(135deg, ${glassColors.hoverGlass} 0%, ${glassColors.hoverGlassStrong} 100%)`,
-            backdropFilter: 'blur(10px)',
-            transform: 'translateX(4px)',
-            '&::before': {
-              background: `linear-gradient(135deg, ${alpha(glassColors.primary, 0.3)}, ${alpha(glassColors.primaryDark, 0.3)})`,
-            },
+            backgroundColor: corporateColors.hover,
           },
           '&.Mui-selected': {
-            background: `linear-gradient(135deg, ${alpha(glassColors.primary, 0.15)} 0%, ${alpha(glassColors.primaryDark, 0.1)} 100%)`,
-            backdropFilter: 'blur(15px)',
-            color: glassColors.primaryDark,
-            fontWeight: 600,
-            boxShadow: `0 4px 20px ${alpha(glassColors.glowPrimary, 0.25)}, inset 0 1px 0 ${alpha('#fff', 0.5)}`,
-            '&::before': {
-              background: `linear-gradient(135deg, ${alpha(glassColors.primary, 0.6)}, ${alpha(glassColors.primaryDark, 0.6)})`,
-            },
-            '&::after': {
-              content: '""',
-              position: 'absolute',
-              left: 0,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              height: '50%',
-              width: '4px',
-              background: glassColors.primaryGradient,
-              borderRadius: '0 4px 4px 0',
-              boxShadow: `2px 0 10px ${alpha(glassColors.glowPrimary, 0.6)}`,
-            },
+            backgroundColor: corporateColors.selected,
+            borderLeft: `4px solid ${corporateColors.primary}`,
+            color: corporateColors.primary,
+            fontWeight: 500,
             '&:hover': {
-              background: `linear-gradient(135deg, ${alpha(glassColors.primary, 0.2)} 0%, ${alpha(glassColors.primaryDark, 0.15)} 100%)`,
-              transform: 'translateX(6px)',
+              backgroundColor: corporateColors.selected,
             },
           },
         },
@@ -374,40 +306,31 @@ export const theme = createTheme({
     MuiListItemIcon: {
       styleOverrides: {
         root: {
-          minWidth: 44,
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          '& svg': {
-            fontSize: '1.4rem',
-            filter: `drop-shadow(0 2px 4px ${alpha(glassColors.glowPrimary, 0.2)})`,
-          },
+          minWidth: 40,
+          color: 'inherit',
         },
       },
     },
     MuiTextField: {
+      defaultProps: {
+        variant: 'outlined',
+        size: 'small',
+      },
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
-            borderRadius: 12,
-            background: glassColors.glassBase,
-            backdropFilter: 'blur(15px)',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            borderRadius: 4,
+            backgroundColor: corporateColors.bgPrimary,
             '& fieldset': {
-              borderColor: glassColors.borderGlass,
-              borderWidth: '1.5px',
+              borderColor: corporateColors.border,
+              borderWidth: '1px',
             },
-            '&:hover': {
-              background: glassColors.glassMedium,
-              '& fieldset': {
-                borderColor: alpha(glassColors.primary, 0.4),
-              },
+            '&:hover fieldset': {
+              borderColor: corporateColors.borderDark,
             },
-            '&.Mui-focused': {
-              background: glassColors.glassStrong,
-              boxShadow: `0 4px 20px ${alpha(glassColors.glowPrimary, 0.2)}, inset 0 1px 0 ${alpha('#fff', 0.6)}`,
-              '& fieldset': {
-                borderWidth: '2px',
-                borderColor: glassColors.primary,
-              },
+            '&.Mui-focused fieldset': {
+              borderWidth: '2px',
+              borderColor: corporateColors.primary,
             },
           },
         },
@@ -416,61 +339,89 @@ export const theme = createTheme({
     MuiDialog: {
       styleOverrides: {
         paper: {
-          borderRadius: 24,
-          background: `linear-gradient(135deg, ${alpha('#fff', 0.95)} 0%, ${alpha('#fff', 0.85)} 100%)`,
-          backdropFilter: 'blur(40px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-          boxShadow: `0 24px 64px ${alpha(glassColors.glowPrimary, 0.3)}, inset 0 1px 0 ${alpha('#fff', 1)}`,
-          border: `1px solid ${glassColors.borderGlass}`,
+          borderRadius: 4,
+          border: `1px solid ${corporateColors.border}`,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
         },
       },
     },
     MuiDialogTitle: {
       styleOverrides: {
         root: {
-          fontSize: '1.5rem',
-          fontWeight: 700,
-          padding: '24px 32px 20px',
-          background: `linear-gradient(135deg, ${alpha(glassColors.primary, 0.1)}, transparent)`,
+          fontSize: '1.25rem',
+          fontWeight: 600,
+          padding: '16px 24px',
+          borderBottom: `1px solid ${corporateColors.borderLight}`,
+          backgroundColor: corporateColors.bgTertiary,
+        },
+      },
+    },
+    MuiDialogContent: {
+      styleOverrides: {
+        root: {
+          padding: '24px',
+        },
+      },
+    },
+    MuiDialogActions: {
+      styleOverrides: {
+        root: {
+          padding: '16px 24px',
+          borderTop: `1px solid ${corporateColors.borderLight}`,
+          backgroundColor: corporateColors.bgTertiary,
         },
       },
     },
     MuiChip: {
       styleOverrides: {
         root: {
-          borderRadius: 10,
+          borderRadius: 4,
           fontWeight: 500,
-          background: glassColors.glassMedium,
-          backdropFilter: 'blur(10px)',
-          border: `1px solid ${glassColors.borderGlass}`,
+          border: `1px solid ${corporateColors.border}`,
         },
       },
     },
     MuiTableCell: {
       styleOverrides: {
         root: {
-          borderBottom: `1px solid ${alpha(glassColors.borderGlass, 0.5)}`,
+          borderBottom: `1px solid ${corporateColors.border}`,
+          padding: '8px 16px',
         },
         head: {
           fontWeight: 600,
-          background: `linear-gradient(135deg, ${alpha(glassColors.primary, 0.08)} 0%, ${alpha(glassColors.primaryDark, 0.05)} 100%)`,
-          backdropFilter: 'blur(10px)',
+          backgroundColor: corporateColors.bgTertiary,
+          borderBottom: `2px solid ${corporateColors.border}`,
+        },
+      },
+    },
+    MuiTableRow: {
+      styleOverrides: {
+        root: {
+          '&:nth-of-type(even)': {
+            backgroundColor: corporateColors.bgSecondary,
+          },
+          '&:hover': {
+            backgroundColor: corporateColors.hover,
+          },
+          '&.Mui-selected': {
+            backgroundColor: corporateColors.selected,
+            '&:hover': {
+              backgroundColor: alpha(corporateColors.selected, 0.8),
+            },
+          },
         },
       },
     },
     MuiTooltip: {
       styleOverrides: {
         tooltip: {
-          background: `linear-gradient(135deg, ${alpha('#1e293b', 0.95)} 0%, ${alpha('#0f172a', 0.95)} 100%)`,
-          backdropFilter: 'blur(15px)',
-          borderRadius: 10,
-          fontSize: '0.8125rem',
-          padding: '8px 14px',
-          boxShadow: `0 8px 24px ${alpha('#000', 0.3)}, inset 0 1px 0 ${alpha('#fff', 0.1)}`,
-          border: `1px solid ${alpha('#fff', 0.1)}`,
+          backgroundColor: corporateColors.secondaryDark,
+          fontSize: '0.75rem',
+          padding: '6px 12px',
+          borderRadius: 4,
         },
         arrow: {
-          color: alpha('#1e293b', 0.95),
+          color: corporateColors.secondaryDark,
         },
       },
     },
@@ -479,14 +430,13 @@ export const theme = createTheme({
         root: {
           padding: 8,
         },
-        track: {
-          borderRadius: 16,
-          opacity: 1,
-          background: glassColors.glassMedium,
-          border: `1px solid ${glassColors.borderGlass}`,
-        },
-        thumb: {
-          boxShadow: `0 2px 8px ${alpha(glassColors.glowPrimary, 0.4)}`,
+      },
+    },
+    MuiAvatar: {
+      styleOverrides: {
+        root: {
+          borderRadius: 4,
+          fontWeight: 600,
         },
       },
     },

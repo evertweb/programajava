@@ -1,16 +1,12 @@
 /* 
- * Global Styles - Windows 11 Fluent Design
+ * Global Styles - Corporate ERP Style
  * Most styling is handled by Material UI Theme (src/theme/theme.ts)
  */
 
 :root {
-  font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  font-family: Roboto, "Segoe UI", Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  /* Mica effect variables */
-  --mica-blur: 40px;
-  --acrylic-blur: 20px;
 
   /* Ensure full height for the app */
   height: 100%;
@@ -39,38 +35,39 @@ body {
 
 /* Selection colors */
 ::selection {
-  background-color: rgba(46, 125, 50, 0.25);
+  background-color: rgba(21, 101, 192, 0.3);
   color: inherit;
 }
 
 ::-moz-selection {
-  background-color: rgba(46, 125, 50, 0.25);
+  background-color: rgba(21, 101, 192, 0.3);
   color: inherit;
 }
 
 /* Scrollbar styling for WebKit browsers (Chrome, Edge, Safari) */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #F5F5F5;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
+  background: #BDBDBD;
   border-radius: 4px;
+  border: 2px solid #F5F5F5;
   transition: background-color 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
+  background: #616161;
 }
 
-/* Focus visible for keyboard navigation (Windows 11 style) */
+/* Focus visible for keyboard navigation (corporate style) */
 *:focus-visible {
-  outline: 2px solid #2e7d32;
+  outline: 2px solid #1565C0;
   outline-offset: 2px;
   border-radius: 2px;
 }

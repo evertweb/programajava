@@ -45,11 +45,8 @@ forestechOil/
 │   │   └── theme/               # MUI theme
 │   └── electron/                # Electron main process
 │
-├── scripts/
-│   └── local-sync.sh            # Sincronizacion local
-│
-└── .devcontainer/               # GitHub Codespaces config
-    └── scripts/                 # Scripts de desarrollo
+└── scripts/
+    └── local-sync.sh            # Sincronizacion local
 ```
 
 ---
@@ -70,87 +67,91 @@ forestechOil/
 
 ---
 
-## Flujo de Desarrollo Hibrido
+## Flujo de Desarrollo Local
 
-### Arquitectura de Entornos
+### Arquitectura del Entorno
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                    FLUJO DE DESARROLLO                              │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
-│  CODESPACES (Desarrollo)              LOCAL WSL (Produccion/Test)  │
-│  ========================              ==========================   │
+│                   DESARROLLO LOCAL (WSL/Linux)                      │
+│                   ================================                   │
 │                                                                     │
-│  - Escribir codigo                    - Ejecutar microservicios    │
-│  - Compilar y probar                  - Probar con datos reales    │
-│  - Commits y push a main              - Testear UI Electron        │
+│  - Escribir código                                                  │
+│  - Ejecutar microservicios (Docker Compose)                         │
+│  - Probar con datos reales                                          │
+│  - Desarrollar UI Electron                                          │
+│  - Commits y push a GitHub                                          │
 │                                                                     │
-│           │                                    ▲                    │
-│           │ git push                           │ forestech-sync     │
-│           ▼                                    │                    │
-│       ┌───────┐                           ┌────────┐                │
-│       │ GitHub│ ─────────────────────────>│ Local  │                │
-│       │ main  │                           │ WSL    │                │
-│       └───────┘                           └────────┘                │
+│                           │ git push                                │
+│                           ▼                                         │
+│                      ┌─────────┐                                    │
+│                      │ GitHub  │                                    │
+│                      │  main   │                                    │
+│                      └────┬────┘                                    │
+│                           │                                         │
+│                           │ GitHub Actions (on tag push)            │
+│                           ▼                                         │
+│                 ┌──────────────────┐                                │
+│                 │  Build Multi-OS  │                                │
+│                 │  Distributables  │                                │
+│                 │  (.exe, .AppImage)│                               │
+│                 └──────────────────┘                                │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-### Codespaces - Centro de Desarrollo
+### Desarrollo Local - Comandos Frecuentes
 
-Al iniciar Codespaces se ejecutan automaticamente:
-
-1. **post-create.sh** (solo primera vez):
-   - Descarga dependencias Maven para todos los microservicios
-   - Instala npm dependencies del frontend
-   - Configura aliases de desarrollo
-
-2. **post-start.sh** (cada inicio):
-   - Inicia Docker daemon
-   - Levanta infraestructura: Consul, MySQL, Redis
-   - Espera que servicios esten healthy
-
-**Comandos disponibles en Codespaces:**
+**Backend (Docker Compose):**
 ```bash
-start-all        # Iniciar todos los microservicios
-stop-all         # Detener todos los contenedores
-rebuild-all      # Recompilar todos los servicios
-health           # Verificar salud de servicios
-ui-dev           # Iniciar servidor de desarrollo frontend
-cdm              # Ir a directorio de microservicios
-cdu              # Ir a directorio de UI
+cd forestech-microservices
+
+# Iniciar todos los servicios
+docker compose up -d
+
+# Ver logs en tiempo real
+docker compose logs -f
+
+# Reconstruir un servicio específico
+docker compose up -d --build catalog-service
+
+# Detener todos los servicios
+docker compose down
+
+# Rebuild completo (sin caché)
+docker compose build --no-cache
+docker compose up -d
 ```
 
-### Local WSL - Sincronizacion
-
-Ejecutar `forestech-sync` (alias configurado en ~/.bashrc):
-
+**Frontend (Desarrollo Electron):**
 ```bash
-# Sincronizacion completa
-forestech-sync
+cd forestech-ui
 
-# Solo pull sin rebuild
-forestech-sync --pull-only
+# Modo desarrollo con hot reload
+npm run electron:dev
 
-# Rebuild rapido (paralelo)
-forestech-sync --quick
+# Build de producción (navegador)
+npm run build
 
-# Forzar rebuild de imagenes
-forestech-sync --force
-
-# Saltar actualizacion de UI
-forestech-sync --skip-ui
+# Solo para probar compilación local
+# (NOTA: En WSL no genera .exe correctamente, usar GitHub Actions)
+npm run electron:build:linux  # Genera AppImage
 ```
 
-**Que hace forestech-sync:**
-1. Verifica cambios locales no commiteados
-2. Pull de origin/main
-3. Detiene contenedores Docker
-4. Reconstruye imagenes Docker
-5. Inicia servicios
-6. Espera que MySQL y API Gateway esten healthy
-7. Actualiza npm dependencies del frontend
+### GitHub - Solo para Versionado y Builds Automáticos
+
+GitHub se usa exclusivamente para:
+
+1. **Control de versiones** - `git push/pull`
+2. **Builds multiplataforma automáticos** - GitHub Actions compila el `.exe` de Windows
+
+**¿Por qué GitHub Actions para el .exe?**
+- En WSL es complicado compilar ejecutables de Windows
+- GitHub Actions tiene runners nativos de Windows
+- Genera distribuciones para Windows, Linux y macOS automáticamente
 
 ---
 

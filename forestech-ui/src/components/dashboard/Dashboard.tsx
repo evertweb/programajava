@@ -11,10 +11,6 @@ import {
   Paper,
   Typography,
   CircularProgress,
-  Card,
-  CardContent,
-  CardHeader,
-  Avatar,
   Button,
 } from '@mui/material';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -65,22 +61,30 @@ export default function Dashboard() {
 
   const MetricCard = useMemo(() =>
     ({ title, value, icon, color }: { title: string, value: number, icon: React.ReactNode, color: string }) => (
-      <Card sx={{ height: '100%' }}>
-        <CardHeader
-          avatar={
-            <Avatar sx={{ bgcolor: color }}>
-              {icon}
-            </Avatar>
-          }
-          title={title}
-          titleTypographyProps={{ variant: 'h6', color: 'text.secondary' }}
-        />
-        <CardContent>
-          <Typography variant="h3" component="div" fontWeight="bold">
+      <Paper sx={{
+        p: 1.5,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1.5,
+        border: '1px solid',
+        borderColor: 'divider',
+        boxShadow: 'none',
+        '&:hover': {
+          borderColor: 'primary.light',
+        },
+      }}>
+        <Box sx={{ color, display: 'flex', alignItems: 'center' }}>
+          {icon}
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5, flexGrow: 1 }}>
+          <Typography variant="body2" color="text.secondary" fontWeight={500}>
+            {title}:
+          </Typography>
+          <Typography variant="h6" component="span" fontWeight="600">
             {value}
           </Typography>
-        </CardContent>
-      </Card>
+        </Box>
+      </Paper>
     ), []
   );
 
@@ -125,11 +129,11 @@ export default function Dashboard() {
 
   return (
     <Box>
-      <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ mb: 4 }}>
-        📊 Dashboard
+      <Typography variant="h5" fontWeight="600" gutterBottom sx={{ mb: 3, color: 'text.primary' }}>
+        Dashboard
       </Typography>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
           <MetricCard
             title="Productos"
