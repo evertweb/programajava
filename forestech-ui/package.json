@@ -6,7 +6,7 @@
     "email": "info@forestech.com"
   },
   "private": true,
-  "version": "0.0.7",
+  "version": "0.0.8",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
@@ -48,6 +48,7 @@
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "bmp-js": "^0.1.0",
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
     "electron": "^39.2.3",
@@ -56,6 +57,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "sharp": "^0.34.5",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",
@@ -73,7 +75,7 @@
       "package.json"
     ],
     "win": {
-      "icon": "public/icon.png",
+      "icon": "build/icon.ico",
       "target": [
         {
           "target": "nsis",
@@ -95,21 +97,11 @@
       "warningsAsErrors": false,
       "differentialPackage": true,
       "license": "build/license.txt",
-      "installerLanguages": [
-        "Spanish"
-      ],
-      "language": "1034",
-      "installerIcon": "build/icon.png",
-      "uninstallerIcon": "build/icon.png",
-      "installerSidebar": "build/installerSidebar.png",
-      "installerHeader": "build/installerHeader.png",
-      "installerHeaderIcon": "build/icon.png",
-      "include": "build/installer.nsh",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
       "artifactName": "${productName}-Setup-${version}.${ext}",
       "perMachine": true,
       "menuCategory": "Forestech",
-      "displayLanguageSelector": false,
-      "multiLanguageInstaller": false,
       "guid": "a9b8c7d6-e5f4-3210-9876-543210fedcba"
     },
     "publish": {
