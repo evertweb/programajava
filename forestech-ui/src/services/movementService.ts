@@ -5,27 +5,36 @@
 
 import { inventoryAPI } from './api';
 import type { Movement, MovementFormData } from '../types/movement.types';
+import { createCrudService } from './createCrudService';
 
 export type MovementTypeFilter = 'ENTRADA' | 'SALIDA' | 'ALL';
 
+// Base CRUD operations from factory
+const baseCrudService = createCrudService<Movement, MovementFormData>(
+    inventoryAPI,
+    '/movements'
+);
+
+// Extended service with custom methods
 export const movementService = {
+    // Override getAll to support type filtering
     async getAll(type?: MovementTypeFilter): Promise<Movement[]> {
         const params = type && type !== 'ALL' ? { type } : {};
         const response = await inventoryAPI.get<Movement[]>('/movements', { params });
         return response.data;
     },
 
-    async getById(id: string): Promise<Movement> {
-        const response = await inventoryAPI.get<Movement>(`/movements/${id}`);
-        return response.data;
-    },
+    // Use base methods from factory
+    getById: baseCrudService.getById,
 
+    // Custom create with specific endpoints for ENTRADA/SALIDA
     async create(data: MovementFormData): Promise<Movement> {
         const endpoint = data.movementType === 'ENTRADA' ? '/movements/entrada' : '/movements/salida';
         const response = await inventoryAPI.post<Movement>(endpoint, data);
         return response.data;
     },
 
+    // Custom methods specific to movements
     async getStock(productId: string): Promise<{ productId: string; stock: number }> {
         const response = await inventoryAPI.get<{ productId: string; stock: number }>(`/movements/stock/${productId}`);
         return response.data;
@@ -41,7 +50,6 @@ export const movementService = {
         return response.data;
     },
 
-    async delete(id: string): Promise<void> {
-        await inventoryAPI.delete(`/movements/${id}`);
-    }
+    // Use base delete from factory
+    delete: baseCrudService.delete,
 };

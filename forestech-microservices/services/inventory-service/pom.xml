@@ -26,6 +26,13 @@
     </properties>
 
     <dependencies>
+        <!-- Shared Libs -->
+        <dependency>
+            <groupId>com.forestech</groupId>
+            <artifactId>shared-libs</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- Spring Boot Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

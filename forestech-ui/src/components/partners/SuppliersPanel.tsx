@@ -3,14 +3,7 @@
  * Main suppliers management interface with CRUD operations
  */
 
-import { useState, useEffect } from 'react';
-import {
-  Box,
-  Button,
-  Typography,
-  Paper,
-  Tooltip,
-} from '@mui/material';
+import { Box, Button, Typography, Paper, Tooltip } from '@mui/material';
 import { DataGrid, type GridColDef, GridActionsCellItem } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -19,61 +12,24 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import type { Supplier } from '../../types/supplier.types';
 import { supplierService } from '../../services/supplierService';
 import SupplierDialog from './SupplierDialog';
-import { useNotification } from '../../context/NotificationContext';
+import { useCrudPanel } from '../../hooks/useCrudPanel';
 
 export default function SuppliersPanel() {
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
-  const { showNotification } = useNotification();
-
-  // Load suppliers on mount
-  useEffect(() => {
-    loadSuppliers();
-  }, []);
-
-  const loadSuppliers = async () => {
-    setLoading(true);
-    try {
-      const data = await supplierService.getAll();
-      setSuppliers(data);
-    } catch (error) {
-      showNotification('Error al cargar proveedores', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreate = () => {
-    setSelectedSupplier(null);
-    setDialogOpen(true);
-  };
-
-  const handleEdit = (supplier: Supplier) => {
-    setSelectedSupplier(supplier);
-    setDialogOpen(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('¿Está seguro de eliminar este proveedor?')) return;
-
-    try {
-      await supplierService.delete(id);
-      showNotification('Proveedor eliminado exitosamente', 'success');
-      loadSuppliers();
-    } catch (error) {
-      showNotification('Error al eliminar proveedor', 'error');
-    }
-  };
-
-  const handleDialogClose = (success: boolean) => {
-    setDialogOpen(false);
-    setSelectedSupplier(null);
-    if (success) {
-      loadSuppliers();
-    }
-  };
+  const {
+    items: suppliers,
+    loading,
+    dialogOpen,
+    selectedItem,
+    loadItems: loadSuppliers,
+    handleCreate,
+    handleEdit,
+    handleDelete,
+    handleDialogClose,
+  } = useCrudPanel({
+    service: supplierService,
+    entityName: 'proveedor',
+    entityNamePlural: 'proveedores',
+  });
 
   const columns: GridColDef[] = [
     {
@@ -186,12 +142,11 @@ export default function SuppliersPanel() {
       {/* Dialog for Create/Edit */}
       <SupplierDialog
         open={dialogOpen}
-        supplier={selectedSupplier}
+        supplier={selectedItem}
         onClose={handleDialogClose}
-        onSuccess={() => showNotification(
-          selectedSupplier ? 'Proveedor actualizado exitosamente' : 'Proveedor creado exitosamente',
-          'success'
-        )}
+        onSuccess={() => {
+          // Notification is handled in SupplierDialog
+        }}
       />
     </Box>
   );

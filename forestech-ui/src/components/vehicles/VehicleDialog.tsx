@@ -18,6 +18,7 @@ import {
 } from '@mui/material';
 import type { Vehicle, VehicleFormData } from '../../types/vehicle.types';
 import { vehicleService } from '../../services/vehicleService';
+import { useNotification } from '../../context/NotificationContext';
 
 interface VehicleDialogProps {
     open: boolean;
@@ -49,6 +50,7 @@ export default function VehicleDialog({ open, vehicle, onClose, onSuccess }: Veh
     const [formData, setFormData] = useState<VehicleFormData>(initialFormData);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(false);
+    const { showNotification } = useNotification();
 
     useEffect(() => {
         if (vehicle) {
@@ -87,14 +89,16 @@ export default function VehicleDialog({ open, vehicle, onClose, onSuccess }: Veh
         try {
             if (vehicle) {
                 await vehicleService.update(vehicle.id, formData);
+                showNotification('Vehículo actualizado exitosamente', 'success');
             } else {
                 await vehicleService.create(formData);
+                showNotification('Vehículo creado exitosamente', 'success');
             }
             onSuccess();
             onClose(true);
         } catch (error) {
             console.error('Error saving vehicle:', error);
-            // Here you might want to set a global error or handle specific API errors
+            showNotification('Error al guardar vehículo', 'error');
         } finally {
             setLoading(false);
         }

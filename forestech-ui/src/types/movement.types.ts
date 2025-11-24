@@ -6,6 +6,8 @@ export interface Movement {
     quantity: number;
     unitPrice: number;
     subtotal: number;
+    realCost?: number;
+    realUnitPrice?: number;
     description: string;
     createdAt: string;
 }

@@ -1,7 +1,9 @@
 package com.forestech.inventory.controller;
 
+import com.forestech.inventory.exception.MovementNotFoundException;
 import com.forestech.inventory.model.Movement;
 import com.forestech.inventory.service.MovementService;
+import com.forestech.shared.exception.EntityNotFoundException;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +35,7 @@ public class MovementController {
                 return ResponseEntity.badRequest().build();
             }
         }
-        return ResponseEntity.ok(movementService.getAllMovements());
+        return ResponseEntity.ok(movementService.findAll());
     }
 
     /**
@@ -53,7 +55,7 @@ public class MovementController {
         movement.setUnitPrice(request.getUnitPrice());
         movement.setDescription(request.getDescription());
 
-        Movement created = movementService.createMovement(movement);
+        Movement created = movementService.create(movement);
         return ResponseEntity.created(URI.create("/api/movements/" + created.getId()))
                 .body(created);
     }
@@ -69,7 +71,7 @@ public class MovementController {
         movement.setUnitPrice(request.getUnitPrice());
         movement.setDescription(request.getDescription());
 
-        Movement created = movementService.createMovement(movement);
+        Movement created = movementService.create(movement);
         return ResponseEntity.created(URI.create("/api/movements/" + created.getId()))
                 .body(created);
     }
@@ -90,8 +92,7 @@ public class MovementController {
         return ResponseEntity.ok(new StockValuedResponse(
                 stockWithPrice.getProductId(),
                 stockWithPrice.getStock(),
-                stockWithPrice.getWeightedAveragePrice()
-        ));
+                stockWithPrice.getWeightedAveragePrice()));
     }
 
     /**
@@ -101,23 +102,23 @@ public class MovementController {
     @DeleteMapping("/internal/{id}")
     public ResponseEntity<Void> deleteMovementInternal(@PathVariable String id) {
         log.info("DELETE /api/movements/internal/{} (llamada interna desde invoicing-service)", id);
-        movementService.deleteMovement(id);
+        movementService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     /**
      * ENDPOINT PÚBLICO - Eliminar movimiento SALIDA con recomposición de stock
-     * Al eliminar una SALIDA, se restaura automáticamente el stock a las entradas FIFO
+     * Al eliminar una SALIDA, se restaura automáticamente el stock a las entradas
+     * FIFO
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMovement(@PathVariable String id) {
         log.info("DELETE /api/movements/{}", id);
-        movementService.deleteMovement(id);
+        movementService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
-    @ExceptionHandler({ MovementService.ProductNotFoundException.class,
-            MovementService.VehicleNotFoundException.class })
+    @ExceptionHandler({ MovementNotFoundException.class, EntityNotFoundException.class })
     public ResponseEntity<String> handleNotFound(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }

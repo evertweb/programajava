@@ -36,9 +36,18 @@ public class Movement {
     @Column(name = "unit_price")
     private BigDecimal unitPrice;
 
+    @Column(name = "real_unit_price")
+    private BigDecimal realUnitPrice;
+
     private BigDecimal subtotal;
 
+    @Column(name = "real_cost")
+    private BigDecimal realCost;
+
     private String description;
+
+    @Version
+    private Long version;
 
     @CreationTimestamp
     @Column(name = "created_at")

@@ -66,21 +66,5 @@ public class VehicleController {
         return ResponseEntity.noContent().build();
     }
 
-    @ExceptionHandler(VehicleService.VehicleNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleVehicleNotFound(VehicleService.VehicleNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse(ex.getMessage()));
-    }
-
-    @ExceptionHandler(VehicleService.DuplicateVehicleException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicateVehicle(VehicleService.DuplicateVehicleException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse(ex.getMessage()));
-    }
-
-    @lombok.Data
-    @lombok.AllArgsConstructor
-    static class ErrorResponse {
-        private String message;
-    }
+    // Exception handlers are now in GlobalExceptionHandler (shared-libs)
 }

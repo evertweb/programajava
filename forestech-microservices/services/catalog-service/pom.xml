@@ -82,6 +82,13 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Shared Libraries (BaseService, Exceptions, etc.) -->
+        <dependency>
+            <groupId>com.forestech</groupId>
+            <artifactId>shared-libs</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

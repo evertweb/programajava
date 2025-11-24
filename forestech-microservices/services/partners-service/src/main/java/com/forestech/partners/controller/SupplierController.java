@@ -24,9 +24,9 @@ public class SupplierController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Supplier> getSupplierById(@PathVariable String id) {
-        return supplierService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        // BaseService.findById() throws exception if not found, no need for Optional
+        Supplier supplier = supplierService.findById(id);
+        return ResponseEntity.ok(supplier);
     }
 
     @GetMapping("/nit/{nit}")
@@ -38,25 +38,18 @@ public class SupplierController {
 
     @PostMapping
     public ResponseEntity<Supplier> createSupplier(@Valid @RequestBody Supplier supplier) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(supplierService.save(supplier));
+        return ResponseEntity.status(HttpStatus.CREATED).body(supplierService.create(supplier));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Supplier> updateSupplier(@PathVariable String id, @Valid @RequestBody Supplier supplier) {
-        return supplierService.findById(id)
-                .map(existing -> {
-                    supplier.setId(id);
-                    return ResponseEntity.ok(supplierService.save(supplier));
-                })
-                .orElse(ResponseEntity.notFound().build());
+        Supplier updated = supplierService.update(id, supplier);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSupplier(@PathVariable String id) {
-        if (supplierService.findById(id).isPresent()) {
-            supplierService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        supplierService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

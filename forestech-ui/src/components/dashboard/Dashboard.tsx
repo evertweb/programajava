@@ -4,7 +4,7 @@
  * Optimized with API caching and connection-aware loading
  */
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Box,
   Grid,
@@ -12,7 +12,13 @@ import {
   Typography,
   CircularProgress,
   Button,
+  useTheme,
+  ToggleButton,
+  ToggleButtonGroup,
+  Chip,
 } from '@mui/material';
+import { BarChart } from '@mui/x-charts/BarChart';
+import { PieChart } from '@mui/x-charts/PieChart';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import ReceiptIcon from '@mui/icons-material/Receipt';
@@ -27,6 +33,8 @@ import { movementService } from '../../services/movementService';
 import { invoiceService } from '../../services/invoiceService';
 import { supplierService } from '../../services/supplierService';
 import { useApiCache } from '../../hooks/useApiCache';
+import type { Product } from '../../types/product.types';
+import type { Movement } from '../../types/movement.types';
 
 interface DashboardMetrics {
   productsCount: number;
@@ -34,9 +42,16 @@ interface DashboardMetrics {
   movementsCount: number;
   invoicesCount: number;
   suppliersCount: number;
+  products: Product[];
+  movements: Movement[];
 }
 
+type ScaleType = 'linear' | 'log' | 'percent';
+
 export default function Dashboard() {
+  const theme = useTheme();
+  const [scaleType, setScaleType] = useState<ScaleType>('log');
+
   const { data: metrics, loading, isDisconnected, refetch } = useApiCache<DashboardMetrics>(
     'dashboard-metrics',
     async () => {
@@ -55,6 +70,8 @@ export default function Dashboard() {
         movementsCount: movements.length,
         invoicesCount: invoices.length,
         suppliersCount: suppliers.length,
+        products,
+        movements,
       };
     }
   );
@@ -113,6 +130,57 @@ export default function Dashboard() {
       </Paper>
     ), []
   );
+
+  const chartData = useMemo(() => {
+    if (!metrics) return { stock: [], movements: [], maxStock: 0 };
+
+    // Calculate Stock per Product
+    const stockMap = new Map<string, number>();
+    metrics.movements.forEach(m => {
+      const current = stockMap.get(m.productId) || 0;
+      const change = m.movementType === 'ENTRADA' ? m.quantity : -m.quantity;
+      stockMap.set(m.productId, current + change);
+    });
+
+    // Top 7 Products by Stock (raw values)
+    const stockRaw = metrics.products
+      .map(p => ({ name: p.name, stock: stockMap.get(p.id) || 0 }))
+      .sort((a, b) => b.stock - a.stock)
+      .slice(0, 7);
+
+    const maxStock = Math.max(...stockRaw.map(s => s.stock), 1);
+
+    // Transform data based on scale type
+    const stock = stockRaw.map(item => {
+      let displayValue = item.stock;
+
+      if (scaleType === 'log') {
+        // Escala logarítmica (base 10): permite ver todos los productos
+        displayValue = item.stock > 0 ? Math.log10(item.stock + 1) : 0;
+      } else if (scaleType === 'percent') {
+        // Porcentaje del máximo: normaliza entre 0-100
+        displayValue = (item.stock / maxStock) * 100;
+      }
+      // 'linear' mantiene el valor original
+
+      return {
+        name: item.name,
+        stock: displayValue,
+        originalStock: item.stock, // Guardamos el valor real para tooltips
+      };
+    });
+
+    // Movements by Type
+    const entries = metrics.movements.filter(m => m.movementType === 'ENTRADA').length;
+    const exits = metrics.movements.filter(m => m.movementType === 'SALIDA').length;
+
+    const movements = [
+      { id: 0, value: entries, label: 'Entradas', color: '#009688' },
+      { id: 1, value: exits, label: 'Salidas', color: '#F57C00' },
+    ];
+
+    return { stock, movements, maxStock };
+  }, [metrics, scaleType]);
 
   if (loading) {
     return (
@@ -204,6 +272,139 @@ export default function Dashboard() {
             icon={<PeopleIcon sx={{ fontSize: 28 }} />}
             color="#D32F2F" // Red
           />
+        </Grid>
+
+        {/* Charts Section */}
+        <Grid size={{ xs: 12, md: 8 }}>
+          <Paper sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6" fontWeight="600">
+                Niveles de Stock (Top 7)
+              </Typography>
+              <ToggleButtonGroup
+                value={scaleType}
+                exclusive
+                onChange={(_, newScale) => newScale && setScaleType(newScale)}
+                size="small"
+                sx={{ bgcolor: 'background.paper' }}
+              >
+                <ToggleButton value="linear" sx={{ px: 2 }}>
+                  Lineal
+                </ToggleButton>
+                <ToggleButton value="log" sx={{ px: 2 }}>
+                  Logarítmica
+                </ToggleButton>
+                <ToggleButton value="percent" sx={{ px: 2 }}>
+                  Porcentaje
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+
+            {/* Info chips */}
+            <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+              {scaleType === 'linear' && (
+                <Chip
+                  label="Escala real: muestra valores absolutos (galones)"
+                  size="small"
+                  color="primary"
+                  variant="outlined"
+                />
+              )}
+              {scaleType === 'log' && (
+                <Chip
+                  label="Escala logarítmica: productos pequeños se ven mejor"
+                  size="small"
+                  color="primary"
+                  variant="outlined"
+                />
+              )}
+              {scaleType === 'percent' && (
+                <Chip
+                  label="Escala porcentual: normalizado al 100% del máximo"
+                  size="small"
+                  color="primary"
+                  variant="outlined"
+                />
+              )}
+            </Box>
+
+            <Box sx={{ flexGrow: 1, width: '100%', minHeight: 300 }}>
+              <BarChart
+                dataset={chartData.stock}
+                xAxis={[{ scaleType: 'band', dataKey: 'name' }]}
+                series={[{
+                  dataKey: 'stock',
+                  label: scaleType === 'linear' ? 'Stock (galones)' :
+                         scaleType === 'log' ? 'Stock (log10)' :
+                         'Stock (%)',
+                  color: theme.palette.primary.main,
+                  valueFormatter: (value: number | null) => {
+                    if (value === null) return 'N/A';
+                    if (scaleType === 'linear') return `${value.toFixed(0)} gal`;
+                    if (scaleType === 'log') return `log₁₀(${value.toFixed(2)})`;
+                    return `${value.toFixed(1)}%`;
+                  },
+                }]}
+                height={300}
+                borderRadius={8}
+              />
+            </Box>
+
+            {/* Real values reference */}
+            {scaleType !== 'linear' && (
+              <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                  Valores reales (galones):
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                  {chartData.stock.map((item) => (
+                    <Chip
+                      key={item.name}
+                      label={`${item.name}: ${item.originalStock.toLocaleString()} gal`}
+                      size="small"
+                      variant="outlined"
+                    />
+                  ))}
+                </Box>
+              </Box>
+            )}
+          </Paper>
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 4 }}>
+          <Paper sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <Typography variant="h6" gutterBottom fontWeight="600">
+              Distribución de Movimientos
+            </Typography>
+            <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
+              <PieChart
+                series={[
+                  {
+                    data: chartData.movements,
+                    highlightScope: { fade: 'global', highlight: 'item' },
+                    faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
+                    innerRadius: 60,
+                    paddingAngle: 2,
+                    cornerRadius: 4,
+                  },
+                ]}
+                height={250}
+                slotProps={{
+                  legend: { hidden: true } as any,
+                }}
+              />
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
+              {chartData.movements.map((item) => (
+                <Box key={item.id} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: item.color }} />
+                  <Typography variant="body2" color="text.secondary">
+                    {item.label}: <b>{item.value}</b>
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Paper>
         </Grid>
 
         {/* Welcome Section */}

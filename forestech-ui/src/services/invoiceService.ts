@@ -5,23 +5,19 @@
 
 import { invoicingAPI } from './api';
 import type { Invoice, InvoiceFormData } from '../types/invoice.types';
+import { createCrudService } from './createCrudService';
 
+// Base CRUD operations from factory
+const baseCrudService = createCrudService<Invoice, InvoiceFormData>(
+    invoicingAPI,
+    '/invoices'
+);
+
+// Extended service with custom cancel method
 export const invoiceService = {
-    async getAll(): Promise<Invoice[]> {
-        const response = await invoicingAPI.get<Invoice[]>('/invoices');
-        return response.data;
-    },
+    ...baseCrudService,
 
-    async getById(id: string): Promise<Invoice> {
-        const response = await invoicingAPI.get<Invoice>(`/invoices/${id}`);
-        return response.data;
-    },
-
-    async create(data: InvoiceFormData): Promise<Invoice> {
-        const response = await invoicingAPI.post<Invoice>('/invoices', data);
-        return response.data;
-    },
-
+    // Custom cancel method specific to invoices
     async cancel(id: string): Promise<void> {
         await invoicingAPI.post(`/invoices/${id}/cancel`, {});
     }

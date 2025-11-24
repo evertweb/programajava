@@ -80,22 +80,5 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
-    // Exception Handlers
-    @ExceptionHandler(ProductService.ProductNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleProductNotFound(ProductService.ProductNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse(ex.getMessage()));
-    }
-
-    @ExceptionHandler(ProductService.DuplicateProductException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicateProduct(ProductService.DuplicateProductException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse(ex.getMessage()));
-    }
-
-    @lombok.Data
-    @lombok.AllArgsConstructor
-    static class ErrorResponse {
-        private String message;
-    }
+    // Exception handlers are now in GlobalExceptionHandler (shared-libs)
 }
