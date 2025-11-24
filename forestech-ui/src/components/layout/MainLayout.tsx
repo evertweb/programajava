@@ -5,7 +5,6 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  AppBar,
   Box,
   Drawer,
   IconButton,
@@ -14,7 +13,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Toolbar,
   Typography,
   CssBaseline,
   useTheme,
@@ -23,8 +21,8 @@ import {
   Button,
   CircularProgress,
 } from '@mui/material';
-import ConnectionBanner from '../common/ConnectionBanner';
-import MenuIcon from '@mui/icons-material/Menu';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import ReceiptIcon from '@mui/icons-material/Receipt';
@@ -34,7 +32,8 @@ import MoveToInboxIcon from '@mui/icons-material/MoveToInbox';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import SystemUpdateIcon from '@mui/icons-material/SystemUpdate';
 
-const drawerWidth = 260; // Optimized for 1920x1080 screens
+const drawerWidth = 260; // Ancho expandido
+const drawerWidthCollapsed = 72; // Ancho colapsado (solo iconos)
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -72,10 +71,13 @@ declare global {
 
 export default function MainLayout({ children, onNavigate, currentRoute }: MainLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false); // Estado del sidebar colapsado
   const [appVersion, setAppVersion] = useState<string>('');
   const [checkingUpdates, setCheckingUpdates] = useState(false);
   const [updateStatus, setUpdateStatus] = useState<string>('');
   const theme = useTheme();
+
+  const currentDrawerWidth = collapsed ? drawerWidthCollapsed : drawerWidth;
 
   // Get app version on mount
   useEffect(() => {
@@ -117,104 +119,164 @@ export default function MainLayout({ children, onNavigate, currentRoute }: MainL
     setMobileOpen(!mobileOpen);
   };
 
+  const handleCollapseToggle = () => {
+    setCollapsed(!collapsed);
+  };
+
   const drawer = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* App Title Area */}
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: 'background.paper' }}>
+      {/* App Title Area - Clinical Style */}
       <Box sx={{
-        p: 2,
+        p: collapsed ? 1.5 : 3,
         display: 'flex',
         alignItems: 'center',
         gap: 1.5,
-        color: theme.palette.text.primary,
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        backgroundColor: 'background.paper',
+        color: theme.palette.primary.main,
+        justifyContent: collapsed ? 'center' : 'flex-start',
       }}>
-        <Box>
-          <Typography variant="subtitle1" noWrap fontWeight="600" sx={{ lineHeight: 1.2 }}>
-            ForestechOil
-          </Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>
-            Sistema de Gestión
-          </Typography>
+        <Box sx={{
+          width: 32,
+          height: 32,
+          borderRadius: '8px',
+          bgcolor: alpha(theme.palette.primary.main, 0.1),
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <LocalShippingIcon sx={{ fontSize: 20 }} />
         </Box>
+        {!collapsed && (
+          <Box>
+            <Typography variant="h6" noWrap sx={{ lineHeight: 1.2, fontSize: '1rem', fontWeight: 700 }}>
+              ForestechOil
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              Enterprise
+            </Typography>
+          </Box>
+        )}
       </Box>
 
       {/* Navigation List */}
-      <List sx={{ px: 1, py: 1.5, flexGrow: 1 }}>
+      <List sx={{ px: 0, py: 1, flexGrow: 1 }}>
         {menuItems.map((item) => (
-          <ListItem key={item.route} disablePadding sx={{ mb: 0.25 }}>
-            <Tooltip title={item.text} placement="right" arrow disableInteractive>
+          <ListItem key={item.route} disablePadding sx={{ mb: 0.5 }}>
+            <Tooltip
+              title={collapsed ? item.text : ''}
+              placement="right"
+              arrow
+              disableInteractive
+            >
               <ListItemButton
                 selected={currentRoute === item.route}
                 onClick={() => onNavigate(item.route)}
+                sx={{
+                  justifyContent: collapsed ? 'center' : 'flex-start',
+                  px: collapsed ? 1 : 2,
+                }}
               >
                 <ListItemIcon sx={{
-                  minWidth: 40,
+                  minWidth: collapsed ? 0 : 48,
                   color: currentRoute === item.route ? 'primary.main' : 'text.secondary',
-                  transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  justifyContent: 'center',
                   '& svg': {
-                    fontSize: '1.35rem',
+                    fontSize: '1.5rem',
                   }
                 }}>
                   {item.icon}
                 </ListItemIcon>
-                <ListItemText
-                  primary={item.text}
-                  primaryTypographyProps={{
-                    fontSize: '0.9rem',
-                    fontWeight: currentRoute === item.route ? 600 : 400,
-                  }}
-                />
+                {!collapsed && (
+                  <ListItemText
+                    primary={item.text}
+                    slotProps={{
+                      primary: {
+                        sx: {
+                          fontSize: '0.95rem',
+                          fontWeight: currentRoute === item.route ? 600 : 400,
+                          color: currentRoute === item.route ? 'primary.dark' : 'text.primary',
+                        }
+                      }
+                    }}
+                  />
+                )}
               </ListItemButton>
             </Tooltip>
           </ListItem>
         ))}
       </List>
 
-      {/* Update & Version Area (Bottom) */}
+      {/* Collapse Toggle Button */}
       <Box sx={{
-        p: 1.5,
-        borderTop: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
-        backgroundColor: alpha(theme.palette.primary.main, 0.04),
+        p: 1,
+        display: 'flex',
+        justifyContent: collapsed ? 'center' : 'flex-end',
+        borderTop: `1px solid ${theme.palette.divider}`,
       }}>
-        {/* Version Info */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-          <Typography variant="caption" color="text.secondary">
-            {appVersion ? `v${appVersion}` : 'Cargando...'}
-          </Typography>
-          {updateStatus && (
-            <Typography variant="caption" color="primary.main" sx={{ fontSize: '0.7rem' }}>
-              {updateStatus}
-            </Typography>
-          )}
-        </Box>
-
-        {/* Update Button */}
-        <Button
-          fullWidth
-          size="small"
-          variant="outlined"
-          onClick={handleCheckUpdates}
-          disabled={checkingUpdates}
-          startIcon={checkingUpdates ? (
-            <CircularProgress size={14} color="inherit" />
-          ) : (
-            <SystemUpdateIcon fontSize="small" />
-          )}
-          sx={{
-            textTransform: 'none',
-            fontSize: '0.8rem',
-            py: 0.5,
-            borderColor: alpha(theme.palette.primary.main, 0.3),
-            '&:hover': {
-              borderColor: theme.palette.primary.main,
-              backgroundColor: alpha(theme.palette.primary.main, 0.08),
-            },
-          }}
-        >
-          {checkingUpdates ? 'Verificando...' : 'Buscar Actualizaciones'}
-        </Button>
+        <Tooltip title={collapsed ? 'Expandir menú' : 'Colapsar menú'} placement="right">
+          <IconButton
+            onClick={handleCollapseToggle}
+            size="small"
+            sx={{
+              color: 'text.secondary',
+              '&:hover': {
+                color: 'primary.main',
+                bgcolor: alpha(theme.palette.primary.main, 0.08),
+              },
+            }}
+          >
+            {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+          </IconButton>
+        </Tooltip>
       </Box>
+
+      {/* Update & Version Area (Bottom) - Only when expanded */}
+      {!collapsed && (
+        <Box sx={{
+          p: 2,
+          borderTop: `1px solid ${theme.palette.divider}`,
+          backgroundColor: 'background.default',
+        }}>
+          {/* Version Info */}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+            <Typography variant="caption" color="text.secondary">
+              {appVersion ? `v${appVersion}` : 'Cargando...'}
+            </Typography>
+            {updateStatus && (
+              <Typography variant="caption" color="primary.main" sx={{ fontSize: '0.7rem' }}>
+                {updateStatus}
+              </Typography>
+            )}
+          </Box>
+
+          {/* Update Button */}
+          <Button
+            fullWidth
+            size="small"
+            variant="outlined"
+            onClick={handleCheckUpdates}
+            disabled={checkingUpdates}
+            startIcon={checkingUpdates ? (
+              <CircularProgress size={14} color="inherit" />
+            ) : (
+              <SystemUpdateIcon fontSize="small" />
+            )}
+            sx={{
+              textTransform: 'none',
+              fontSize: '0.8rem',
+              py: 0.5,
+              borderColor: alpha(theme.palette.primary.main, 0.3),
+              '&:hover': {
+                borderColor: theme.palette.primary.main,
+                backgroundColor: alpha(theme.palette.primary.main, 0.08),
+              },
+            }}
+          >
+            {checkingUpdates ? 'Verificando...' : 'Buscar Actualizaciones'}
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 
@@ -268,7 +330,11 @@ export default function MainLayout({ children, onNavigate, currentRoute }: MainL
 
       <Box
         component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        sx={{
+          width: { sm: currentDrawerWidth },
+          flexShrink: { sm: 0 },
+          transition: 'width 0.2s ease-in-out',
+        }}
       >
         {/* Mobile drawer */}
         <Drawer
@@ -293,8 +359,10 @@ export default function MainLayout({ children, onNavigate, currentRoute }: MainL
             display: { xs: 'none', sm: 'block' },
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
-              width: drawerWidth,
+              width: currentDrawerWidth,
               borderRight: 'none',
+              transition: 'width 0.2s ease-in-out',
+              overflowX: 'hidden',
             },
           }}
           open
@@ -308,17 +376,30 @@ export default function MainLayout({ children, onNavigate, currentRoute }: MainL
         sx={{
           flexGrow: 1,
           p: 2.5,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          width: { sm: `calc(100% - ${currentDrawerWidth}px)` },
           height: '100vh',
           overflow: 'auto',
-          // Header temporarily removed — remove top padding so content fills top
-          pt: 0,
+          pt: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          transition: 'width 0.2s ease-in-out',
         }}
       >
         {/* Connection banner commented out temporarily */}
         {/* <ConnectionBanner /> */}
 
-        {children}
+        {/* Content container - full width when sidebar is collapsed */}
+        <Box
+          sx={{
+            flex: 1,
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 0,
+          }}
+        >
+          {children}
+        </Box>
       </Box>
     </Box>
   );

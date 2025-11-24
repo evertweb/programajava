@@ -1,86 +1,84 @@
 /**
  * Material-UI Theme Configuration
- * Corporate ERP/POS Style for Forestech Oil
- * Professional, dense, and utilitarian design
+ * Hospital/Clinical Enterprise Style for Forestech Oil
+ * Clean, sterile, high-legibility, and calming design
  */
 
 import { createTheme, alpha } from '@mui/material/styles';
 
-// Corporate Color Palette - Professional & Neutral
-const corporateColors = {
-  // Primary - Corporate Blue
-  primary: '#1565C0',
-  primaryLight: '#1976D2',
-  primaryDark: '#0D47A1',
+// Clinical Color Palette - Clean & Trustworthy
+const clinicalColors = {
+  // Primary - Teal Medico (Calm, Professional, Hygienic)
+  primary: '#009688',
+  primaryLight: '#B2DFDB',
+  primaryDark: '#00695C',
 
-  // Secondary - Neutral Greys
-  secondary: '#424242',
-  secondaryLight: '#616161',
-  secondaryDark: '#212121',
+  // Secondary - Slate Blue (Technical, Neutral)
+  secondary: '#455A64',
+  secondaryLight: '#CFD8DC',
+  secondaryDark: '#263238',
 
   // Backgrounds
-  bgPrimary: '#FFFFFF',
-  bgSecondary: '#FAFAFA',
-  bgTertiary: '#F5F5F5',
+  bgPrimary: '#FFFFFF',      // Pure White for cards/containers
+  bgSecondary: '#F8F9FA',    // Very light grey for app background
+  bgTertiary: '#F1F3F4',     // Slightly darker for headers/sidebars
 
   // Borders
   border: '#E0E0E0',
-  borderDark: '#BDBDBD',
-  borderLight: '#F0F0F0',
+  borderLight: '#EEEEEE',
 
   // Text
-  textPrimary: '#212121',
-  textSecondary: '#616161',
-  textDisabled: '#9E9E9E',
+  textPrimary: '#263238',    // Dark Blue-Grey for better readability than pure black
+  textSecondary: '#546E7A',  // Medium Blue-Grey
+  textDisabled: '#90A4AE',
 
-  // States - Corporate colors
+  // States
   success: '#388E3C',
   warning: '#F57C00',
   error: '#D32F2F',
-  info: '#1976D2',
+  info: '#0288D1',
 
-  // Interactive states
-  selected: '#E3F2FD',      // Light blue for selections
-  hover: '#F5F5F5',         // Light grey for hover
-  pressed: '#EEEEEE',       // Slightly darker grey for pressed
+  // Interactive
+  hover: '#E0F2F1',          // Very light teal for hover
+  selected: '#B2DFDB',       // Light teal for selection
 };
 
 export const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: corporateColors.primary,
-      light: corporateColors.primaryLight,
-      dark: corporateColors.primaryDark,
+      main: clinicalColors.primary,
+      light: clinicalColors.primaryLight,
+      dark: clinicalColors.primaryDark,
       contrastText: '#fff',
     },
     secondary: {
-      main: corporateColors.secondary,
-      light: corporateColors.secondaryLight,
-      dark: corporateColors.secondaryDark,
+      main: clinicalColors.secondary,
+      light: clinicalColors.secondaryLight,
+      dark: clinicalColors.secondaryDark,
       contrastText: '#fff',
     },
     background: {
-      default: corporateColors.bgSecondary,
-      paper: corporateColors.bgPrimary,
+      default: clinicalColors.bgSecondary,
+      paper: clinicalColors.bgPrimary,
     },
     text: {
-      primary: corporateColors.textPrimary,
-      secondary: corporateColors.textSecondary,
-      disabled: corporateColors.textDisabled,
+      primary: clinicalColors.textPrimary,
+      secondary: clinicalColors.textSecondary,
+      disabled: clinicalColors.textDisabled,
     },
-    divider: corporateColors.border,
+    divider: clinicalColors.border,
     success: {
-      main: corporateColors.success,
+      main: clinicalColors.success,
     },
     warning: {
-      main: corporateColors.warning,
+      main: clinicalColors.warning,
     },
     error: {
-      main: corporateColors.error,
+      main: clinicalColors.error,
     },
     info: {
-      main: corporateColors.info,
+      main: clinicalColors.info,
     },
   },
   typography: {
@@ -90,77 +88,121 @@ export const theme = createTheme({
       'Arial',
       'sans-serif',
     ].join(','),
-    h1: { fontWeight: 600, letterSpacing: '-0.01em' },
-    h2: { fontWeight: 600, letterSpacing: '-0.01em' },
-    h3: { fontWeight: 600, letterSpacing: '0em' },
-    h4: { fontWeight: 600, letterSpacing: '0em' },
-    h5: { fontWeight: 500, letterSpacing: '0em' },
-    h6: { fontWeight: 500, letterSpacing: '0em' },
-    subtitle1: { fontWeight: 500 },
-    subtitle2: { fontWeight: 500 },
+    h1: { fontWeight: 500, letterSpacing: '-0.01em', color: clinicalColors.textPrimary },
+    h2: { fontWeight: 500, letterSpacing: '-0.01em', color: clinicalColors.textPrimary },
+    h3: { fontWeight: 500, letterSpacing: '0em', color: clinicalColors.textPrimary },
+    h4: { fontWeight: 500, letterSpacing: '0em', color: clinicalColors.textPrimary },
+    h5: { fontWeight: 500, letterSpacing: '0em', color: clinicalColors.textPrimary },
+    h6: { fontWeight: 500, letterSpacing: '0.01em', color: clinicalColors.textPrimary },
+    subtitle1: { fontWeight: 500, color: clinicalColors.textSecondary },
+    subtitle2: { fontWeight: 500, color: clinicalColors.textSecondary },
     button: {
       textTransform: 'none',
-      fontWeight: 500,
+      fontWeight: 600,
       letterSpacing: '0.02em',
     },
-    body1: { lineHeight: 1.5 },
-    body2: { lineHeight: 1.5 },
+    body1: { lineHeight: 1.6, color: clinicalColors.textPrimary },
+    body2: { lineHeight: 1.6, color: clinicalColors.textSecondary },
   },
   shape: {
-    borderRadius: 4, // Minimal border radius for corporate look
-  },
-  transitions: {
-    duration: {
-      shortest: 100,
-      shorter: 150,
-      short: 200,
-      standard: 250,
-      complex: 300,
-      enteringScreen: 200,
-      leavingScreen: 150,
-    },
+    borderRadius: 12, // Softer, more organic feel
   },
   components: {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          background: corporateColors.bgSecondary,
-          backgroundAttachment: 'fixed',
+          background: clinicalColors.bgSecondary,
           scrollbarWidth: 'thin',
-          scrollbarColor: `${corporateColors.borderDark} transparent`,
+          scrollbarColor: `${clinicalColors.secondaryLight} transparent`,
           '&::-webkit-scrollbar': {
-            width: '12px',
-            height: '12px',
+            width: '8px',
+            height: '8px',
           },
           '&::-webkit-scrollbar-track': {
-            background: corporateColors.bgTertiary,
+            background: 'transparent',
           },
           '&::-webkit-scrollbar-thumb': {
-            background: corporateColors.borderDark,
+            background: clinicalColors.secondaryLight,
             borderRadius: '4px',
-            border: `2px solid ${corporateColors.bgTertiary}`,
             '&:hover': {
-              background: corporateColors.secondaryLight,
+              background: clinicalColors.secondary,
             },
           },
-          // MUI DataGrid global gridlines
+          // Global DataGrid styles - Zebra Stripes + Teal Header + Compact
           '.MuiDataGrid-root': {
-            border: `1px solid ${corporateColors.border}`,
-            borderRadius: 4,
-            '& .MuiDataGrid-columnHeaders': {
-              borderBottom: `1px solid ${corporateColors.border}`,
-              background: corporateColors.bgTertiary,
-            },
-            '& .MuiDataGrid-cell': {
-              borderRight: `1px solid ${corporateColors.border}`,
-              borderBottom: `1px solid ${corporateColors.border}`,
-            },
-            '& .MuiDataGrid-row:last-child .MuiDataGrid-cell': {
-              borderBottom: `1px solid ${corporateColors.border}`,
-            },
-            '& .MuiDataGrid-columnSeparator': {
-              display: 'none',
-            },
+            border: `1px solid ${clinicalColors.border}`,
+            borderRadius: '8px',
+            backgroundColor: clinicalColors.bgPrimary,
+            fontSize: '0.85rem', // Texto más compacto
+          },
+          // Filas más compactas
+          '.MuiDataGrid-row': {
+            minHeight: '42px !important',
+            maxHeight: '42px !important',
+          },
+          '.MuiDataGrid-cell': {
+            minHeight: '42px !important',
+            maxHeight: '42px !important',
+            padding: '0 12px !important',
+            display: 'flex',
+            alignItems: 'center',
+            borderBottom: `1px solid ${clinicalColors.borderLight}`,
+          },
+          // Header con color Teal
+          '.MuiDataGrid-columnHeaders': {
+            backgroundColor: `${clinicalColors.primary} !important`,
+            borderBottom: 'none',
+            minHeight: '48px !important',
+            maxHeight: '48px !important',
+          },
+          '.MuiDataGrid-columnHeader': {
+            backgroundColor: `${clinicalColors.primary} !important`,
+            color: '#FFFFFF !important',
+          },
+          '.MuiDataGrid-columnHeaderTitle': {
+            color: '#FFFFFF !important',
+            fontWeight: '700 !important',
+            textTransform: 'uppercase',
+            fontSize: '0.75rem',
+            letterSpacing: '0.05em',
+          },
+          '.MuiDataGrid-sortIcon': {
+            color: '#FFFFFF !important',
+          },
+          '.MuiDataGrid-menuIconButton': {
+            color: 'rgba(255, 255, 255, 0.7) !important',
+          },
+          '.MuiDataGrid-menuIconButton:hover': {
+            color: '#FFFFFF !important',
+          },
+          '.MuiDataGrid-iconButtonContainer .MuiIconButton-root': {
+            color: '#FFFFFF !important',
+          },
+          '.MuiDataGrid-columnSeparator': {
+            color: 'rgba(255, 255, 255, 0.3) !important',
+          },
+          '.MuiDataGrid-cell:focus, .MuiDataGrid-cell:focus-within': {
+            outline: 'none !important',
+          },
+          // Zebra Stripes - Filas alternadas
+          '.MuiDataGrid-row:nth-of-type(odd)': {
+            backgroundColor: clinicalColors.bgPrimary,
+          },
+          '.MuiDataGrid-row:nth-of-type(even)': {
+            backgroundColor: clinicalColors.bgTertiary,
+          },
+          '.MuiDataGrid-row:hover': {
+            backgroundColor: `${alpha(clinicalColors.primary, 0.08)} !important`,
+          },
+          '.MuiDataGrid-row.Mui-selected': {
+            backgroundColor: `${alpha(clinicalColors.primary, 0.12)} !important`,
+          },
+          '.MuiDataGrid-row.Mui-selected:hover': {
+            backgroundColor: `${alpha(clinicalColors.primary, 0.16)} !important`,
+          },
+          // Footer
+          '.MuiDataGrid-footerContainer': {
+            borderTop: `1px solid ${clinicalColors.border}`,
           },
         },
       },
@@ -171,36 +213,23 @@ export const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          borderRadius: 4,
-          padding: '6px 16px',
+          borderRadius: 24, // Pill shape
+          padding: '8px 24px',
           fontSize: '0.875rem',
-          fontWeight: 500,
-          textTransform: 'none',
-          boxShadow: 'none',
-          '&:hover': {
-            boxShadow: 'none',
-          },
+          transition: 'all 0.2s ease-in-out',
         },
         contained: {
-          boxShadow: 'none',
           '&:hover': {
-            boxShadow: 'none',
+            backgroundColor: clinicalColors.primaryDark,
+            transform: 'translateY(-1px)',
+            boxShadow: '0 4px 8px rgba(0, 150, 136, 0.2)',
           },
         },
         outlined: {
-          borderWidth: '1px',
+          borderWidth: '1.5px',
           '&:hover': {
-            borderWidth: '1px',
-          },
-        },
-      },
-    },
-    MuiIconButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 4,
-          '&:hover': {
-            backgroundColor: corporateColors.hover,
+            borderWidth: '1.5px',
+            backgroundColor: alpha(clinicalColors.primary, 0.04),
           },
         },
       },
@@ -212,112 +241,72 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          background: corporateColors.bgPrimary,
-          border: `1px solid ${corporateColors.border}`,
-          borderRadius: 4,
+          backgroundColor: clinicalColors.bgPrimary,
         },
         elevation0: {
-          boxShadow: 'none',
+          border: `1px solid ${alpha(clinicalColors.border, 0.5)}`,
         },
         elevation1: {
-          boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+          border: 'none',
         },
         elevation2: {
-          boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
-        },
-        elevation3: {
-          boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+          border: 'none',
         },
       },
     },
     MuiCard: {
-      defaultProps: {
-        elevation: 0,
-      },
       styleOverrides: {
         root: {
-          background: corporateColors.bgPrimary,
-          border: `1px solid ${corporateColors.border}`,
-          borderRadius: 4,
-          boxShadow: 'none',
+          borderRadius: 16,
+          boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+          border: 'none',
+          overflow: 'visible', // For hover effects
+          transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
           '&:hover': {
-            borderColor: corporateColors.borderDark,
-          },
-        },
-      },
-    },
-    MuiCardHeader: {
-      styleOverrides: {
-        root: {
-          padding: '12px 16px',
-          borderBottom: `1px solid ${corporateColors.borderLight}`,
-        },
-        title: {
-          fontSize: '0.875rem',
-          fontWeight: 500,
-          color: corporateColors.textSecondary,
-        },
-      },
-    },
-    MuiCardContent: {
-      styleOverrides: {
-        root: {
-          padding: '16px',
-          '&:last-child': {
-            paddingBottom: '16px',
+            transform: 'translateY(-2px)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
           },
         },
       },
     },
     MuiAppBar: {
-      defaultProps: {
-        elevation: 0,
-      },
       styleOverrides: {
         root: {
-          background: corporateColors.bgPrimary,
-          borderBottom: `1px solid ${corporateColors.border}`,
-          boxShadow: 'none',
-          color: corporateColors.textPrimary,
-        },
-      },
-    },
-    MuiToolbar: {
-      styleOverrides: {
-        root: {
-          minHeight: '64px !important',
-          '@media (min-width: 600px)': {
-            minHeight: '64px !important',
-          },
+          backgroundColor: clinicalColors.bgPrimary,
+          color: clinicalColors.textPrimary,
+          borderBottom: `1px solid ${clinicalColors.borderLight}`,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
         },
       },
     },
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          background: corporateColors.bgTertiary,
-          borderRight: `1px solid ${corporateColors.border}`,
-          boxShadow: 'none',
+          backgroundColor: clinicalColors.bgPrimary,
+          borderRight: `1px solid ${clinicalColors.borderLight}`,
         },
       },
     },
     MuiListItemButton: {
       styleOverrides: {
         root: {
-          borderRadius: 0,
-          margin: 0,
+          borderRadius: '0 24px 24px 0', // Rounded on right side only
+          margin: '4px 8px 4px 0',
           padding: '10px 16px',
-          '&:hover': {
-            backgroundColor: corporateColors.hover,
-          },
           '&.Mui-selected': {
-            backgroundColor: corporateColors.selected,
-            borderLeft: `4px solid ${corporateColors.primary}`,
-            color: corporateColors.primary,
-            fontWeight: 500,
+            backgroundColor: alpha(clinicalColors.primary, 0.1),
+            color: clinicalColors.primary,
             '&:hover': {
-              backgroundColor: corporateColors.selected,
+              backgroundColor: alpha(clinicalColors.primary, 0.15),
             },
+            '& .MuiListItemIcon-root': {
+              color: clinicalColors.primary,
+            },
+          },
+          '&:hover': {
+            backgroundColor: alpha(clinicalColors.secondary, 0.05),
           },
         },
       },
@@ -326,7 +315,7 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           minWidth: 40,
-          color: 'inherit',
+          color: clinicalColors.textSecondary,
         },
       },
     },
@@ -338,29 +327,62 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
-            borderRadius: 4,
-            backgroundColor: corporateColors.bgPrimary,
+            borderRadius: 8,
+            backgroundColor: clinicalColors.bgSecondary,
             '& fieldset': {
-              borderColor: corporateColors.border,
-              borderWidth: '1px',
+              borderColor: 'transparent',
             },
             '&:hover fieldset': {
-              borderColor: corporateColors.borderDark,
+              borderColor: clinicalColors.border,
             },
-            '&.Mui-focused fieldset': {
-              borderWidth: '2px',
-              borderColor: corporateColors.primary,
+            '&.Mui-focused': {
+              backgroundColor: clinicalColors.bgPrimary,
+              '& fieldset': {
+                borderColor: clinicalColors.primary,
+              },
             },
           },
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 6,
+          fontWeight: 600,
+          fontSize: '0.75rem',
+        },
+        filled: {
+          backgroundColor: clinicalColors.bgTertiary,
+        },
+        // High visibility variants
+        colorSuccess: {
+          backgroundColor: alpha(clinicalColors.success, 0.15),
+          color: '#1B5E20', // Darker green for text
+          border: `1px solid ${alpha(clinicalColors.success, 0.3)}`,
+        },
+        colorWarning: {
+          backgroundColor: alpha(clinicalColors.warning, 0.15),
+          color: '#E65100', // Darker orange for text
+          border: `1px solid ${alpha(clinicalColors.warning, 0.3)}`,
+        },
+        colorError: {
+          backgroundColor: alpha(clinicalColors.error, 0.15),
+          color: '#B71C1C', // Darker red for text
+          border: `1px solid ${alpha(clinicalColors.error, 0.3)}`,
+        },
+        colorDefault: {
+          backgroundColor: clinicalColors.bgTertiary,
+          color: clinicalColors.textSecondary,
+          border: `1px solid ${clinicalColors.border}`,
         },
       },
     },
     MuiDialog: {
       styleOverrides: {
         paper: {
-          borderRadius: 4,
-          border: `1px solid ${corporateColors.border}`,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          borderRadius: 16,
+          boxShadow: '0 24px 48px rgba(0,0,0,0.1)',
         },
       },
     },
@@ -369,108 +391,8 @@ export const theme = createTheme({
         root: {
           fontSize: '1.25rem',
           fontWeight: 600,
-          padding: '16px 24px',
-          borderBottom: `1px solid ${corporateColors.borderLight}`,
-          backgroundColor: corporateColors.bgTertiary,
-        },
-      },
-    },
-    MuiDialogContent: {
-      styleOverrides: {
-        root: {
-          padding: '24px',
-        },
-      },
-    },
-    MuiDialogActions: {
-      styleOverrides: {
-        root: {
-          padding: '16px 24px',
-          borderTop: `1px solid ${corporateColors.borderLight}`,
-          backgroundColor: corporateColors.bgTertiary,
-        },
-      },
-    },
-    MuiChip: {
-      styleOverrides: {
-        root: {
-          borderRadius: 4,
-          fontWeight: 500,
-          border: `1px solid ${corporateColors.border}`,
-        },
-      },
-    },
-    MuiTableCell: {
-      styleOverrides: {
-        root: {
-          // show full grid: all sides have a thin border so the table looks like a grid
-          border: `1px solid ${corporateColors.border}`,
-          padding: '8px 16px',
-          // ensure internal cells don't double-border visually when table uses collapse
-          boxSizing: 'border-box',
-        },
-        head: {
-          fontWeight: 600,
-          backgroundColor: corporateColors.bgTertiary,
-          // stronger border for the header row
-          borderBottom: `2px solid ${corporateColors.border}`,
-        },
-      },
-    },
-    MuiTable: {
-      styleOverrides: {
-        root: {
-          // collapse borders so adjacent cells share the same grid lines
-          borderCollapse: 'collapse',
-          width: '100%',
-        },
-      },
-    },
-    MuiTableRow: {
-      styleOverrides: {
-        root: {
-          '&:nth-of-type(even)': {
-            backgroundColor: corporateColors.bgSecondary,
-          },
-          '&:hover': {
-            backgroundColor: corporateColors.hover,
-          },
-          '&.Mui-selected': {
-            backgroundColor: corporateColors.selected,
-            '&:hover': {
-              backgroundColor: alpha(corporateColors.selected, 0.8),
-            },
-          },
-        },
-      },
-    },
-    // DataGrid (MUI X) styling: use CssBaseline global overrides instead of a components entry
-    // (MuiDataGrid type may not be available in the core theme definitions)
-    MuiTooltip: {
-      styleOverrides: {
-        tooltip: {
-          backgroundColor: corporateColors.secondaryDark,
-          fontSize: '0.75rem',
-          padding: '6px 12px',
-          borderRadius: 4,
-        },
-        arrow: {
-          color: corporateColors.secondaryDark,
-        },
-      },
-    },
-    MuiSwitch: {
-      styleOverrides: {
-        root: {
-          padding: 8,
-        },
-      },
-    },
-    MuiAvatar: {
-      styleOverrides: {
-        root: {
-          borderRadius: 4,
-          fontWeight: 600,
+          color: clinicalColors.textPrimary,
+          padding: '24px 24px 16px',
         },
       },
     },
