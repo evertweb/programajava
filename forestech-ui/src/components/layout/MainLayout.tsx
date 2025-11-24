@@ -89,29 +89,39 @@ export default function MainLayout({ children, onNavigate, currentRoute }: MainL
   }, []);
 
   const handleCheckUpdates = async () => {
+    console.log('[Update] Button clicked');
+    console.log('[Update] electronAPI available:', !!window.electronAPI);
+    console.log('[Update] checkForUpdates available:', !!window.electronAPI?.checkForUpdates);
+
     if (!window.electronAPI?.checkForUpdates) {
-      setUpdateStatus('Solo disponible en la app de escritorio');
+      const msg = 'Solo disponible en la app de escritorio';
+      console.log('[Update]', msg);
+      setUpdateStatus(msg);
       setTimeout(() => setUpdateStatus(''), 3000);
       return;
     }
 
     setCheckingUpdates(true);
     setUpdateStatus('Buscando actualizaciones...');
+    console.log('[Update] Calling checkForUpdates...');
 
     try {
       const result = await window.electronAPI.checkForUpdates();
+      console.log('[Update] Result:', JSON.stringify(result, null, 2));
+
       if (result.isDev) {
         setUpdateStatus('No disponible en modo desarrollo');
       } else if (result.error) {
-        setUpdateStatus('Error al buscar actualizaciones');
+        setUpdateStatus(`Error: ${result.error}`);
       } else {
-        setUpdateStatus('Verificando...');
+        setUpdateStatus('Verificando en servidor...');
       }
-    } catch {
+    } catch (err) {
+      console.error('[Update] Error:', err);
       setUpdateStatus('Error de conexion');
     } finally {
       setCheckingUpdates(false);
-      setTimeout(() => setUpdateStatus(''), 4000);
+      setTimeout(() => setUpdateStatus(''), 6000); // Más tiempo para leer
     }
   };
 

@@ -151,11 +151,14 @@ function createMenu() {
 // ============================================
 
 autoUpdater.on('checking-for-update', () => {
-  console.log('Checking for updates...');
+  console.log('[AutoUpdater] Checking for updates...');
+  console.log('[AutoUpdater] Current version:', app.getVersion());
+  console.log('[AutoUpdater] Feed URL:', autoUpdater.getFeedURL());
 });
 
 autoUpdater.on('update-available', (info) => {
-  console.log('Update available:', info.version);
+  console.log('[AutoUpdater] Update available:', info.version);
+  console.log('[AutoUpdater] Release info:', JSON.stringify(info, null, 2));
 
   // Send event to renderer
   if (mainWindow) {
@@ -185,8 +188,9 @@ autoUpdater.on('update-available', (info) => {
   });
 });
 
-autoUpdater.on('update-not-available', () => {
-  console.log('No updates available');
+autoUpdater.on('update-not-available', (info) => {
+  console.log('[AutoUpdater] No updates available');
+  console.log('[AutoUpdater] Current is latest:', info?.version || 'unknown');
   // Send event to renderer
   if (mainWindow) {
     mainWindow.webContents.send('update-not-available');
@@ -226,16 +230,12 @@ autoUpdater.on('update-downloaded', (info) => {
 });
 
 autoUpdater.on('error', (error) => {
-  console.error('Error in auto-updater:', error);
+  console.error('[AutoUpdater] Error:', error.message);
+  console.error('[AutoUpdater] Error stack:', error.stack);
 
+  // Send error to renderer for logging
   if (mainWindow) {
-    dialog.showMessageBox(mainWindow, {
-      type: 'error',
-      title: 'Error de Actualización',
-      message: 'Ocurrió un error al verificar actualizaciones.',
-      detail: error.message,
-      buttons: ['OK'],
-    });
+    mainWindow.webContents.send('update-error', error.message);
   }
 });
 
@@ -250,19 +250,26 @@ ipcMain.handle('get-app-version', () => {
 
 // Manual update check from UI
 ipcMain.handle('check-for-updates', async () => {
+  console.log('[IPC] check-for-updates called');
   const isDev = process.env.NODE_ENV === 'development';
+  console.log('[IPC] NODE_ENV:', process.env.NODE_ENV);
+  console.log('[IPC] isDev:', isDev);
+
   if (!isDev) {
     try {
+      console.log('[IPC] Calling autoUpdater.checkForUpdates()...');
       const result = await autoUpdater.checkForUpdates();
-      return { checking: true, result };
+      console.log('[IPC] checkForUpdates result:', result?.updateInfo?.version || 'no info');
+      return { checking: true, result: result?.updateInfo };
     } catch (error) {
-      console.error('Error checking for updates:', error);
+      console.error('[IPC] Error checking for updates:', error.message);
       if (mainWindow) {
         mainWindow.webContents.send('update-error', error.message);
       }
       return { checking: false, error: error.message };
     }
   }
+  console.log('[IPC] Skipping update check (dev mode)');
   return { checking: false, isDev: true };
 });
 
