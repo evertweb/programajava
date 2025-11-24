@@ -112,9 +112,11 @@ export default function VehiclesPanel() {
             width: 120,
             renderCell: (params) => (
                 <Chip
-                    label={params.value ? 'Activo' : 'Inactivo'}
+                    label={params.value ? 'ACTIVO' : 'INACTIVO'}
                     color={params.value ? 'success' : 'default'}
                     size="small"
+                    variant="filled"
+                    sx={{ fontWeight: 'bold', minWidth: 80 }}
                 />
             ),
         },

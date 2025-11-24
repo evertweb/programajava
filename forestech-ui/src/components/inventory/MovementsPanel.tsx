@@ -150,6 +150,8 @@ export default function MovementsPanel() {
           label={params.value}
           color={params.value === 'ENTRADA' ? 'success' : 'warning'}
           size="small"
+          variant="filled"
+          sx={{ fontWeight: 'bold', minWidth: 80 }}
         />
       ),
     },

@@ -3,22 +3,16 @@ import {
   Box,
   Typography,
   Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Chip,
-  CircularProgress,
-  Alert,
   IconButton,
   Tooltip,
 } from '@mui/material';
+import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 import { Refresh as RefreshIcon } from '@mui/icons-material';
 import type { Product } from '../../types/product.types';
 import { productService } from '../../services/productService';
 import { movementService } from '../../services/movementService';
+import { useNotification } from '../../context/NotificationContext';
 
 interface ProductStock extends Product {
   currentStock: number;
@@ -28,11 +22,10 @@ interface ProductStock extends Product {
 export default function StockView() {
   const [products, setProducts] = useState<ProductStock[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const { showNotification } = useNotification();
 
   const loadData = async () => {
     setLoading(true);
-    setError('');
     try {
       const productsData = await productService.getAll();
       
@@ -56,7 +49,7 @@ export default function StockView() {
       setProducts(productsWithStock);
     } catch (err) {
       console.error('Error loading stock data:', err);
-      setError('Error al cargar el inventario');
+      showNotification('Error al cargar el inventario', 'error');
     } finally {
       setLoading(false);
     }
@@ -66,90 +59,111 @@ export default function StockView() {
     loadData();
   }, []);
 
+  const columns: GridColDef[] = [
+    {
+      field: 'name',
+      headerName: 'Producto',
+      flex: 1.5,
+      minWidth: 200,
+    },
+    {
+      field: 'presentation',
+      headerName: 'Presentación',
+      width: 150,
+      valueGetter: (_value, row) => row.presentation || row.measurementUnit || 'N/A',
+    },
+    {
+      field: 'weightedAveragePrice',
+      headerName: 'Precio Promedio',
+      width: 150,
+      align: 'right',
+      headerAlign: 'right',
+      valueFormatter: (value) => new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+      }).format(value || 0),
+    },
+    {
+      field: 'currentStock',
+      headerName: 'Stock Actual',
+      width: 130,
+      align: 'right',
+      headerAlign: 'right',
+      renderCell: (params) => (
+        <Typography
+          fontWeight="bold"
+          color={params.value < 10 ? 'error.main' : 'text.primary'}
+        >
+          {params.value}
+        </Typography>
+      ),
+    },
+    {
+      field: 'totalValue',
+      headerName: 'Valor Total',
+      width: 150,
+      align: 'right',
+      headerAlign: 'right',
+      valueGetter: (_value, row) => (row.weightedAveragePrice || 0) * row.currentStock,
+      valueFormatter: (value) => new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+      }).format(value),
+    },
+    {
+      field: 'status',
+      headerName: 'Estado',
+      width: 130,
+      align: 'center',
+      headerAlign: 'center',
+      renderCell: (params) => {
+        const isLowStock = params.row.currentStock < 10;
+        return (
+          <Chip
+            label={isLowStock ? 'BAJO STOCK' : 'NORMAL'}
+            color={isLowStock ? 'error' : 'success'}
+            size="small"
+            variant="filled"
+            sx={{ fontWeight: 'bold', minWidth: 90 }}
+          />
+        );
+      },
+    },
+  ];
+
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h4" component="h1">
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h5" component="h1" fontWeight="600">
           Niveles de Stock
         </Typography>
         <Tooltip title="Actualizar">
-          <IconButton onClick={loadData} disabled={loading}>
+          <IconButton onClick={loadData} disabled={loading} color="primary">
             <RefreshIcon />
           </IconButton>
         </Tooltip>
       </Box>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
-          {error}
-        </Alert>
-      )}
-
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Producto</TableCell>
-              <TableCell>Presentación</TableCell>
-              <TableCell align="right">Precio Promedio</TableCell>
-              <TableCell align="right">Stock Actual</TableCell>
-              <TableCell align="right">Valor Total</TableCell>
-              <TableCell align="center">Estado</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                  <CircularProgress />
-                </TableCell>
-              </TableRow>
-            ) : products.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                  No hay productos registrados
-                </TableCell>
-              </TableRow>
-            ) : (
-              products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>{product.name}</TableCell>
-                  <TableCell>{product.presentation || product.measurementUnit || 'N/A'}</TableCell>
-                  <TableCell align="right">
-                    {new Intl.NumberFormat('es-CO', {
-                      style: 'currency',
-                      currency: 'COP',
-                    }).format(product.weightedAveragePrice || 0)}
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography
-                      fontWeight="bold"
-                      color={product.currentStock < 10 ? 'error.main' : 'text.primary'}
-                    >
-                      {product.currentStock}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography fontWeight="bold">
-                      {new Intl.NumberFormat('es-CO', {
-                        style: 'currency',
-                        currency: 'COP',
-                      }).format((product.weightedAveragePrice || 0) * product.currentStock)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    {product.currentStock < 10 ? (
-                      <Chip label="Bajo Stock" color="error" size="small" />
-                    ) : (
-                      <Chip label="Normal" color="success" size="small" />
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Paper sx={{ flex: 1, p: 0, border: '1px solid', borderColor: 'divider' }}>
+        <DataGrid
+          rows={products}
+          columns={columns}
+          loading={loading}
+          density="standard"
+          pageSizeOptions={[25, 50, 100]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 50 } },
+            sorting: { sortModel: [{ field: 'currentStock', sort: 'asc' }] },
+          }}
+          disableRowSelectionOnClick
+          sx={{
+            border: 'none',
+            '& .MuiDataGrid-cell:focus': {
+              outline: 'none',
+            },
+          }}
+        />
+      </Paper>
     </Box>
   );
 }

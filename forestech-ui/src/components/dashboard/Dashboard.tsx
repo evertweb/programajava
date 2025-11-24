@@ -62,28 +62,54 @@ export default function Dashboard() {
   const MetricCard = useMemo(() =>
     ({ title, value, icon, color }: { title: string, value: number, icon: React.ReactNode, color: string }) => (
       <Paper sx={{
-        p: 1.5,
+        p: 3,
         display: 'flex',
-        alignItems: 'center',
-        gap: 1.5,
-        border: '1px solid',
-        borderColor: 'divider',
-        boxShadow: 'none',
+        flexDirection: 'column',
+        gap: 2,
+        position: 'relative',
+        overflow: 'hidden',
+        transition: 'all 0.3s ease',
         '&:hover': {
-          borderColor: 'primary.light',
+          transform: 'translateY(-4px)',
+          boxShadow: '0 12px 24px rgba(0,0,0,0.08)',
         },
       }}>
-        <Box sx={{ color, display: 'flex', alignItems: 'center' }}>
-          {icon}
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5, flexGrow: 1 }}>
-          <Typography variant="body2" color="text.secondary" fontWeight={500}>
-            {title}:
-          </Typography>
-          <Typography variant="h6" component="span" fontWeight="600">
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+        }}>
+          <Box sx={{
+            p: 1.5,
+            borderRadius: '12px',
+            bgcolor: `${color}15`, // 15% opacity
+            color: color,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            {icon}
+          </Box>
+          <Typography variant="h4" fontWeight="600" color="text.primary">
             {value}
           </Typography>
         </Box>
+        
+        <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ letterSpacing: '0.02em' }}>
+          {title}
+        </Typography>
+
+        {/* Decorative background circle */}
+        <Box sx={{
+          position: 'absolute',
+          right: -20,
+          bottom: -20,
+          width: 100,
+          height: 100,
+          borderRadius: '50%',
+          bgcolor: `${color}08`, // 8% opacity
+          zIndex: 0,
+        }} />
       </Paper>
     ), []
   );
@@ -129,62 +155,96 @@ export default function Dashboard() {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight="600" gutterBottom sx={{ mb: 2.5, color: 'text.primary' }}>
-        Dashboard
-      </Typography>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" fontWeight="600" gutterBottom sx={{ color: 'text.primary', letterSpacing: '-0.02em' }}>
+          Resumen General
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Vista general del estado del sistema y métricas clave.
+        </Typography>
+      </Box>
 
-      <Grid container spacing={2.5}>
+      <Grid container spacing={3}>
         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
           <MetricCard
-            title="Productos"
+            title="Productos Activos"
             value={metrics?.productsCount ?? 0}
-            icon={<InventoryIcon />}
-            color="#1976d2"
+            icon={<InventoryIcon sx={{ fontSize: 28 }} />}
+            color="#009688" // Teal
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
           <MetricCard
-            title="Vehículos"
+            title="Flota Vehicular"
             value={metrics?.vehiclesCount ?? 0}
-            icon={<LocalShippingIcon />}
-            color="#2e7d32"
+            icon={<LocalShippingIcon sx={{ fontSize: 28 }} />}
+            color="#455A64" // Slate
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
           <MetricCard
             title="Movimientos"
             value={metrics?.movementsCount ?? 0}
-            icon={<MoveToInboxIcon />}
-            color="#ed6c02"
+            icon={<MoveToInboxIcon sx={{ fontSize: 28 }} />}
+            color="#F57C00" // Orange
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
           <MetricCard
-            title="Facturas"
+            title="Facturación"
             value={metrics?.invoicesCount ?? 0}
-            icon={<ReceiptIcon />}
-            color="#9c27b0"
+            icon={<ReceiptIcon sx={{ fontSize: 28 }} />}
+            color="#7B1FA2" // Purple
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
           <MetricCard
             title="Proveedores"
             value={metrics?.suppliersCount ?? 0}
-            icon={<PeopleIcon />}
-            color="#d32f2f"
+            icon={<PeopleIcon sx={{ fontSize: 28 }} />}
+            color="#D32F2F" // Red
           />
         </Grid>
 
         {/* Welcome Section */}
         <Grid size={{ xs: 12 }}>
-          <Paper sx={{ p: 3, mt: 1 }}>
-            <Typography variant="h5" gutterBottom>
-              Bienvenido a ForestechOil
-            </Typography>
-            <Typography color="text.secondary">
-              Sistema integral para la gestión de combustibles, flota vehicular y control de inventarios.
-              Utilice el menú lateral para navegar entre los diferentes módulos.
-            </Typography>
+          <Paper sx={{
+            p: 4,
+            mt: 2,
+            background: 'linear-gradient(135deg, #009688 0%, #00695C 100%)',
+            color: 'white',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <Box sx={{ position: 'relative', zIndex: 1 }}>
+              <Typography variant="h5" gutterBottom fontWeight="600">
+                Bienvenido a ForestechOil Enterprise
+              </Typography>
+              <Typography variant="body1" sx={{ opacity: 0.9, maxWidth: '800px' }}>
+                Sistema integral de gestión clínica para el control de combustibles y flota.
+                Seleccione un módulo del menú lateral para comenzar a operar.
+              </Typography>
+            </Box>
+            
+            {/* Decorative circles */}
+            <Box sx={{
+              position: 'absolute',
+              top: -50,
+              right: -50,
+              width: 200,
+              height: 200,
+              borderRadius: '50%',
+              bgcolor: 'rgba(255,255,255,0.1)',
+            }} />
+            <Box sx={{
+              position: 'absolute',
+              bottom: -30,
+              right: 80,
+              width: 120,
+              height: 120,
+              borderRadius: '50%',
+              bgcolor: 'rgba(255,255,255,0.05)',
+            }} />
           </Paper>
         </Grid>
       </Grid>
