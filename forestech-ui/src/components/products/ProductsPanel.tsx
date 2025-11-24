@@ -15,9 +15,6 @@ import {
   Card,
   CardContent,
   LinearProgress,
-  Chip,
-  Tooltip,
-  useTheme,
 } from '@mui/material';
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 import { BarChart } from '@mui/x-charts/BarChart';
@@ -27,9 +24,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import WarningIcon from '@mui/icons-material/Warning';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
 import type { Product } from '../../types/product.types';
 import type { Movement } from '../../types/movement.types';
@@ -40,7 +35,6 @@ import { useNotification } from '../../context/NotificationContext';
 type ViewMode = 'table' | 'analytics';
 
 export default function ProductsPanel() {
-  const theme = useTheme();
   const [products, setProducts] = useState<Product[]>([]);
   const [movements, setMovements] = useState<Movement[]>([]);
   const [loading, setLoading] = useState(false);

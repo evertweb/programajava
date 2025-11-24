@@ -22,7 +22,6 @@ import {
   Grid,
   Card,
   CardContent,
-  useTheme,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -62,7 +61,6 @@ type ViewMode = 'table' | 'analytics';
 type DateRange = 7 | 15 | 30 | 90;
 
 export default function MovementsPanel() {
-  const theme = useTheme();
   const [movements, setMovements] = useState<Movement[]>([]);
   const [products, setProducts] = useState<Record<string, Product>>({});
   const [vehicles, setVehicles] = useState<Record<string, Vehicle>>({});
@@ -169,7 +167,6 @@ export default function MovementsPanel() {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 1);
 
     let todayEntries = 0;
     let todayExits = 0;
@@ -629,7 +626,7 @@ export default function MovementsPanel() {
       {/* Stats Cards - Shown in analytics view */}
       {viewMode === 'analytics' && (
         <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card sx={{
               bgcolor: '#E8F5E9',
               transition: 'transform 0.2s',
@@ -665,7 +662,7 @@ export default function MovementsPanel() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card sx={{
               bgcolor: '#FFF3E0',
               transition: 'transform 0.2s',
@@ -701,7 +698,7 @@ export default function MovementsPanel() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card sx={{
               bgcolor: '#E3F2FD',
               transition: 'transform 0.2s',
@@ -730,7 +727,7 @@ export default function MovementsPanel() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card sx={{
               bgcolor: '#F3E5F5',
               transition: 'transform 0.2s',
@@ -761,7 +758,7 @@ export default function MovementsPanel() {
       {viewMode === 'analytics' && (
         <Grid container spacing={3} sx={{ mb: 3 }}>
           {/* Timeline Chart */}
-          <Grid item xs={12} lg={8}>
+          <Grid size={{ xs: 12, lg: 8 }}>
             <Paper sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography variant="h6" fontWeight="600">
@@ -811,7 +808,7 @@ export default function MovementsPanel() {
           </Grid>
 
           {/* Product Movements Chart */}
-          <Grid item xs={12} lg={4}>
+          <Grid size={{ xs: 12, lg: 4 }}>
             <Paper sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom fontWeight="600">
                 Top 5 Productos

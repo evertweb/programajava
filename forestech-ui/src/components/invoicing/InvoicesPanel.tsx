@@ -16,7 +16,6 @@ import {
   Grid,
   Card,
   CardContent,
-  useTheme,
 } from '@mui/material';
 import { DataGrid, type GridColDef, GridActionsCellItem } from '@mui/x-data-grid';
 import { LineChart } from '@mui/x-charts/LineChart';
@@ -43,7 +42,6 @@ type ViewMode = 'table' | 'analytics';
 type DateRange = 6 | 12;
 
 export default function InvoicesPanel() {
-  const theme = useTheme();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -344,7 +342,7 @@ export default function InvoicesPanel() {
       {/* Stats Cards - Shown in analytics view */}
       {viewMode === 'analytics' && (
         <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card sx={{
               bgcolor: '#E8F5E9',
               transition: 'transform 0.2s',
@@ -380,7 +378,7 @@ export default function InvoicesPanel() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card sx={{
               bgcolor: '#FFF3E0',
               transition: 'transform 0.2s',
@@ -405,7 +403,7 @@ export default function InvoicesPanel() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card sx={{
               bgcolor: '#E3F2FD',
               transition: 'transform 0.2s',
@@ -430,7 +428,7 @@ export default function InvoicesPanel() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card sx={{
               bgcolor: '#F3E5F5',
               transition: 'transform 0.2s',
@@ -461,7 +459,7 @@ export default function InvoicesPanel() {
       {viewMode === 'analytics' && (
         <Grid container spacing={3} sx={{ mb: 3 }}>
           {/* Timeline Chart */}
-          <Grid item xs={12} lg={7}>
+          <Grid size={{ xs: 12, lg: 7 }}>
             <Paper sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography variant="h6" fontWeight="600">
@@ -502,7 +500,7 @@ export default function InvoicesPanel() {
           </Grid>
 
           {/* Supplier Chart */}
-          <Grid item xs={12} lg={5}>
+          <Grid size={{ xs: 12, lg: 5 }}>
             <Paper sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom fontWeight="600">
                 Top 5 Proveedores
