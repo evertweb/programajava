@@ -214,18 +214,34 @@ export default function Dashboard() {
             background: 'linear-gradient(135deg, #009688 0%, #00695C 100%)',
             color: 'white',
             position: 'relative',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
           }}>
+            {/* Fuel Icon/Image */}
+            <Box sx={{
+              width: 120,
+              height: 120,
+              borderRadius: '16px',
+              bgcolor: 'rgba(255,255,255,0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <LocalShippingIcon sx={{ fontSize: 64, opacity: 0.9 }} />
+            </Box>
+
             <Box sx={{ position: 'relative', zIndex: 1 }}>
               <Typography variant="h5" gutterBottom fontWeight="600">
-                Bienvenido a ForestechOil Enterprise
+                Sistema de Gestión de Combustibles
               </Typography>
               <Typography variant="body1" sx={{ opacity: 0.9, maxWidth: '800px' }}>
-                Sistema integral de gestión clínica para el control de combustibles y flota.
-                Seleccione un módulo del menú lateral para comenzar a operar.
+                Controle el inventario de combustibles, gestione la flota vehicular, registre movimientos de entrada y salida, y administre la facturación de proveedores desde un solo lugar.
               </Typography>
             </Box>
-            
+
             {/* Decorative circles */}
             <Box sx={{
               position: 'absolute',
