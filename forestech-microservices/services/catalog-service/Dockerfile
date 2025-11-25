@@ -2,7 +2,7 @@ FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
-RUN apk add --no-cache maven
+RUN apk add --no-cache maven libx11 libxext libxi libxrender libxtst alsa-lib giflib libjpeg-turbo lcms2
 RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:21-jre-alpine

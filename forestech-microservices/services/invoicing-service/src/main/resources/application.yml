@@ -6,6 +6,32 @@ spring:
     name: invoicing-service
   config:
     import: "optional:configserver:http://config-server:8888/"
+  cloud:
+    consul:
+      host: consul
+      port: 8500
+      discovery:
+        instance-id: ${spring.application.name}:${random.value}
+        health-check-path: /actuator/health
+        health-check-interval: 10s
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 5000
+            readTimeout: 10000
+            loggerLevel: BASIC
+          catalog-service:
+            connectTimeout: 3000
+            readTimeout: 5000
+          partners-service:
+            connectTimeout: 3000
+            readTimeout: 5000
+          inventory-service:
+            connectTimeout: 5000
+            readTimeout: 15000
+      circuitbreaker:
+        enabled: true
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:mysql-forestech}:${MYSQL_PORT:3306}/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: ${MYSQL_USER:root}
@@ -20,10 +46,43 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
 
 management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://zipkin:9411/api/v2/spans}
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,prometheus
   endpoint:
     health:
       show-details: always
+
+# Resilience4j Configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      catalog-service:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+      partners-service:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+      inventory-service:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 15s
+
+logging:
+  level:
+    root: INFO
+    com.forestech: DEBUG
+
+# Security Configuration
+security:
+  internal-api-key: ${INTERNAL_API_KEY:forestech-internal-2024}
+  internal-endpoints-enabled: ${INTERNAL_ENDPOINTS_ENABLED:true}

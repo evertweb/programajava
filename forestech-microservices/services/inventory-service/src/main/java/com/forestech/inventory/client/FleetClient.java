@@ -1,5 +1,7 @@
 package com.forestech.inventory.client;
 
+import com.forestech.shared.exception.ServiceUnavailableException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,9 +15,12 @@ public interface FleetClient {
 }
 
 @Component
+@Slf4j
 class FleetClientFallback implements FleetClient {
     @Override
     public VehicleDTO getVehicleById(String id) {
-        return null;
+        log.error("Fallback activado: fleet-service no disponible para vehículo {}", id);
+        throw new ServiceUnavailableException("fleet-service",
+            "El servicio de flota no está disponible. No se puede validar el vehículo: " + id);
     }
 }

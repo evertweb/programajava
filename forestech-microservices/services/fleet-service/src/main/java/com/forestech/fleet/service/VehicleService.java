@@ -7,6 +7,9 @@ import com.forestech.shared.service.BaseService;
 import com.forestech.shared.util.IdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,8 +20,10 @@ import java.util.List;
  * Servicio de lógica de negocio para Vehicle
  * REFACTORIZADO: Ahora extiende BaseService para reducir código duplicado
  * 
- * ANTES: 104 líneas
- * DESPUÉS: ~70 líneas (-33%)
+ * CACHE STRATEGY:
+ * - vehicles: Cache de vehículos individuales por ID (TTL: 30min)
+ * - vehiclesActive: Lista de vehículos activos (TTL: 10min)
+ * - vehicleSearch: Resultados de búsqueda (TTL: 5min)
  */
 @Service
 @RequiredArgsConstructor
@@ -67,35 +72,82 @@ public class VehicleService extends BaseService<Vehicle, String> {
     }
 
     // ============================================
-    // Métodos custom específicos de Vehicle
+    // Métodos con Cache
     // ============================================
 
     /**
-     * Listar solo vehículos activos
+     * Obtener vehículo por ID con cache
      */
+    @Override
+    @Cacheable(value = "vehicles", key = "#id")
+    @Transactional(readOnly = true)
+    public Vehicle findById(String id) {
+        log.info("Buscando vehículo por ID: {} (cache miss)", id);
+        return super.findById(id);
+    }
+
+    /**
+     * Listar solo vehículos activos (con cache)
+     */
+    @Cacheable(value = "vehiclesActive")
     @Transactional(readOnly = true)
     public List<Vehicle> findAllActive() {
-        log.info("Listando vehículos activos");
+        log.info("Listando vehículos activos (cache miss)");
         return vehicleRepository.findByIsActiveTrue();
     }
 
     /**
-     * Buscar vehículos por placa
+     * Buscar vehículos por placa (con cache)
      */
+    @Cacheable(value = "vehicleSearch", key = "#placa")
     @Transactional(readOnly = true)
     public List<Vehicle> searchByPlaca(String placa) {
-        log.info("Buscando vehículos por placa: {}", placa);
+        log.info("Buscando vehículos por placa: {} (cache miss)", placa);
         return vehicleRepository.findByPlacaContainingIgnoreCase(placa);
     }
 
     /**
-     * Eliminar vehículo (soft delete)
+     * Crear vehículo - invalida caches de listas
      */
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "vehiclesActive", allEntries = true),
+            @CacheEvict(value = "vehicleSearch", allEntries = true)
+    })
+    @Transactional
+    public Vehicle create(Vehicle vehicle) {
+        log.info("Creando vehículo - invalidando caches de listas");
+        return super.create(vehicle);
+    }
+
+    /**
+     * Actualizar vehículo - invalida caches
+     */
+    @Override
+    @Caching(evict = {
+            @CacheEvict(value = "vehicles", key = "#id"),
+            @CacheEvict(value = "vehiclesActive", allEntries = true),
+            @CacheEvict(value = "vehicleSearch", allEntries = true)
+    })
+    @Transactional
+    public Vehicle update(String id, Vehicle vehicle) {
+        log.info("Actualizando vehículo ID: {} - invalidando caches", id);
+        return super.update(id, vehicle);
+    }
+
+    /**
+     * Eliminar vehículo (soft delete) - invalida caches
+     */
+    @Override
+    @Caching(evict = {
+            @CacheEvict(value = "vehicles", key = "#id"),
+            @CacheEvict(value = "vehiclesActive", allEntries = true),
+            @CacheEvict(value = "vehicleSearch", allEntries = true)
+    })
     @Transactional
     public void delete(String id) {
-        log.info("Eliminando vehículo con ID: {} (soft delete)", id);
-        Vehicle vehicle = findById(id);
+        log.info("Eliminando vehículo con ID: {} (soft delete) - invalidando caches", id);
+        Vehicle vehicle = super.findById(id);
         vehicle.setIsActive(false);
         getRepository().save(vehicle);
         log.info("Vehículo marcado como inactivo");

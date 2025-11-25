@@ -11,6 +11,21 @@ spring:
         instance-id: ${spring.application.name}:${random.value}
         health-check-path: /actuator/health
         health-check-interval: 10s
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 5000
+            readTimeout: 10000
+            loggerLevel: BASIC
+          catalog-service:
+            connectTimeout: 3000
+            readTimeout: 5000
+          fleet-service:
+            connectTimeout: 3000
+            readTimeout: 5000
+      circuitbreaker:
+        enabled: true
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:mysql-forestech}:${MYSQL_PORT:3306}/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: ${MYSQL_USER:root}
@@ -40,3 +55,21 @@ logging:
   level:
     root: INFO
     com.forestech: DEBUG
+
+# Distributed Tracing Configuration
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://zipkin:9411/api/v2/spans}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+# Security Configuration
+security:
+  internal-api-key: ${INTERNAL_API_KEY:forestech-internal-2024}
+  internal-endpoints-enabled: ${INTERNAL_ENDPOINTS_ENABLED:true}

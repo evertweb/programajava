@@ -1,5 +1,7 @@
 package com.forestech.inventory.client;
 
+import com.forestech.shared.exception.ServiceUnavailableException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,9 +15,12 @@ public interface CatalogClient {
 }
 
 @Component
+@Slf4j
 class CatalogClientFallback implements CatalogClient {
     @Override
     public ProductDTO getProductById(String id) {
-        return null;
+        log.error("Fallback activado: catalog-service no disponible para producto {}", id);
+        throw new ServiceUnavailableException("catalog-service", 
+            "El servicio de catálogo no está disponible. No se puede validar el producto: " + id);
     }
 }

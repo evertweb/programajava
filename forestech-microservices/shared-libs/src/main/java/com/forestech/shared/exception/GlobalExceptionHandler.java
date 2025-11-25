@@ -60,6 +60,16 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Maneja excepciones de servicios externos no disponibles
+     */
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleServiceUnavailable(ServiceUnavailableException ex) {
+        log.error("Service unavailable: {} - {}", ex.getServiceName(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ErrorResponse(ex.getMessage()));
+    }
+
+    /**
      * Maneja excepciones genéricas no capturadas
      */
     @ExceptionHandler(Exception.class)

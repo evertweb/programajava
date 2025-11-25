@@ -26,9 +26,31 @@ spring:
       minimum-idle: 5
       idle-timeout: 300000
       connection-test-query: SELECT 1
+  # Redis Configuration for Cache
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+  cache:
+    type: redis
+    redis:
+      time-to-live: 900000  # 15 minutos default
 
 server:
   port: 8081
+
+# Cache TTL Configuration
+cache:
+  products:
+    ttl-minutes: 30
+  products-active:
+    ttl-minutes: 10
 
 # Configuración de Swagger/OpenAPI
 springdoc:
@@ -41,3 +63,21 @@ logging:
   level:
     root: INFO
     com.forestech: DEBUG
+
+# Distributed Tracing Configuration
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://zipkin:9411/api/v2/spans}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+# Security Configuration
+security:
+  internal-api-key: ${INTERNAL_API_KEY:forestech-internal-2024}
+  internal-endpoints-enabled: ${INTERNAL_ENDPOINTS_ENABLED:true}

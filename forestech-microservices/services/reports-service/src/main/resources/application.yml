@@ -42,3 +42,16 @@ logging:
   level:
     com.forestech.reports: DEBUG
     org.springframework.jdbc.core: DEBUG
+
+# Distributed Tracing Configuration
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://zipkin:9411/api/v2/spans}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus

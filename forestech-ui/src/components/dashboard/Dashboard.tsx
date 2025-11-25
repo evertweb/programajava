@@ -144,7 +144,7 @@ export default function Dashboard() {
 
     // Top 7 Products by Stock (raw values)
     const stockRaw = metrics.products
-      .map(p => ({ name: p.name, stock: stockMap.get(p.id) || 0 }))
+      .map(p => ({ id: p.id, name: p.name, stock: stockMap.get(p.id) || 0 }))
       .sort((a, b) => b.stock - a.stock)
       .slice(0, 7);
 
@@ -164,6 +164,7 @@ export default function Dashboard() {
       // 'linear' mantiene el valor original
 
       return {
+        id: item.id,
         name: item.name,
         stock: displayValue,
         originalStock: item.stock, // Guardamos el valor real para tooltips
@@ -359,7 +360,7 @@ export default function Dashboard() {
                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                   {chartData.stock.map((item) => (
                     <Chip
-                      key={item.name}
+                      key={item.id}
                       label={`${item.name}: ${item.originalStock.toLocaleString()} gal`}
                       size="small"
                       variant="outlined"

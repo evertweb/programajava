@@ -41,17 +41,11 @@ export default function ProductsPanel() {
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const { showNotification } = useNotification();
 
-  // Load products on mount
+  // Load products and movements on mount
   useEffect(() => {
     loadProducts();
+    loadMovements();
   }, []);
-
-  // Load movements when switching to analytics view
-  useEffect(() => {
-    if (viewMode === 'analytics') {
-      loadMovements();
-    }
-  }, [viewMode]);
 
   const loadProducts = async () => {
     setLoading(true);
@@ -72,6 +66,10 @@ export default function ProductsPanel() {
     } catch (error) {
       console.error('Error loading movements:', error);
     }
+  };
+
+  const handleRefresh = async () => {
+    await Promise.all([loadProducts(), loadMovements()]);
   };
 
   // Calculate stock levels for each product
@@ -267,7 +265,7 @@ export default function ProductsPanel() {
             variant="outlined"
             size="small"
             startIcon={<RefreshIcon />}
-            onClick={loadProducts}
+            onClick={handleRefresh}
             disabled={loading}
           >
             Actualizar
