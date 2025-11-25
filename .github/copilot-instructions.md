@@ -37,16 +37,19 @@ forestechOil/
 │   │   └── databases/           # SQL init scripts
 │   └── docker-compose.yml
 │
-├── forestech-ui/                # Frontend - React + Electron
-│   ├── src/
-│   │   ├── components/          # React components by domain
-│   │   ├── services/            # API clients (axios)
-│   │   ├── types/               # TypeScript interfaces
-│   │   └── theme/               # MUI theme
-│   └── electron/                # Electron main process
+├── forestech_app/               # Frontend - Flutter Desktop (NUEVO)
+│   ├── lib/
+│   │   ├── core/                # Config, Network, Theme, Services
+│   │   ├── data/                # Models, Repositories Impl
+│   │   ├── domain/              # Entities, Repository Interfaces
+│   │   └── presentation/        # Providers, Screens, Widgets
+│   ├── assets/                  # Icons, images
+│   └── scripts/                 # Build helpers
 │
-└── scripts/
-    └── local-sync.sh            # Sincronizacion local
+├── forestech-ui/                # Frontend Legacy - React + Electron (DEPRECADO)
+│   └── (mantenido para referencia)
+│
+└── docs/                        # Documentacion del proyecto
 ```
 
 ---
@@ -59,11 +62,16 @@ forestechOil/
 - **MySQL 8.0** + **Redis 7**
 - **Maven** + **Docker Compose**
 
-### Frontend
-- **React 19** + **TypeScript**
-- **Material UI 7** + MUI X Data Grid
-- **Vite 7** + **Electron 39**
-- **electron-updater** (auto-updates)
+### Frontend (Flutter - ACTUAL)
+- **Flutter 3.x** + **Dart 3.x**
+- **Provider** (state management)
+- **Dio** (HTTP client)
+- **go_router** (navigation)
+- **Syncfusion** (DataGrid, Charts)
+
+### Frontend Legacy (Electron - DEPRECADO)
+- React 19 + TypeScript + Electron 39
+- (Solo para referencia, no desarrollar nuevas features)
 
 ---
 
@@ -79,10 +87,9 @@ forestechOil/
 │                   DESARROLLO LOCAL (WSL/Linux)                      │
 │                   ================================                   │
 │                                                                     │
-│  - Escribir código                                                  │
+│  - Escribir código Flutter/Dart                                     │
 │  - Ejecutar microservicios (Docker Compose)                         │
-│  - Probar con datos reales                                          │
-│  - Desarrollar UI Electron                                          │
+│  - Probar con hot reload (flutter run)                              │
 │  - Commits y push a GitHub                                          │
 │                                                                     │
 │                           │ git push                                │
@@ -96,8 +103,8 @@ forestechOil/
 │                           ▼                                         │
 │                 ┌──────────────────┐                                │
 │                 │  Build Multi-OS  │                                │
-│                 │  Distributables  │                                │
-│                 │  (.exe, .AppImage)│                               │
+│                 │  Flutter Desktop │                                │
+│                 │  (.zip, .tar.gz) │                                │
 │                 └──────────────────┘                                │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
@@ -120,38 +127,30 @@ docker compose up -d --build catalog-service
 
 # Detener todos los servicios
 docker compose down
-
-# Rebuild completo (sin caché)
-docker compose build --no-cache
-docker compose up -d
 ```
 
-**Frontend (Desarrollo Electron):**
+**Frontend Flutter (Desktop):**
 ```bash
-cd forestech-ui
+cd forestech_app
 
-# Modo desarrollo con hot reload
-npm run electron:dev
+# Instalar dependencias
+flutter pub get
 
-# Build de producción (navegador)
-npm run build
+# Desarrollo con hot reload (equivalente a npm run dev)
+flutter run -d linux      # Linux desktop
+flutter run -d windows    # Windows desktop
+flutter run -d chrome     # Web browser
 
-# Solo para probar compilación local
-# (NOTA: En WSL no genera .exe correctamente, usar GitHub Actions)
-npm run electron:build:linux  # Genera AppImage
+# Atajos durante ejecución:
+# r - Hot reload (aplica cambios instantáneamente)
+# R - Hot restart (reinicio completo)
+# d - Abrir DevTools
+# q - Salir
+
+# Build de producción
+flutter build linux --release
+flutter build windows --release
 ```
-
-### GitHub - Solo para Versionado y Builds Automáticos
-
-GitHub se usa exclusivamente para:
-
-1. **Control de versiones** - `git push/pull`
-2. **Builds multiplataforma automáticos** - GitHub Actions compila el `.exe` de Windows
-
-**¿Por qué GitHub Actions para el .exe?**
-- En WSL es complicado compilar ejecutables de Windows
-- GitHub Actions tiene runners nativos de Windows
-- Genera distribuciones para Windows, Linux y macOS automáticamente
 
 ---
 
@@ -161,50 +160,51 @@ GitHub se usa exclusivamente para:
 
 **Archivo:** `.github/workflows/release.yml`
 
-**Trigger:** Push de tags `v*` (ej: `v0.0.3`)
+**Trigger:** Push de tags `v*` (ej: `v1.0.0`)
 
 **Proceso:**
 1. Checkout codigo
-2. Setup Node.js 20
-3. Install dependencies (`npm ci`)
-4. Build aplicacion (`npm run build`)
-5. Package con electron-builder (Windows/Linux/Mac)
-6. Publish a GitHub Releases
+2. Setup Flutter (stable channel)
+3. Install dependencies (`flutter pub get`)
+4. Build Windows release (`flutter build windows --release`)
+5. Build Linux release (`flutter build linux --release`)
+6. Crear ZIP/tarball
+7. Publish a GitHub Releases
 
 **Crear un Release:**
 ```bash
-cd forestech-ui
+cd forestech_app
 
-# 1. Bump version
-npm version patch    # 0.0.2 -> 0.0.3
+# 1. Actualizar version en pubspec.yaml
+# version: 1.0.1+2
 
 # 2. Commit y push
-git add package.json package-lock.json
-git commit -m "chore: bump version to 0.0.3"
+git add .
+git commit -m "chore: bump version to 1.0.1"
 git push origin main
 
 # 3. Crear tag (dispara GitHub Actions)
-git tag v0.0.3
-git push origin v0.0.3
+git tag v1.0.1
+git push origin v1.0.1
 ```
 
 **Artefactos generados:**
-- Windows: `ForestechOil Setup X.X.X.exe` + `latest.yml`
-- Linux: `ForestechOil-X.X.X.AppImage` + `latest-linux.yml`
-- macOS: `ForestechOil-X.X.X.dmg` + `latest-mac.yml`
+- Windows: `ForestechOil-Windows-vX.X.X.zip`
+- Linux: `ForestechOil-Linux-vX.X.X.tar.gz`
+- Metadata: `latest.json` (para auto-update)
 
-### Auto-Update en Electron
+### Auto-Update en Flutter
 
-La app verifica actualizaciones automaticamente:
-1. 3 segundos despues de iniciar (solo produccion)
-2. Consulta `https://github.com/evertweb/programajava/releases`
-3. Si hay version nueva -> Dialogo al usuario
-4. Usuario acepta -> Descarga en background
-5. Al cerrar app -> Instala automaticamente
+La app verifica actualizaciones via GitHub Releases:
+1. 3 segundos después de iniciar (solo producción)
+2. Consulta `latest.json` en GitHub Releases
+3. Si hay versión nueva -> Diálogo al usuario
+4. Usuario acepta -> Abre navegador para descargar
 
 **Archivos clave:**
-- `forestech-ui/electron/main.cjs` - Logica de auto-updater
-- `forestech-ui/package.json` - Configuracion de publish
+- `lib/core/services/update_service.dart` - Lógica de verificación
+- `lib/presentation/providers/update_provider.dart` - Estado
+- `lib/presentation/widgets/update_widgets.dart` - UI
 
 ---
 
@@ -254,69 +254,50 @@ GET/PUT/DELETE /api/invoices/{numeroFactura}
 
 ---
 
-## Base de Datos
-
-### Configuracion MySQL
-- **Host:** localhost (mysql-forestech en Docker)
-- **Puerto:** 3307 (Docker) / 3306 (WSL local)
-- **Database:** FORESTECHOIL
-- **User:** root
-- **Password:** hp (local) / forestech_root_2024 (Docker)
-
-### Tablas y Relaciones
+## Estructura Flutter (Clean Architecture)
 
 ```
-oil_products (sin dependencias)
-    └── vehicles.fuel_product_id (SET NULL)
-    └── Movement.product_id (RESTRICT)
-
-suppliers (sin dependencias)
-    └── facturas.supplier_id (RESTRICT)
-
-vehicles (depende de oil_products)
-    └── Movement.vehicle_id (SET NULL)
-
-facturas (depende de suppliers)
-    └── Movement.numero_factura (SET NULL)
-    └── detalle_factura.numero_factura (CASCADE)
+lib/
+├── core/                   # Código agnóstico al dominio
+│   ├── config/             # Constantes, URLs
+│   ├── errors/             # Failures personalizados
+│   ├── network/            # Dio client configurado
+│   ├── router/             # go_router config
+│   ├── services/           # UpdateService, etc.
+│   └── theme/              # AppTheme (colores, tipografía)
+│
+├── data/                   # Capa de Datos
+│   ├── models/             # DTOs con fromJson/toJson
+│   └── repositories/       # Implementación de interfaces
+│
+├── domain/                 # Capa de Negocio (Dart puro)
+│   ├── entities/           # Objetos de negocio
+│   └── repositories/       # Interfaces (contratos)
+│
+└── presentation/           # Capa Visual
+    ├── providers/          # ChangeNotifiers (estado)
+    ├── screens/            # Pantallas completas
+    └── widgets/            # Componentes reutilizables
 ```
 
-### Reglas de Negocio
-- **ENTRADA:** Debe tener `numero_factura`
-- **SALIDA:** Debe tener `vehicle_id`
-- Products no se pueden eliminar si tienen movimientos
-- Suppliers no se pueden eliminar si tienen facturas
+### Patron de Provider
 
----
+```dart
+// lib/presentation/providers/product_provider.dart
+class ProductProvider extends ChangeNotifier {
+  final ProductRepository _repository;
+  List<Product> _products = [];
+  bool _isLoading = false;
 
-## Patrones de Codigo
-
-### Backend - Estructura de Microservicio
-
-```
-com.forestech.{service}/
-├── {Service}Application.java    # Main class
-├── controller/                  # REST endpoints
-├── service/                     # Business logic
-├── repository/                  # JPA repositories
-├── model/                       # JPA entities
-└── client/                      # Feign clients
-```
-
-### Frontend - Patron de Componentes
-
-```typescript
-// src/components/{domain}/{Domain}List.tsx - Vista principal
-// src/components/{domain}/{Domain}Form.tsx - Dialogo crear/editar
-// src/services/{domain}Service.ts - Llamadas API
-
-export const productService = {
-  getAll: () => api.get('/products'),
-  getById: (id: string) => api.get(`/products/${id}`),
-  create: (data: Product) => api.post('/products', data),
-  update: (id: string, data: Product) => api.put(`/products/${id}`, data),
-  delete: (id: string) => api.delete(`/products/${id}`),
-};
+  Future<void> loadProducts() async {
+    _isLoading = true;
+    notifyListeners();
+    
+    _products = await _repository.getAll();
+    _isLoading = false;
+    notifyListeners();
+  }
+}
 ```
 
 ---
@@ -333,14 +314,15 @@ docker compose logs -f            # Ver logs
 docker compose build --no-cache   # Rebuild completo
 ```
 
-### Frontend
+### Frontend Flutter
 ```bash
-cd forestech-ui
+cd forestech_app
 
-npm run dev                # Desarrollo browser
-npm run electron:dev       # Desarrollo Electron
-npm run build              # Build produccion
-npm run electron:build:win # Build .exe Windows
+flutter pub get            # Instalar dependencias
+flutter run -d linux       # Desarrollo con hot reload
+flutter build linux        # Build release Linux
+flutter clean              # Limpiar cache
+flutter doctor             # Verificar instalación
 ```
 
 ### Git
@@ -349,6 +331,10 @@ git status
 git add .
 git commit -m "feat: descripcion"
 git push origin main
+
+# Release
+git tag v1.0.1
+git push origin v1.0.1
 ```
 
 ---
@@ -368,15 +354,22 @@ docker exec mysql-forestech mysqladmin ping -u root -p'forestech_root_2024'
 docker logs mysql-forestech
 ```
 
-### Frontend no conecta al backend
+### Flutter no conecta al backend
 - Verificar API Gateway en puerto 8080
-- Verificar CORS en `api-gateway/.../CorsConfig.java`
+- Verificar `lib/core/config/constants.dart` tiene URL correcta
 - Probar: `curl http://localhost:8080/actuator/health`
 
 ### Build de GitHub Actions falla
 - Revisar tab Actions en GitHub
-- Verificar permisos del workflow (Settings > Actions > Workflow permissions)
-- Asegurar que package.json tiene todas las dependencias
+- Verificar que `pubspec.yaml` tiene todas las dependencias
+- Ver logs del job específico (Windows o Linux)
+
+### Flutter run falla
+```bash
+flutter clean
+flutter pub get
+flutter doctor -v
+```
 
 ---
 

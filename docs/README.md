@@ -1,104 +1,85 @@
-# README - Proyecto de Aprendizaje de Java
+# Documentación ForestechOil
 
-> **Carpeta de aprendizaje Java desde cero**  
-> **Fecha de inicio:** 7 de octubre de 2025
+> **Sistema de Gestión de Combustibles**  
+> Frontend: Flutter Desktop | Backend: Spring Boot Microservices
 
 ---
 
-## 🎯 **EMPIEZA AQUÍ**
+## �� Índice de Documentación
 
-**Lee el archivo `INICIO.md` primero. Ese archivo te guiará paso a paso.**
+| Documento | Descripción |
+|-----------|-------------|
+| [LOCAL_DEVELOPMENT.md](LOCAL_DEVELOPMENT.md) | Guía de desarrollo local |
+| [FLUTTER_MIGRATION_ROADMAP.md](FLUTTER_MIGRATION_ROADMAP.md) | Roadmap de migración Electron → Flutter |
+| [ARQUITECTURA_UML.md](ARQUITECTURA_UML.md) | Diagramas de arquitectura |
+| [PRODUCCION_DESKTOP.md](../forestech_app/docs/PRODUCCION_DESKTOP.md) | Builds de producción Flutter |
 
+---
+
+## 🚀 Quick Start
+
+### Requisitos
+- Docker & Docker Compose
+- Flutter SDK 3.x (stable)
+- Git
+
+### Iniciar Backend
 ```bash
-# Abrir VS Code en esta carpeta
-cd ~/Documents/programajava
-code .
+cd forestech-microservices
+docker compose up -d
+```
 
-# Leer archivo de inicio
-cat INICIO.md
+### Iniciar Frontend (Desarrollo)
+```bash
+cd forestech_app
+flutter pub get
+flutter run -d linux
 ```
 
 ---
 
-## 📂 **ARCHIVOS EN ESTA CARPETA**
+## 🏗️ Arquitectura
 
-| Archivo | Propósito | Cuándo leerlo |
-|---------|-----------|---------------|
-| `INICIO.md` | **Punto de entrada** | **PRIMERO** |
-| `GIT_LEARNING_ROADMAP.md` | Aprende Git desde cero | Día 1 |
-| `JAVA_AGENTS_INSTRUCTIONS.md` | Contexto para Copilot | Configurar IA |
-| `JAVA_LEARNING_ROADMAP.md` | Roadmap completo | Día 1 |
-| `JAVA_PROJECT_SETUP.md` | Instalación de herramientas | Día 1 |
-| `JAVA_NEXT_STEPS.md` | Siguiente tarea específica | Siempre |
-| `JAVA_LEARNING_LOG.md` | Registro de progreso | Actualizar frecuentemente |
-| `forestech-cli-java/` | Proyecto Java | Empezar Fase 1 |
-
----
-
-## 🚀 **INICIO RÁPIDO**
-
-```bash
-# 1. Abrir carpeta en VS Code
-code ~/Documents/programajava
-
-# 2. Configurar Copilot
-# Abrir JAVA_AGENTS_INSTRUCTIONS.md en VS Code
-# Copilot lo leerá automáticamente
-
-# 3. Leer documentación
-cat INICIO.md                      # Guía de inicio
-cat JAVA_LEARNING_ROADMAP.md      # Roadmap completo
-cat JAVA_NEXT_STEPS.md             # Tu próxima tarea
-
-# 4. Verificar entorno
-java -version
-mvn -version
-git --version
+```
+forestechOil/
+├── forestech_app/           # Frontend Flutter Desktop
+├── forestech-microservices/ # Backend Spring Boot
+├── forestech-ui/            # [DEPRECADO] Frontend Electron
+└── docs/                    # Documentación
 ```
 
----
+### Stack Tecnológico
 
-## 🎓 **FILOSOFÍA**
-
-Este es un **proyecto de aprendizaje**, NO de desarrollo rápido.
-
-**Objetivo:** Aprender Java desde cero construyendo una aplicación CLI real.
-
-**Metodología:**
-- 📖 Leer concepto
-- 💬 IA explica
-- ✍️ Tú escribes código
-- 🧪 Pruebas y entiendes
-- ✅ Pasas al siguiente paso
+| Capa | Tecnología |
+|------|------------|
+| Frontend | Flutter 3.x + Dart + Provider |
+| API Gateway | Spring Cloud Gateway |
+| Microservicios | Spring Boot 3.x + Java 17 |
+| Base de Datos | MySQL 8.0 + Redis 7 |
+| Service Discovery | Consul |
+| CI/CD | GitHub Actions |
 
 ---
 
-## 📚 **RECURSOS**
+## 📦 Releases
 
-- [Oracle Java Tutorials](https://docs.oracle.com/javase/tutorial/)
-- [Maven Documentation](https://maven.apache.org/guides/)
-- [JDBC Tutorial](https://docs.oracle.com/javase/tutorial/jdbc/)
+Los releases se generan automáticamente via GitHub Actions cuando se crea un tag:
 
----
-
-## 🆘 **AYUDA**
-
-Si tienes dudas:
-1. Lee `JAVA_NEXT_STEPS.md` (siempre tiene tu siguiente tarea)
-2. Consulta `JAVA_LEARNING_ROADMAP.md` (para ver en qué fase estás)
-3. Pregunta a Copilot (ya tiene el contexto de `JAVA_AGENTS_INSTRUCTIONS.md`)
-
----
-
-## 🎉 **¡EMPIEZA AHORA!**
-
-**Archivo a abrir primero:** `INICIO.md`
-
-**Comando:**
 ```bash
-cat INICIO.md
+git tag v1.0.0
+git push origin v1.0.0
 ```
 
+**Artefactos generados:**
+- `ForestechOil-Windows-vX.X.X.zip` - Ejecutable Windows
+- `ForestechOil-Linux-vX.X.X.tar.gz` - Ejecutable Linux
+
+Descargar desde: https://github.com/evertweb/programajava/releases
+
 ---
 
-**¡Buena suerte en tu aventura de aprendizaje Java! 🚀**
+## 🔗 Links Útiles
+
+- [Flutter Documentation](https://docs.flutter.dev/)
+- [Spring Boot Reference](https://docs.spring.io/spring-boot/docs/current/reference/html/)
+- [Docker Compose](https://docs.docker.com/compose/)

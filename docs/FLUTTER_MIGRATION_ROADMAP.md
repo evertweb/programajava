@@ -127,9 +127,10 @@ lib/
 
 ### 🚀 Fase 5: Producción Desktop (Sesión 13)
 
-> **Prompt para el Agente:** "Agente, finaliza la migración preparando los ejecutables de escritorio."
+> **Prompt para el Agente:** "Agente, finaliza la migración preparando los ejecutables de escritorio para windows."
 
 #### Tareas:
 1.  Configurar iconos de aplicación (`flutter_launcher_icons`).
 2.  Ajustar permisos de AndroidManifest y Linux (network).
 3.  Generar builds de release.
+al final explicame al usuario como es el nuevo proceso de build ya que antes se genraba exe pero con electron.
