@@ -111,22 +111,46 @@ class _MovementsScreenState extends State<MovementsScreen> {
             onDelete: _handleDeleteClick,
           );
 
+          // En modo Analytics, todo el contenido es scrollable
+          // En modo Table, solo se muestra header + tabla expandida
+          if (_viewMode == ViewMode.analytics) {
+            return CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Header
+                      _buildHeader(provider),
+                      const SizedBox(height: 16),
+                      // Alerts Section
+                      if (provider.alerts.isNotEmpty)
+                        _buildAlertsSection(provider),
+                      // Stats Cards
+                      _buildStatsCards(provider),
+                      // Charts Row
+                      _buildChartsRow(provider),
+                      // Table with fixed height in analytics mode
+                      SizedBox(
+                        height: 400,
+                        child: _buildTableView(provider),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          }
+          
+          // Modo Table: layout simple con tabla expandida
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Header
               _buildHeader(provider),
               const SizedBox(height: 16),
-              // Alerts Section (only in analytics view)
-              if (_viewMode == ViewMode.analytics && provider.alerts.isNotEmpty)
-                _buildAlertsSection(provider),
-              // Stats Cards (only in analytics view)
-              if (_viewMode == ViewMode.analytics)
-                _buildStatsCards(provider),
-              // Charts Row (only in analytics view)
-              if (_viewMode == ViewMode.analytics)
-                _buildChartsRow(provider),
-              // Content - Table is always shown
+              // Content - Table takes all remaining space
               Expanded(
                 child: _buildTableView(provider),
               ),
@@ -139,8 +163,11 @@ class _MovementsScreenState extends State<MovementsScreen> {
 
   /// Build header with title and controls (matches React header)
   Widget _buildHeader(MovementProvider provider) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 16,
+      runSpacing: 12,
       children: [
         const Text(
           'Movimientos de Inventario',
@@ -150,7 +177,10 @@ class _MovementsScreenState extends State<MovementsScreen> {
             color: AppTheme.textPrimary,
           ),
         ),
-        Row(
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             // View mode toggle
             ToggleButtons(
@@ -170,6 +200,7 @@ class _MovementsScreenState extends State<MovementsScreen> {
               ),
               children: const [
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.table_chart, size: 18),
                     SizedBox(width: 4),
@@ -177,6 +208,7 @@ class _MovementsScreenState extends State<MovementsScreen> {
                   ],
                 ),
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.assessment, size: 18),
                     SizedBox(width: 4),
@@ -185,7 +217,6 @@ class _MovementsScreenState extends State<MovementsScreen> {
                 ),
               ],
             ),
-            const SizedBox(width: 8),
             // Type filter toggle
             ToggleButtons(
               isSelected: [
@@ -212,7 +243,6 @@ class _MovementsScreenState extends State<MovementsScreen> {
                 Text('Salidas'),
               ],
             ),
-            const SizedBox(width: 8),
             // NOTE: Registrar Entrada button removed as per business logic
             // Entries are only created via invoice registration
             ElevatedButton.icon(
@@ -224,7 +254,6 @@ class _MovementsScreenState extends State<MovementsScreen> {
                 foregroundColor: Colors.white,
               ),
             ),
-            const SizedBox(width: 8),
             // Refresh button
             OutlinedButton.icon(
               onPressed: provider.isLoading ? null : _handleRefresh,

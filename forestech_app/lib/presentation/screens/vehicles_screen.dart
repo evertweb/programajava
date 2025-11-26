@@ -5,8 +5,15 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/extensions/number_extensions.dart';
 import '../../domain/entities/vehicle_entity.dart';
+import '../mixins/confirmation_dialog_mixin.dart';
+import '../mixins/snackbar_mixin.dart';
 import '../providers/vehicle_provider.dart';
+import '../widgets/common/data_grid_wrapper.dart';
+import '../widgets/common/error_state_widget.dart';
+import '../widgets/common/loading_state_widget.dart';
+import '../widgets/common/stats_card.dart';
 import '../widgets/vehicle_form_dialog.dart';
 
 /// ViewMode enum matching React's ViewMode type
@@ -21,7 +28,8 @@ class VehiclesScreen extends StatefulWidget {
   State<VehiclesScreen> createState() => _VehiclesScreenState();
 }
 
-class _VehiclesScreenState extends State<VehiclesScreen> {
+class _VehiclesScreenState extends State<VehiclesScreen>
+    with ConfirmationDialogMixin, SnackBarMixin {
   ViewMode _viewMode = ViewMode.table;
   late VehicleProvider _provider;
   late VehicleDataSource _dataSource;
@@ -70,43 +78,20 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
   }
 
   Future<void> _handleDelete(String id) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirmar eliminación'),
-        content: const Text(
-          '¿Está seguro que desea eliminar este vehículo? Esta acción no se puede deshacer.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
+    // Using ConfirmationDialogMixin
+    final confirmed = await showDeleteConfirmation(
+      itemName: 'este vehículo',
+      customMessage: '¿Está seguro que desea eliminar este vehículo? Esta acción no se puede deshacer.',
     );
 
-    if (confirmed == true) {
+    if (confirmed) {
       final success = await _provider.deleteVehicle(id);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              success
-                  ? 'Vehículo eliminado exitosamente'
-                  : _provider.errorMessage ?? 'Error al eliminar vehículo',
-            ),
-            backgroundColor: success ? Colors.green : Colors.red,
-          ),
-        );
+      
+      // Using SnackBarMixin
+      if (success) {
+        showSuccessMessage('Vehículo eliminado exitosamente');
+      } else {
+        showErrorMessage(_provider.errorMessage ?? 'Error al eliminar vehículo');
       }
     }
   }
@@ -226,52 +211,23 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
 
   /// Build table view with SfDataGrid (matches React DataGrid)
   Widget _buildTableView(VehicleProvider provider) {
+    // Using LoadingStateWidget
     if (provider.isLoading && provider.items.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const LoadingStateWidget(message: 'Cargando vehículos...');
     }
 
+    // Using ErrorStateWidget
     if (provider.isError) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: AppTheme.error),
-            const SizedBox(height: 16),
-            Text(
-              provider.errorMessage ?? 'Error al cargar vehículos',
-              style: const TextStyle(color: AppTheme.error),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: _handleRefresh,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Reintentar'),
-            ),
-          ],
-        ),
+      return ErrorStateWidget(
+        errorMessage: provider.errorMessage ?? 'Error al cargar vehículos',
+        onRetry: _handleRefresh,
       );
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: SfDataGrid(
-          source: _dataSource,
-          columns: _buildColumns(),
-          columnWidthMode: ColumnWidthMode.fill,
-          gridLinesVisibility: GridLinesVisibility.horizontal,
-          headerGridLinesVisibility: GridLinesVisibility.horizontal,
-          rowHeight: 52,
-          headerRowHeight: 48,
-          allowSorting: true,
-          selectionMode: SelectionMode.none,
-        ),
-      ),
+    // Using DataGridWrapper
+    return DataGridWrapper(
+      source: _dataSource,
+      columns: _buildColumns(),
     );
   }
 
@@ -424,8 +380,9 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
 
     return Row(
       children: [
+        // Using StatsCard widget
         Expanded(
-          child: _StatsCard(
+          child: StatsCard(
             title: 'Total Vehículos',
             value: stats.total.toString(),
             icon: Icons.local_shipping,
@@ -434,7 +391,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
         ),
         const SizedBox(width: 24),
         Expanded(
-          child: _StatsCard(
+          child: StatsCard(
             title: 'Vehículos Activos',
             value: stats.active.toString(),
             icon: Icons.check_circle,
@@ -444,7 +401,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
         ),
         const SizedBox(width: 24),
         Expanded(
-          child: _StatsCard(
+          child: StatsCard(
             title: 'Vehículos Inactivos',
             value: stats.inactive.toString(),
             icon: Icons.cancel,
@@ -453,9 +410,9 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
         ),
         const SizedBox(width: 24),
         Expanded(
-          child: _StatsCard(
+          child: StatsCard(
             title: 'Consumo Este Mes (gal)',
-            value: NumberFormat('#,##0', 'es_CO').format(stats.monthConsumption),
+            value: stats.monthConsumption.toFormatted(), // Using extension
             icon: Icons.local_gas_station,
             iconColor: const Color(0xFFF57C00),
           ),
@@ -662,95 +619,6 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
   }
 }
 
-/// Stats Card Widget (matches React's stats cards)
-class _StatsCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color iconColor;
-  final double? change;
-
-  const _StatsCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.iconColor,
-    this.change,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: iconColor,
-              borderRadius: BorderRadius.circular(28),
-            ),
-            child: Icon(icon, color: Colors.white, size: 28),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-                if (change != null && change != 0)
-                  Row(
-                    children: [
-                      Icon(
-                        change! > 0 ? Icons.trending_up : Icons.trending_down,
-                        size: 16,
-                        color: change! > 0 ? Colors.green : Colors.red,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${change!.abs().toStringAsFixed(1)}% vs mes anterior',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: change! > 0 ? Colors.green : Colors.red,
-                        ),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 /// DataSource for SfDataGrid
 /// Handles data mapping and cell rendering for vehicles

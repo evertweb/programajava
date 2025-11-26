@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import '../services/update_service.dart';
+import '../../core/services/update_service.dart';
 
 /// Estado de la verificación de actualizaciones
 enum UpdateStatus {

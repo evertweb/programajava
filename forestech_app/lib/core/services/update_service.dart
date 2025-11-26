@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 /// Información de una release disponible
@@ -86,9 +87,9 @@ class UpdateService {
     final currentVersion = await getCurrentVersion();
     
     try {
-      print('[UpdateService] Checking for updates...');
-      print('[UpdateService] Current version: $currentVersion');
-      print('[UpdateService] Fetching: $_latestJsonUrl');
+      _log('Checking for updates...');
+      _log('Current version: $currentVersion');
+      _log('Fetching: $_latestJsonUrl');
       
       final response = await _dio.get(
         _latestJsonUrl,
@@ -111,8 +112,8 @@ class UpdateService {
         final releaseInfo = ReleaseInfo.fromJson(data);
         final isNewer = _isNewerVersion(currentVersion, releaseInfo.version);
         
-        print('[UpdateService] Latest version: ${releaseInfo.version}');
-        print('[UpdateService] Update available: $isNewer');
+        _log('Latest version: ${releaseInfo.version}');
+        _log('Update available: $isNewer');
         
         return UpdateCheckResult(
           updateAvailable: isNewer,
@@ -127,14 +128,14 @@ class UpdateService {
         );
       }
     } on DioException catch (e) {
-      print('[UpdateService] Dio error: ${e.message}');
+      _log('Dio error: ${e.message}');
       return UpdateCheckResult(
         updateAvailable: false,
         error: e.message ?? 'Network error',
         currentVersion: currentVersion,
       );
     } catch (e) {
-      print('[UpdateService] Error: $e');
+      _log('Error: $e');
       return UpdateCheckResult(
         updateAvailable: false,
         error: e.toString(),
@@ -162,7 +163,7 @@ class UpdateService {
       
       return false; // Son iguales
     } catch (e) {
-      print('[UpdateService] Error parsing versions: $e');
+      _log('Error parsing versions: $e');
       return false;
     }
   }
@@ -182,7 +183,7 @@ class UpdateService {
       }
       return false;
     } catch (e) {
-      print('[UpdateService] Error opening URL: $e');
+      _log('Error opening URL: $e');
       return false;
     }
   }
@@ -191,5 +192,12 @@ class UpdateService {
   Future<bool> openReleasePage() async {
     const url = 'https://github.com/$_owner/$_repo/releases/latest';
     return openDownloadUrl(url);
+  }
+
+  /// Logging condicional - solo imprime en debug mode
+  void _log(String message) {
+    if (kDebugMode) {
+      debugPrint('[UpdateService] $message');
+    }
   }
 }

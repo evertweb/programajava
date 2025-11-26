@@ -5,8 +5,13 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/extensions/number_extensions.dart';
 import '../../domain/entities/product_entity.dart';
 import '../providers/product_provider.dart';
+import '../widgets/common/data_grid_wrapper.dart';
+import '../widgets/common/error_state_widget.dart';
+import '../widgets/common/loading_state_widget.dart';
+import '../widgets/common/stats_card.dart';
 
 /// ViewMode enum matching React's ViewMode type
 enum ViewMode { table, analytics }
@@ -25,14 +30,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
   late ProductProvider _provider;
   late ProductDataSource _dataSource;
 
-  // Currency formatter matching React's formatCurrency
-  final _currencyFormat = NumberFormat.currency(
-    locale: 'es_CO',
-    symbol: '\$',
-    decimalDigits: 0,
-  );
-
-  String _formatCurrency(double amount) => _currencyFormat.format(amount);
+  // Using extension for currency formatting
+  String _formatCurrency(double amount) => amount.toCurrency();
 
   @override
   void initState() {
@@ -163,52 +162,23 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   /// Build table view with SfDataGrid
   Widget _buildTableView(ProductProvider provider) {
+    // Using LoadingStateWidget
     if (provider.isLoading && provider.items.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const LoadingStateWidget(message: 'Cargando productos...');
     }
 
+    // Using ErrorStateWidget
     if (provider.isError) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: AppTheme.error),
-            const SizedBox(height: 16),
-            Text(
-              provider.errorMessage ?? 'Error al cargar productos',
-              style: const TextStyle(color: AppTheme.error),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: _handleRefresh,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Reintentar'),
-            ),
-          ],
-        ),
+      return ErrorStateWidget(
+        errorMessage: provider.errorMessage ?? 'Error al cargar productos',
+        onRetry: _handleRefresh,
       );
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: SfDataGrid(
-          source: _dataSource,
-          columns: _buildColumns(),
-          columnWidthMode: ColumnWidthMode.fill,
-          gridLinesVisibility: GridLinesVisibility.horizontal,
-          headerGridLinesVisibility: GridLinesVisibility.horizontal,
-          rowHeight: 52,
-          headerRowHeight: 48,
-          allowSorting: true,
-          selectionMode: SelectionMode.none,
-        ),
-      ),
+    // Using DataGridWrapper
+    return DataGridWrapper(
+      source: _dataSource,
+      columns: _buildColumns(),
     );
   }
 
@@ -336,8 +306,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
     return Row(
       children: [
+        // Using StatsCard widget
         Expanded(
-          child: _StatsCard(
+          child: StatsCard(
             title: 'Total Productos',
             value: stats.total.toString(),
             subtitle: '${stats.active} activos',
@@ -347,9 +318,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
         ),
         const SizedBox(width: 24),
         Expanded(
-          child: _StatsCard(
+          child: StatsCard(
             title: 'Stock Total',
-            value: NumberFormat('#,##0', 'es_CO').format(stats.totalStock),
+            value: stats.totalStock.toFormatted(), // Using extension
             subtitle: 'galones',
             icon: Icons.local_gas_station_outlined,
             iconColor: const Color(0xFF2E7D32),
@@ -357,7 +328,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
         ),
         const SizedBox(width: 24),
         Expanded(
-          child: _StatsCard(
+          child: StatsCard(
             title: 'Valor en Inventario',
             value: _formatCurrency(stats.totalValue),
             subtitle: 'total',
@@ -367,7 +338,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
         ),
         const SizedBox(width: 24),
         Expanded(
-          child: _StatsCard(
+          child: StatsCard(
             title: 'Alertas de Stock',
             value: stats.lowStockCount.toString(),
             subtitle: 'productos bajos',
@@ -532,80 +503,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 }
 
-/// Stats Card Widget matching React's stats cards
-class _StatsCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final String subtitle;
-  final IconData icon;
-  final Color iconColor;
-
-  const _StatsCard({
-    required this.title,
-    required this.value,
-    required this.subtitle,
-    required this.icon,
-    required this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w600,
-                    color: iconColor,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(
-            icon,
-            size: 48,
-            color: iconColor.withValues(alpha: 0.3),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 /// DataSource for SfDataGrid
 /// Handles data mapping and cell rendering for products

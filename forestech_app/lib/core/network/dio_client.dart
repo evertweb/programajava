@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../config/constants.dart';
 import '../errors/failures.dart';
 
@@ -26,16 +27,19 @@ class DioClient {
       ),
     );
 
-    // Add interceptors for logging and error handling
-    _dio.interceptors.add(
-      LogInterceptor(
-        requestBody: true,
-        responseBody: true,
-        error: true,
-        requestHeader: true,
-        responseHeader: false,
-      ),
-    );
+    // Add logging interceptor only in debug mode
+    if (kDebugMode) {
+      _dio.interceptors.add(
+        LogInterceptor(
+          requestBody: false,  // Evita imprimir body completo
+          responseBody: false, // Evita imprimir response completo
+          error: true,
+          requestHeader: false,
+          responseHeader: false,
+          logPrint: (obj) => debugPrint('[Dio] $obj'),
+        ),
+      );
+    }
 
     _dio.interceptors.add(
       InterceptorsWrapper(

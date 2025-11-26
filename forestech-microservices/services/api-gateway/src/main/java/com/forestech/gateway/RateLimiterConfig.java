@@ -3,6 +3,7 @@ package com.forestech.gateway;
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import reactor.core.publisher.Mono;
 
 /**
@@ -17,6 +18,7 @@ public class RateLimiterConfig {
      * Limita las peticiones por dirección IP remota.
      */
     @Bean
+    @Primary
     public KeyResolver ipKeyResolver() {
         return exchange -> {
             var remoteAddress = exchange.getRequest().getRemoteAddress();
