@@ -8,14 +8,12 @@ import 'package:package_info_plus/package_info_plus.dart';
 class ReleaseInfo {
   final String version;
   final String windowsUrl;
-  final String linuxUrl;
   final String releaseDate;
   final String releaseNotesUrl;
 
   ReleaseInfo({
     required this.version,
     required this.windowsUrl,
-    required this.linuxUrl,
     required this.releaseDate,
     required this.releaseNotesUrl,
   });
@@ -24,18 +22,13 @@ class ReleaseInfo {
     return ReleaseInfo(
       version: json['version'] ?? '',
       windowsUrl: json['windows'] ?? '',
-      linuxUrl: json['linux'] ?? '',
       releaseDate: json['releaseDate'] ?? '',
       releaseNotesUrl: json['releaseNotes'] ?? '',
     );
   }
 
-  /// Obtiene la URL de descarga según la plataforma actual
-  String get downloadUrl {
-    if (Platform.isWindows) return windowsUrl;
-    if (Platform.isLinux) return linuxUrl;
-    return '';
-  }
+  /// Obtiene la URL de descarga del instalador Windows
+  String get downloadUrl => windowsUrl;
 }
 
 /// Resultado de la verificación de actualizaciones
@@ -169,13 +162,14 @@ class UpdateService {
   }
 
   /// Abre la URL de descarga en el navegador del sistema
+  /// Para Windows, esto descargará el instalador .exe
   Future<bool> openDownloadUrl(String url) async {
     try {
-      if (Platform.isLinux) {
-        await Process.run('xdg-open', [url]);
-        return true;
-      } else if (Platform.isWindows) {
+      if (Platform.isWindows) {
         await Process.run('start', [url], runInShell: true);
+        return true;
+      } else if (Platform.isLinux) {
+        await Process.run('xdg-open', [url]);
         return true;
       } else if (Platform.isMacOS) {
         await Process.run('open', [url]);

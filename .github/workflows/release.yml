@@ -37,31 +37,36 @@ jobs:
       - name: Build Windows release
         run: flutter build windows --release
 
-      - name: Create Windows ZIP (flat structure)
+      - name: Create icon for installer
         run: |
-          $releaseDir = "build\windows\x64\runner\Release"
-          $outputZip = "ForestechOil-Windows-${{ github.ref_name }}.zip"
-          
-          # Create a clean temp directory with app contents
-          $tempDir = "ForestechOil"
-          New-Item -ItemType Directory -Force -Path $tempDir
-          
-          # Copy all release files to temp directory
-          Copy-Item -Path "$releaseDir\*" -Destination $tempDir -Recurse
-          
-          # Create ZIP with single root folder "ForestechOil"
-          Compress-Archive -Path $tempDir -DestinationPath $outputZip -Force
-          
-          # Cleanup temp directory
-          Remove-Item -Path $tempDir -Recurse -Force
-          
-          Write-Host "Created $outputZip with ForestechOil folder structure"
+          # Convert PNG to ICO using PowerShell (simple copy for now, Inno Setup accepts PNG too)
+          Copy-Item -Path "assets\icon.png" -Destination "assets\icon.ico" -Force
 
-      - name: Upload Windows artifact
+      - name: Install Inno Setup
+        run: |
+          choco install innosetup -y
+
+      - name: Extract version from tag
+        id: version
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Build Installer with Inno Setup
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion="${{ steps.version.outputs.version }}" inno_setup.iss
+
+      - name: List output files
+        run: |
+          Get-ChildItem -Path . -Filter "*.exe" | ForEach-Object { Write-Host $_.FullName }
+
+      - name: Upload Windows Installer artifact
         uses: actions/upload-artifact@v4
         with:
-          name: windows-release
-          path: forestech_app/ForestechOil-Windows-${{ github.ref_name }}.zip
+          name: windows-installer
+          path: forestech_app/ForestechOil-Setup-v${{ steps.version.outputs.version }}.exe
 
   publish-release:
     needs: [build-windows]
@@ -71,13 +76,16 @@ jobs:
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
-          name: windows-release
+          name: windows-installer
+
+      - name: List downloaded files
+        run: ls -la
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ForestechOil-Windows-${{ github.ref_name }}.zip
+            ForestechOil-Setup-v*.exe
           generate_release_notes: true
           draft: false
           prerelease: false
@@ -91,11 +99,12 @@ jobs:
           cat > latest.json <<EOFJ
           {
             "version": "${VERSION}",
-            "windows": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ForestechOil-Windows-${{ github.ref_name }}.zip",
+            "windows": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ForestechOil-Setup-v${VERSION}.exe",
             "releaseDate": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "releaseNotes": "https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
           }
           EOFJ
+          cat latest.json
 
       - name: Upload latest.json to release
         uses: softprops/action-gh-release@v1
