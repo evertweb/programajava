@@ -22,8 +22,8 @@ spring:
     hikari:
       connection-timeout: 60000
       initialization-fail-timeout: 60000
-      maximum-pool-size: 10
-      minimum-idle: 5
+      maximum-pool-size: 5
+      minimum-idle: 2
       idle-timeout: 300000
       connection-test-query: SELECT 1
   # Redis Configuration for Cache
@@ -34,9 +34,9 @@ spring:
       timeout: 2000ms
       lettuce:
         pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 2
+          max-active: 4
+          max-idle: 4
+          min-idle: 1
   cache:
     type: redis
     redis:
@@ -68,7 +68,7 @@ logging:
 management:
   tracing:
     sampling:
-      probability: 1.0
+      probability: 0.1
   zipkin:
     tracing:
       endpoint: ${ZIPKIN_URL:http://zipkin:9411/api/v2/spans}

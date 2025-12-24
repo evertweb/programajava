@@ -29,8 +29,10 @@ services:
   # ============================================
   config-server:
     build:
-      context: ./infrastructure/config-server
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.lite
+      args:
+        JAR_FILE: ./infrastructure/config-server/target/config-server-1.0.0.jar
     container_name: config-server
     hostname: config-server
     ports:
@@ -40,6 +42,12 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: native
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8888/actuator/health" ]
       interval: 30s
@@ -65,6 +73,12 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
       - ./infrastructure/databases/shared/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-hp}" ]
       interval: 10s
@@ -78,8 +92,10 @@ services:
   # ============================================
   catalog-service:
     build:
-      context: ./services/catalog-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.lite
+      args:
+        JAR_FILE: ./services/catalog-service/target/catalog-service-1.0.0.jar
     container_name: catalog-service
     hostname: catalog-service
     ports:
@@ -98,6 +114,12 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hp}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+        reservations:
+          memory: 256M
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081/actuator/health" ]
       interval: 15s
@@ -112,8 +134,10 @@ services:
   # ============================================
   fleet-service:
     build:
-      context: ./services/fleet-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.lite
+      args:
+        JAR_FILE: ./services/fleet-service/target/fleet-service-1.0.0.jar
     container_name: fleet-service
     hostname: fleet-service
     ports:
@@ -132,6 +156,12 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hp}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+        reservations:
+          memory: 256M
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8082/actuator/health" ]
       interval: 15s
@@ -146,8 +176,10 @@ services:
   # ============================================
   inventory-service:
     build:
-      context: ./services/inventory-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.lite
+      args:
+        JAR_FILE: ./services/inventory-service/target/inventory-service-1.0.0.jar
     container_name: inventory-service
     hostname: inventory-service
     ports:
@@ -166,6 +198,12 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hp}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+        reservations:
+          memory: 256M
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8083/actuator/health" ]
       interval: 15s
@@ -180,8 +218,10 @@ services:
   # ============================================
   partners-service:
     build:
-      context: ./services/partners-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.lite
+      args:
+        JAR_FILE: ./services/partners-service/target/partners-service-1.0.0.jar
     container_name: partners-service
     hostname: partners-service
     ports:
@@ -200,6 +240,12 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hp}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    deploy:
+      resources:
+        limits:
+          memory: 320M
+        reservations:
+          memory: 192M
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8084/actuator/health" ]
       interval: 15s
@@ -214,8 +260,10 @@ services:
   # ============================================
   invoicing-service:
     build:
-      context: ./services/invoicing-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.lite
+      args:
+        JAR_FILE: ./services/invoicing-service/target/invoicing-service-1.0.0.jar
     container_name: invoicing-service
     hostname: invoicing-service
     ports:
@@ -234,6 +282,12 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hp}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    deploy:
+      resources:
+        limits:
+          memory: 320M
+        reservations:
+          memory: 192M
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8085/actuator/health" ]
       interval: 15s
@@ -251,9 +305,15 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --maxmemory 50mb --maxmemory-policy allkeys-lru
     volumes:
       - redis-data:/data
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+        reservations:
+          memory: 32M
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
@@ -273,6 +333,13 @@ services:
       - "9411:9411"
     environment:
       - STORAGE_TYPE=mem
+      - MEM_MAX_SPANS=50000
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9411/health" ]
       interval: 10s
@@ -286,8 +353,10 @@ services:
   # ============================================
   api-gateway:
     build:
-      context: ./services/api-gateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.lite
+      args:
+        JAR_FILE: ./services/api-gateway/target/api-gateway-1.0.0.jar
     container_name: api-gateway
     hostname: api-gateway
     ports:
@@ -313,6 +382,12 @@ services:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_CLOUD_CONSUL_HOST: consul
       SPRING_REDIS_HOST: redis
+    deploy:
+      resources:
+        limits:
+          memory: 320M
+        reservations:
+          memory: 192M
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health" ]
       interval: 30s
@@ -326,8 +401,10 @@ services:
   # ============================================
   reports-service:
     build:
-      context: ./services/reports-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.lite
+      args:
+        JAR_FILE: ./services/reports-service/target/reports-service-1.0.0.jar
     container_name: reports-service
     hostname: reports-service
     ports:
@@ -355,6 +432,12 @@ services:
       DATASOURCE_INVENTORY_JDBC_URL: jdbc:mysql://mysql-forestech:3306/FORESTECHOIL?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       DATASOURCE_INVENTORY_USERNAME: root
       DATASOURCE_INVENTORY_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hp}
+    deploy:
+      resources:
+        limits:
+          memory: 320M
+        reservations:
+          memory: 192M
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8086/actuator/health" ]
       interval: 30s

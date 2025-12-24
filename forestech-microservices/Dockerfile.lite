@@ -1,0 +1,18 @@
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+ARG JAR_FILE
+COPY ${JAR_FILE} app.jar
+
+# JVM Memory Optimizations:
+# - G1GC: Better memory management for containers
+# - MaxRAMPercentage: Use max 75% of container memory limit
+# - UseStringDeduplication: Reduce string memory footprint
+# - urandom: Faster startup
+ENV JAVA_OPTS="-XX:+UseG1GC \
+  -XX:MaxRAMPercentage=75.0 \
+  -XX:+UseStringDeduplication \
+  -XX:+OptimizeStringConcat \
+  -Djava.security.egd=file:/dev/./urandom \
+  -XX:+ExitOnOutOfMemoryError"
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
