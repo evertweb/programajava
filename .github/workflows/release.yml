@@ -37,10 +37,25 @@ jobs:
       - name: Build Windows release
         run: flutter build windows --release
 
-      - name: Create Windows ZIP
+      - name: Create Windows ZIP (flat structure)
         run: |
-          cd build/windows/x64/runner/Release
-          Compress-Archive -Path * -DestinationPath ../../../../../ForestechOil-Windows-${{ github.ref_name }}.zip
+          $releaseDir = "build\windows\x64\runner\Release"
+          $outputZip = "ForestechOil-Windows-${{ github.ref_name }}.zip"
+          
+          # Create a clean temp directory with app contents
+          $tempDir = "ForestechOil"
+          New-Item -ItemType Directory -Force -Path $tempDir
+          
+          # Copy all release files to temp directory
+          Copy-Item -Path "$releaseDir\*" -Destination $tempDir -Recurse
+          
+          # Create ZIP with single root folder "ForestechOil"
+          Compress-Archive -Path $tempDir -DestinationPath $outputZip -Force
+          
+          # Cleanup temp directory
+          Remove-Item -Path $tempDir -Recurse -Force
+          
+          Write-Host "Created $outputZip with ForestechOil folder structure"
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
@@ -48,52 +63,8 @@ jobs:
           name: windows-release
           path: forestech_app/ForestechOil-Windows-${{ github.ref_name }}.zip
 
-  build-linux:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: forestech_app
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Linux dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build libgtk-3-dev liblzma-dev libstdc++-12-dev
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          cache: true
-
-      - name: Flutter version
-        run: flutter --version
-
-      - name: Enable Linux desktop
-        run: flutter config --enable-linux-desktop
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Build Linux release
-        run: flutter build linux --release
-
-      - name: Create Linux tarball
-        run: |
-          cd build/linux/x64/release/bundle
-          tar -czvf ../../../../../ForestechOil-Linux-${{ github.ref_name }}.tar.gz *
-
-      - name: Upload Linux artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-release
-          path: forestech_app/ForestechOil-Linux-${{ github.ref_name }}.tar.gz
-
   publish-release:
-    needs: [build-windows, build-linux]
+    needs: [build-windows]
     runs-on: ubuntu-latest
 
     steps:
@@ -102,17 +73,11 @@ jobs:
         with:
           name: windows-release
 
-      - name: Download Linux artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: linux-release
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
             ForestechOil-Windows-${{ github.ref_name }}.zip
-            ForestechOil-Linux-${{ github.ref_name }}.tar.gz
           generate_release_notes: true
           draft: false
           prerelease: false
@@ -123,11 +88,10 @@ jobs:
         run: |
           VERSION="${{ github.ref_name }}"
           VERSION="${VERSION#v}"
-          cat > latest.json << EOFJ
+          cat > latest.json <<EOFJ
           {
             "version": "${VERSION}",
             "windows": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ForestechOil-Windows-${{ github.ref_name }}.zip",
-            "linux": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ForestechOil-Linux-${{ github.ref_name }}.tar.gz",
             "releaseDate": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "releaseNotes": "https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
           }
