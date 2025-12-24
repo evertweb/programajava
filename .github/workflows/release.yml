@@ -37,11 +37,6 @@ jobs:
       - name: Build Windows release
         run: flutter build windows --release
 
-      - name: Create icon for installer
-        run: |
-          # Convert PNG to ICO using PowerShell (simple copy for now, Inno Setup accepts PNG too)
-          Copy-Item -Path "assets\icon.png" -Destination "assets\icon.ico" -Force
-
       - name: Install Inno Setup
         run: |
           choco install innosetup -y

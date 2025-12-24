@@ -22,7 +22,7 @@ AllowNoIcons=yes
 ; Output settings
 OutputDir=.
 OutputBaseFilename=ForestechOil-Setup-v{#MyAppVersion}
-SetupIconFile=assets\icon.ico
+; Note: SetupIconFile removed - using default icon until .ico file is added
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
